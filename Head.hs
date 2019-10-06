@@ -20,10 +20,10 @@ data Literal = Str String | Numb LitNumber deriving(Show)
 
 data LitNumber = Int Integer | Decimal Double deriving(Show)
 
-data Value = Variable Identifier | Constant Identifier | SetValue Set | LiteralValue Literal deriving(Show)
+data Value = Variable Identifier | Constant Identifier | SetValue Set | RecordValue Record | LiteralValue Literal deriving(Show)
 
 type Record = [(Key, Value)]
 
-data Predicate = Equality Value Value | RecordBelonging Record Identifier deriving(Show)
+data Predicate = Equality Value Value | RecordBelonging Value Value deriving(Show)
 
 data Action = Condition Predicate | Primed Identifier Value | Unchanged [Identifier] | ActionNot Action | ActionAnd [Action] deriving(Show)

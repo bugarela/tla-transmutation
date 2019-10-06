@@ -12,7 +12,7 @@ import Control.Monad.Identity (Identity)
 ws = do {many (oneOf " \n"); return()}
 
 identifier = many (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
-reserved = ",;.(){}\"/\\"
+reserved = ",;.(){}\"/\\[]"
 comma = do {ws; char ','; ws; return ()}
 
 parseFile a = do f <- readFile a
@@ -89,14 +89,11 @@ predicate = do try $ do v1 <- value
                         v2 <- value
                         return (Equality v1 v2)
             <|>
-            do char '['
-               ms <- mapping `sepBy` comma
-               char ']'
-               ws
-               string "\\in"
-               ws
-               i <- identifier
-               return (RecordBelonging ms i)
+            do try $ do v1 <- value
+                        string "\\in"
+                        ws
+                        v2 <- value
+                        return (RecordBelonging v1 v2)
 
 mapping = do ws
              i <- identifier
@@ -114,6 +111,8 @@ primed = do try $ do i <- identifier
 
 value = do {l <- literal; return (LiteralValue l)}
         <|>
+        do {r <- record; return (RecordValue r)}
+        <|>
         do {s <- set; return (SetValue s)}
         <|>
         do {i <- identifier; ws; return (Variable i)}
@@ -129,6 +128,12 @@ atomSet = do char '{'
              return (Set vs)
           <|>
           do {i <- identifier; ws; return (Ref i)}
+
+record = do char '['
+            ms <- mapping `sepBy` comma
+            char ']'
+            ws
+            return (ms)
 
 literal = do try $ do n <- number
                       return (Numb n)
