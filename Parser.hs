@@ -142,9 +142,9 @@ literal = do try $ do n <- number
 
 number = do try $ do f <- Token.float (Token.makeTokenParser emptyDef)
                      ws
-                     return (Decimal f)
+                     return (f)
          <|>
          do try $ do digits <- many1 digit
-                     let n = foldl (\x d -> 10*x + toInteger (digitToInt d)) 0 digits
+                     let n = foldl (\x d -> 10*x + fromIntegral (digitToInt d)) 0 digits
                      ws
-                     return (Int n)
+                     return (n)

@@ -16,9 +16,7 @@ data Definition = Definition Identifier [Parameter] Documentation Action | Comme
 
 data Set = Set [Value] | Ref Identifier | Union Set Set deriving(Show)
 
-data Literal = Str String | Numb LitNumber deriving(Show)
-
-data LitNumber = Int Integer | Decimal Double deriving(Show)
+data Literal = Str String | Numb Double  deriving(Show)
 
 data Value = Variable Identifier | Constant Identifier | SetValue Set | RecordValue Record | LiteralValue Literal deriving(Show)
 
