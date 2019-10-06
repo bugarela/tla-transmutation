@@ -11,7 +11,7 @@ import Control.Monad.Identity (Identity)
 
 ws = do {many (oneOf " \n"); return()}
 
-identifier = many (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
+identifier = many1 (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
 reserved = ",;.(){}\"/\\[]"
 comma = do {ws; char ','; ws; return ()}
 
@@ -48,7 +48,9 @@ comment = do string "(*"
 
 parameters = identifier `sepBy` comma
 
-definition = do try $ do i <- identifier
+definition = do {c <- comment; return (Comment c)}
+             <|>
+             do try $ do i <- identifier
                          char '('
                          ws
                          ps <- parameters
@@ -61,7 +63,14 @@ definition = do try $ do i <- identifier
                          ws
                          return (Definition i ps doc a)
              <|>
-             do {c <- comment; return (Comment c)}
+             do try $ do i <- identifier
+                         ws
+                         string "=="
+                         ws
+                         doc <- many comment
+                         a <- action
+                         ws
+                         return (Definition i [] doc a)
 
 andAction = do string "/\\"
                ws
@@ -113,6 +122,8 @@ value = do {l <- literal; return (LiteralValue l)}
         <|>
         do {r <- record; return (RecordValue r)}
         <|>
+        do try $ do {i <- identifier; char '['; k <- identifier; char ']'; ws; return (Index i k)}
+        <|>
         do {s <- set; return (SetValue s)}
         <|>
         do {i <- identifier; ws; return (Variable i)}
@@ -129,11 +140,27 @@ atomSet = do char '{'
           <|>
           do {i <- identifier; ws; return (Ref i)}
 
-record = do char '['
-            ms <- mapping `sepBy` comma
+record = do try $ do char '['
+                     ms <- mapping `sepBy` comma
+                     char ']'
+                     ws
+                     return (Record ms)
+         <|>
+         do char '['
+            i <- identifier
+            ws
+            string "EXCEPT"
+            ws
+            string "!["
+            k <- identifier
             char ']'
             ws
-            return (ms)
+            char '='
+            ws
+            v <- value
+            char ']'
+            ws
+            return (Except i k v)
 
 literal = do try $ do n <- number
                       return (Numb n)

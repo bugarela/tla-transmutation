@@ -13,3 +13,9 @@ elixir a = do ls <- parseFile a
                  Right ls -> putStrLn (generate ls)
               return ()
 
+file a = do ls <- parseFile a
+            case ls of
+               Left e -> print e
+               Right ls -> writeFile "out.exs" (generate ls)
+            return ()
+
