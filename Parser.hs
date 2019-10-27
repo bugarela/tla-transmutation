@@ -9,7 +9,9 @@ import Head
 
 import Control.Monad.Identity (Identity)
 
-ws = do {many (oneOf " \n"); return()}
+ws = many $ do {many1 (oneOf " \n"); many divisionLine; return()}
+
+divisionLine = do {string "--"; many (char '-'); char '\n'; return()}
 
 identifier = many1 (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
 reserved = ",;.(){}\"/\\[]"
@@ -23,21 +25,16 @@ specification = do h <- moduleHeader
                    ws
                    ds <- many definition
                    ws
-                   many (char '=')
+                   many $ char '='
                    ws
                    eof
                    return (Module h ds)
 
 moduleHeader = do many (char '-')
-                  ws
-                  string "MODULE"
-                  ws
+                  string " MODULE "
                   name <- identifier
                   ws
-                  many (char '-')
-                  ws
                   documentation <- many comment
-                  many (char '-')
                   ws
                   return (Header name documentation)
 
@@ -48,29 +45,28 @@ comment = do string "(*"
 
 parameters = identifier `sepBy` comma
 
+call = do try $ do i <- identifier
+                   char '('
+                   ws
+                   ps <- parameters
+                   char ')'
+                   ws
+                   return (i, ps)
+       <|>
+       do try $ do i <- identifier
+                   ws
+                   return (i, [])
+
+
 definition = do {c <- comment; return (Comment c)}
              <|>
-             do try $ do i <- identifier
-                         char '('
-                         ws
-                         ps <- parameters
-                         char ')'
-                         ws
+             do try $ do (i, ps) <- call
                          string "=="
                          ws
                          doc <- many comment
                          a <- action
                          ws
                          return (Definition i ps doc a)
-             <|>
-             do try $ do i <- identifier
-                         ws
-                         string "=="
-                         ws
-                         doc <- many comment
-                         a <- action
-                         ws
-                         return (Definition i [] doc a)
 
 andAction = do string "/\\"
                ws
@@ -90,7 +86,9 @@ action = do {p <- predicate; return (Condition p)}
             ws
             return (Unchanged vs)
          <|>
-         do try $ do {ws; as <- many andAction; return (ActionAnd as)}
+         do {(i, ps) <- call; return (ActionCall i ps)}
+         <|>
+         do try $ do {ws; as <- many1 andAction; return (ActionAnd as)}
 
 predicate = do try $ do v1 <- value
                         char '='

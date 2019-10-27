@@ -3,11 +3,13 @@ module Elixir where
 import Data.List
 import qualified Text.Casing as Casing -- cabal install casing
 
-
 import Head
 
-generate :: Module -> String
-generate (Module h ds) = header h ++ (intercalate "\n" (map (ident . definition) ds)) ++ "\nend\n"
+generate :: Spec -> String
+generate (Spec (Module h ds) i n) = let code = map definition (filter (not . (initOrNext i n)) ds)
+                                        initialization = ini (findIdentifier i ds) h
+                                        nextState = next (findIdentifier n ds)
+                                    in header h ++ (intercalate "\n" (map ident (code ++ [nextState]))) ++ "\nend\n\n" ++ initialization
 
 header :: Header -> String
 header (Header i doc) = "defmodule " ++ pascal i ++ " do\n" ++ moduleDoc doc
@@ -16,9 +18,17 @@ moduleDoc doc = "@moduledoc \"\"\"\n" ++ (intercalate "\n" doc) ++ "\n\"\"\"\n"
 
 funDoc doc = "@doc \"\"\"\n" ++ (intercalate "\n" doc) ++ "\n\"\"\"\n"
 
+ini (Definition _ _ doc a) (Header i _) = funDoc doc ++ pascal i ++ ".main()" -- TODO
+
+next (Definition _ _ doc a) = funDoc doc ++ "def main(variables) do\n" -- TODO
+
+initOrNext :: String -> String -> Definition -> Bool
+initOrNext i n d = (isNamed i d) || (isNamed n d)
+
+-- TODO: filter actions without actions
 definition :: Definition -> String
 definition (Definition i ps doc a) = let (conditions, actions) = actionsAndConditions ps a
-                                     in funDoc doc ++ condition i ps conditions ++ action i ps actions ++ "end\n\n"
+                                      in funDoc doc ++ condition i ps conditions ++ action i ps actions ++ "end\n\n"
 definition (Comment s) = "# " ++ s
 
 condition :: Identifier -> [Parameter] -> [String] -> String
@@ -76,3 +86,10 @@ snake i = Casing.toQuietSnake (Casing.fromAny i)
 pascal i = Casing.toPascal (Casing.fromAny i)
 
 ident block = intercalate "\n" (map ((++) "  ") (lines block))
+
+isNamed i (Definition id _ _ _) = i == id
+isNamed _ _ = False
+
+findIdentifier i ds = case find (isNamed i) ds of
+                        Just a -> a
+                        Nothing -> error("Definition not found: " ++ (show i))

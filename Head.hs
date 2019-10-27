@@ -5,6 +5,8 @@ type Key = String
 type Parameter = Identifier
 type Documentation = [String]
 
+data Spec = Spec Module Identifier Identifier
+
 data Module = Module Header [Definition] deriving(Show)
 
 data Header = Header Identifier Documentation deriving(Show)
@@ -21,4 +23,4 @@ data Record = Record [(Key, Value)] | Except Identifier Key Value deriving(Show)
 
 data Predicate = Equality Value Value | RecordBelonging Value Value deriving(Show)
 
-data Action = Condition Predicate | Primed Identifier Value | Unchanged [Identifier] | ActionNot Action | ActionAnd [Action] deriving(Show)
+data Action = Condition Predicate | Primed Identifier Value | Unchanged [Identifier] | ActionNot Action | ActionAnd [Action] | ActionCall Identifier [Parameter] deriving(Show)
