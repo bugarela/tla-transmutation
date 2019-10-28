@@ -68,6 +68,12 @@ definition = do {c <- comment; return (Comment c)}
                          ws
                          return (Definition i ps doc a)
 
+orAction = do string "\\/"
+              ws
+              a <- action
+              ws
+              return a
+
 andAction = do string "/\\"
                ws
                a <- action
@@ -89,6 +95,8 @@ action = do {p <- predicate; return (Condition p)}
          do {(i, ps) <- call; return (ActionCall i ps)}
          <|>
          do try $ do {ws; as <- many1 andAction; return (ActionAnd as)}
+         <|>
+         do try $ do {ws; as <- many1 orAction; return (ActionOr as)}
 
 predicate = do try $ do v1 <- value
                         char '='

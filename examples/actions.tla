@@ -81,6 +81,6 @@ RMRcvAbortMsg(r) ==
   /\ UNCHANGED <<tmState, tmPrepared, msgs>>
 
 (* \/ \E r \in RM : *)
-TPNext == TMCommit
+TPNext == \/ TMCommit \/ TMAbort
 =================================================================================
 
