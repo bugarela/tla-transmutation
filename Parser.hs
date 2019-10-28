@@ -110,14 +110,27 @@ predicate = do try $ do v1 <- value
                         v2 <- value
                         return (RecordBelonging v1 v2)
 
-mapping = do ws
+mapping = do try $ do ws
+                      i <- identifier
+                      ws
+                      string "\\in"
+                      ws
+                      a <- value
+                      ws
+                      string "|->"
+                      ws
+                      v <- value
+                      ws
+                      return (All i a, v)
+          <|>
+          do ws
              i <- identifier
              ws
              string "|->"
              ws
              v <- value
              ws
-             return (i, v)
+             return (Key i, v)
 
 primed = do try $ do i <- identifier
                      char '\''

@@ -54,6 +54,9 @@ actionsAndConditions ps (ActionAnd as) = unzipAndFold (map (actionsAndConditions
 actionsAndConditions _ (ActionCall i ps) = ([call (i ++ "Condition") ps], [call i ps])
 actionsAndConditions ps (ActionOr as) = ([], [decide ps (map (actionsAndConditions ps) as)])
 
+-- Used for Init definition
+-- conditionAsAction (Condition p)
+
 unchanged i = i ++ ": variables[:" ++ snake i ++ "]"
 
 call i [] = snake i
@@ -92,9 +95,11 @@ set ps (Set vs) = "[" ++ intercalate ", " (map (value ps) vs) ++ "]"
 set ps (Ref i) = variable ps i
 set ps (Union s1 s2) = set ps s1 ++ " ++ " ++ set ps s2
 
-record ps (Record rs) = let f(k,v) = k ++ ": " ++ value ps v in
-                          "%{ " ++ intercalate ", " (map f rs) ++ " }"
+record ps (Record rs) = intercalate " ++ " (map (mapping ps) rs) ++ " |> Enum.into(%{})"
 record ps (Except i k v) = "Map.put(" ++ variable ps i ++ ", " ++ k ++ ", " ++ value ps v ++ ")"
+
+mapping ps ((Key i), v) = "[{" ++ i ++ ", " ++ value ps v ++ "}]"
+mapping ps ((All i a), v) = value ps a ++ " |> Enum.map(fn (" ++ i ++ " -> {" ++ i ++ ", " ++ value ps v ++ "} end)"
 
 literal (Str s) = show s
 literal (Numb n) = show n

@@ -1,7 +1,6 @@
 module Head where
 
 type Identifier = String
-type Key = String
 type Parameter = Identifier
 type Documentation = [String]
 
@@ -19,7 +18,9 @@ data Literal = Str String | Numb Double  deriving(Show)
 
 data Value = Variable Identifier | Constant Identifier | SetValue Set | RecordValue Record | LiteralValue Literal | Index Identifier Identifier deriving(Show)
 
-data Record = Record [(Key, Value)] | Except Identifier Key Value deriving(Show)
+data Key = Key Identifier | All Identifier Value deriving(Show)
+
+data Record = Record [(Key, Value)] | Except Identifier Identifier Value deriving(Show)
 
 data Predicate = Equality Value Value | RecordBelonging Value Value deriving(Show)
 
