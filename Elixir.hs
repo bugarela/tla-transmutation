@@ -17,9 +17,9 @@ header (Header i doc) = "defmodule " ++ pascal i ++ " do\n" ++ moduleDoc doc
 moduleDoc doc = "@moduledoc \"\"\"\n" ++ (intercalate "\n" doc) ++ "\n\"\"\"\n"
 
 funDoc doc = "@doc \"\"\"\n" ++ (intercalate "\n" doc) ++ "\n\"\"\"\n"
+comment doc = intercalate "\n" (map ((++) "# ") doc) ++ "\n"
 
-ini (Definition _ _ doc a) (Header i _) = let (conditions, actions) = actionsAndConditions [] a
-                                          in funDoc doc ++ pascal i ++ ".main(\n" ++ intercalate "\n" (conditions ++ actions) ++ "\n)\n"
+ini (Definition _ _ doc a) (Header i _) = comment doc ++ pascal i ++ ".main(%{\n" ++ intercalate ",\n" (conditionsToVariables (pascal i) a) ++ "\n})\n"
 
 next (Definition _ _ doc a) = let (conditions, actions) = actionsAndConditions [] a
                               in funDoc doc ++ "def main(variables) do\n" ++ intercalate "\n" (conditions ++ actions) ++ "\nend\n"
@@ -55,7 +55,15 @@ actionsAndConditions _ (ActionCall i ps) = ([call (i ++ "Condition") ps], [call 
 actionsAndConditions ps (ActionOr as) = ([], [decide ps (map (actionsAndConditions ps) as)])
 
 -- Used for Init definition
--- conditionAsAction (Condition p)
+conditionsToVariables :: Identifier -> Action -> [String]
+conditionsToVariables m (Condition p) = case p of
+                                      (Equality v1 v2) -> case v1 of
+                                                           (Variable i) -> [i ++ ": " ++ value [] v2]
+                                                           -- (Constant c) -> [m ++ ".constants[:" ++ c ++ "]"]
+                                                           (SetValue (Ref i)) -> [i ++ ": " ++ value [] v2]
+                                                           _ -> error("Init condition ambiguous: " ++ show p)
+                                      _ -> error("Init condition ambiguous: " ++ show p)
+conditionsToVariables m (ActionAnd as) = foldr (++) [] (map (conditionsToVariables m) as)
 
 unchanged i = i ++ ": variables[:" ++ snake i ++ "]"
 
@@ -81,6 +89,7 @@ decide ps ls = let conditionsAndActions = "conditions_and_actions = [" ++ interc
 
 value :: [Parameter] -> Value -> String
 value ps (Variable i) = variable ps i
+value _ (Constant c) = "constants[:" ++ c ++ "]"
 value ps (SetValue s) = set ps s
 value ps (RecordValue r) = record ps r
 value _ (LiteralValue l) = literal l
@@ -99,7 +108,7 @@ record ps (Record rs) = intercalate " ++ " (map (mapping ps) rs) ++ " |> Enum.in
 record ps (Except i k v) = "Map.put(" ++ variable ps i ++ ", " ++ k ++ ", " ++ value ps v ++ ")"
 
 mapping ps ((Key i), v) = "[{" ++ i ++ ", " ++ value ps v ++ "}]"
-mapping ps ((All i a), v) = value ps a ++ " |> Enum.map(fn (" ++ i ++ " -> {" ++ i ++ ", " ++ value ps v ++ "} end)"
+mapping ps ((All i a), v) = value ps a ++ " |> Enum.map(fn (" ++ i ++ ") -> {" ++ i ++ ", " ++ value ps v ++ "} end)"
 
 literal (Str s) = show s
 literal (Numb n) = show n

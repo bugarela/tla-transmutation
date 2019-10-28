@@ -14,6 +14,10 @@ ws = many $ do {many1 (oneOf " \n"); many divisionLine; return()}
 divisionLine = do {string "--"; many (char '-'); char '\n'; return()}
 
 identifier = many1 (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
+constant = do c <- oneOf ['A'..'Z']
+              cs <- many (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
+              return (c:cs)
+
 reserved = ",;.(){}\"/\\[]"
 comma = do {ws; char ','; ws; return ()}
 
@@ -142,6 +146,8 @@ value = do {l <- literal; return (LiteralValue l)}
         do {r <- record; return (RecordValue r)}
         <|>
         do try $ do {i <- identifier; char '['; k <- identifier; char ']'; ws; return (Index i k)}
+        <|>
+        do {c <- constant; ws; return (Constant c)}
         <|>
         do {s <- set; return (SetValue s)}
         <|>
