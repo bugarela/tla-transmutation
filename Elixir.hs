@@ -51,7 +51,7 @@ actionsAndConditions ps (Condition p) = (predicate ps p, [])
 actionsAndConditions ps (Primed i v) = ([], [i ++ ": " ++ value ps v])
 actionsAndConditions _ (Unchanged is) = ([], map unchanged is)
 actionsAndConditions ps (ActionAnd as) = unzipAndFold (map (actionsAndConditions ps) as)
-actionsAndConditions _ (ActionCall i ps) = ([call (i ++ "Condition") ps], [call i ps])
+actionsAndConditions _ (ActionCall i ps) = ([call (i ++ "Condition") ("variables":ps)], [call i ps])
 actionsAndConditions ps (ActionOr as) = ([], [decide ps (map (actionsAndConditions ps) as)])
 
 -- Used for Init definition
@@ -72,10 +72,11 @@ call i ps = snake i ++ "(" ++ intercalate ", " (ps) ++ ")"
 
 predicate :: [Parameter] -> Predicate -> [String]
 predicate ps (Equality v1 v2) = [value ps v1 ++ " == " ++ value ps v2]
+predicate ps (Inequality v1 v2) = [value ps v1 ++ " != " ++ value ps v2]
 predicate ps (RecordBelonging v1 v2) = ["Enum.member?(" ++ value ps v1 ++ ", " ++ value ps v2 ++ ")"]
 
 decide :: [Parameter] -> [([String], [String])] -> String
-decide ps ls = let conditionsAndActions = "conditions_and_actions = [" ++ intercalate ", " (map (conditionActionTuple ps) ls) ++ "]\n"
+decide ps ls = let conditionsAndActions = "conditions_and_actions = [\n" ++ intercalate ", " (map (conditionActionTuple ps) ls) ++ "\n]\n"
                    tryPossibilities = "possible_states = for {condition, action} <- conditions_and_actions,\n\
                                       \into: MapSet.new,\n\
                                       \do: if condition, do: action, else: nil\n\n\
@@ -85,7 +86,7 @@ decide ps ls = let conditionsAndActions = "conditions_and_actions = [" ++ interc
                                       \else\n\
                                       \raise 'Not enough information to decide'\n\
                                       \end\n"
-              in conditionsAndActions ++ tryPossibilities
+              in "(\n" ++ conditionsAndActions ++ tryPossibilities ++ ")"
 
 value :: [Parameter] -> Value -> String
 value ps (Variable i) = variable ps i
@@ -95,14 +96,16 @@ value ps (RecordValue r) = record ps r
 value _ (LiteralValue l) = literal l
 value ps (Index i k) = index ps i k
 
-conditionActionTuple ps (cs, as) = "{" ++ condition ps cs ++ ", " ++ action ps as ++ "}"
+conditionActionTuple ps (cs, as) = "{\n  " ++ condition ps cs ++ ",\n  (" ++ action ps as ++ ")\n}"
 
 parameters ps = intercalate ", " ("variables": ps)
 extraParameters ps = intercalate ", " ps
 
-set ps (Set vs) = "[" ++ intercalate ", " (map (value ps) vs) ++ "]"
+set ps (Set vs) = "MapSet.new([" ++ intercalate ", " (map (value ps) vs) ++ "])"
 set ps (Ref i) = variable ps i
-set ps (Union s1 s2) = set ps s1 ++ " ++ " ++ set ps s2
+set ps (Union (Set [v]) s) = "MapSet.put(" ++ set ps s ++ ", " ++ value ps v ++ ")"
+set ps (Union  s (Set [v])) = "MapSet.put(" ++ set ps s ++ ", " ++ value ps v ++ ")"
+set ps (Union s1 s2) = "MapSet.union(" ++ set ps s1 ++ ", " ++ set ps s2 ++ ")"
 
 record ps (Record rs) = intercalate " ++ " (map (mapping ps) rs) ++ " |> Enum.into(%{})"
 record ps (Except i k v) = "Map.put(" ++ variable ps i ++ ", " ++ k ++ ", " ++ value ps v ++ ")"
@@ -128,7 +131,7 @@ pascal i = Casing.toPascal (Casing.fromAny i)
 
 ident block = intercalate "\n" (map ((++) "  ") (lines block))
 
-preassignment as = (dropWhile ((/=) ':') as) == []
+preassignment as = (head as) == '(' || dropWhile (/= ':') as == []
 
 isNamed i (Definition id _ _ _) = i == id
 isNamed _ _ = False

@@ -109,6 +109,12 @@ predicate = do try $ do v1 <- value
                         return (Equality v1 v2)
             <|>
             do try $ do v1 <- value
+                        char '#'
+                        ws
+                        v2 <- value
+                        return (Inequality v1 v2)
+            <|>
+            do try $ do v1 <- value
                         string "\\in"
                         ws
                         v2 <- value
