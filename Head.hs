@@ -10,7 +10,7 @@ data Module = Module Header [Definition] deriving(Show)
 
 data Header = Header Identifier Documentation deriving(Show)
 
-data Definition = Definition Identifier [Parameter] Documentation Action | Comment String deriving(Show)
+data Definition = Definition Identifier [Parameter] Documentation Action | Constants [Identifier] | Comment String deriving(Show)
 
 data Set = Set [Value] | Ref Identifier | Union Set Set deriving(Show)
 

@@ -1,3 +1,4 @@
+---- MODULE TwoPhaseCommit----------------------------------------------------
 (***************************************************************************)
 (* This specification is discussed in "Two-Phase Commit", Lecture 6 of the *)
 (* TLA+ Video Course.  It describes the Two-Phase Commit protocol, in      *)
@@ -32,7 +33,7 @@ VARIABLES
     (* particular protocol, that's not a problem.                          *)
     (***********************************************************************)
 
-Messages ==
+(* Messages == *)
   (*************************************************************************)
   (* The set of all possible messages.  Messages of type "Prepared" are    *)
   (* sent from the RM indicated by the message's rm field to the TM.       *)
@@ -40,16 +41,16 @@ Messages ==
   (* received by all RMs.  The set msgs contains just a single copy of     *)
   (* such a message.                                                       *)
   (*************************************************************************)
-  [type : {"Prepared"}, rm : RM]  \cup  [type : {"Commit", "Abort"}]
+  (* [type : {"Prepared"}, rm : RM]  \cup  [type : {"Commit", "Abort"}] *)
 
-TPTypeOK ==
+(* TPTypeOK == *)
   (*************************************************************************)
   (* The type-correctness invariant                                        *)
   (*************************************************************************)
-  /\ rmState \in [RM -> {"working", "prepared", "committed", "aborted"}]
-  /\ tmState \in {"init", "done"}
-  /\ tmPrepared \subseteq RM
-  /\ msgs \subseteq Messages
+  (* /\ rmState \in [RM -> {"working", "prepared", "committed", "aborted"}] *)
+  (* /\ tmState \in {"init", "done"} *)
+  (* /\ tmPrepared \subseteq RM *)
+  (* /\ msgs \subseteq Messages *)
 
 TPInit ==
   (*************************************************************************)
@@ -133,16 +134,16 @@ RMRcvAbortMsg(r) ==
 
 TPNext ==
   \/ TMCommit \/ TMAbort
-  \/ \E r \in RM :
-       TMRcvPrepared(r) \/ RMPrepare(r) \/ RMChooseToAbort(r)
-         \/ RMRcvCommitMsg(r) \/ RMRcvAbortMsg(r)
+  (* \/ \E r \in RM : *)
+  (*      TMRcvPrepared(r) \/ RMPrepare(r) \/ RMChooseToAbort(r) *)
+  (*        \/ RMRcvCommitMsg(r) \/ RMRcvAbortMsg(r) *)
 -----------------------------------------------------------------------------
 (***************************************************************************)
 (* The material below this point is not discussed in Video Lecture 6.  It  *)
 (* will be explained in Video Lecture 8.                                   *)
 (***************************************************************************)
 
-TPSpec == TPInit /\ [][TPNext]_<<rmState, tmState, tmPrepared, msgs>>
+(* TPSpec == TPInit /\ [][TPNext]_<<rmState, tmState, tmPrepared, msgs>> *)
   (*************************************************************************)
   (* The complete spec of the Two-Phase Commit protocol.                   *)
   (*************************************************************************)
@@ -172,3 +173,4 @@ THEOREM TPSpec => TCSpec
 (* RMs, a configuration with 50816 reachable states, in a little over a    *)
 (* minute on a 1 GHz PC.                                                   *)
 (***************************************************************************)
+================================================================================

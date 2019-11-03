@@ -2,8 +2,7 @@
 (* This specification is explained in "Transaction Commit", Lecture 5 of   *)
 (* the TLA+ Video Course.                                                  *)
 (***************************************************************************)
-(* CONSTANT RM       \* The set of participating resource managers *)
-
+CONSTANT RM       \* The set of participating resource managers
 (* VARIABLE rmState  \* rmState[rm] is the state of resource manager r. *)
 -----------------------------------------------------------------------------
 

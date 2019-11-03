@@ -30,16 +30,17 @@ initOrNext i n d = (isNamed i d) || (isNamed n d)
 definition :: Definition -> String
 definition (Definition i ps doc a) = let (conditions, actions) = actionsAndConditions ps a
                                       in funDoc doc ++ declaration (i ++ "Condition") ps ++ condition ps conditions ++ "\nend\n\n" ++ declaration i ps ++ action ps actions ++ "\nend\n\n"
+definition (Constants cs) = intercalate "\n" (map constant cs)
 definition (Comment s) = "# " ++ cleanTrailing s
 
 declaration i ps =  "def " ++ snake i ++ "(" ++ parameters ps ++ ") do\n"
 
 condition :: [Parameter] -> [String] -> String
-condition _ [] = "  True\n"
+condition _ [] = "  True"
 condition ps cs = identAndSeparate " and" cs
 
 action :: [Parameter] -> [String] -> String
-action ps [] = "  variables\n"
+action ps [] = "  variables"
 action ps as = let (otherActions, actions) = partition preassignment as
                    initialVariables = case actions of
                                         [] -> []
@@ -88,6 +89,8 @@ decide ps ls = let conditionsAndActions = "conditions_and_actions = [\n" ++ iden
                                       \end\n"
               in "(\n" ++ conditionsAndActions ++ tryPossibilities ++ ")"
 
+conditionActionTuple ps (cs, as) = "{\n" ++ condition ps cs ++ ",\n" ++action ps as ++ "\n}"
+
 value :: [Parameter] -> Value -> String
 value ps (Variable i) = variable ps i
 value _ (Constant c) = "constants[:" ++ c ++ "]"
@@ -96,7 +99,7 @@ value ps (RecordValue r) = record ps r
 value _ (LiteralValue l) = literal l
 value ps (Index i k) = index ps i k
 
-conditionActionTuple ps (cs, as) = "{\n" ++ condition ps cs ++ ",\n" ++action ps as ++ "\n}"
+constant c = let s = snake c in "@" ++ s ++ "<value for " ++ c ++ ">\ndef " ++ s ++ ", do: @" ++ s
 
 parameters ps = intercalate ", " ("variables": ps)
 extraParameters ps = intercalate ", " ps

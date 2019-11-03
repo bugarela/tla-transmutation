@@ -1,16 +1,16 @@
+---- MODULE TransactionCommit -----------------------------------------------
 (***************************************************************************)
 (* This specification is explained in "Transaction Commit", Lecture 5 of   *)
 (* the TLA+ Video Course.                                                  *)
 (***************************************************************************)
-CONSTANT RM       \* The set of participating resource managers
-
-VARIABLE rmState  \* rmState[rm] is the state of resource manager r.
+CONSTANT RM
+VARIABLE rmState
 -----------------------------------------------------------------------------
-TCTypeOK ==
-  (*************************************************************************)
-  (* The type-correctness invariant                                        *)
-  (*************************************************************************)
-  rmState \in [RM -> {"working", "prepared", "committed", "aborted"}]
+(* TCTypeOK == *)
+(*   (\*************************************************************************\) *)
+(*   (\* The type-correctness invariant                                        *\) *)
+(*   (\*************************************************************************\) *)
+(*   rmState \in [RM -> {"working", "prepared", "committed", "aborted"}] *)
 
 TCInit ==   rmState = [r \in RM |-> "working"]
   (*************************************************************************)
@@ -73,3 +73,4 @@ THEOREM TCSpec => [](TCTypeOK /\ TCConsistent)
   (* equivalent to invariance of both of the formulas TCTypeOK and         *)
   (* TCConsistent.                                                         *)
   (*************************************************************************)
+=================================================================================

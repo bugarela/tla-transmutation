@@ -9,14 +9,27 @@ import Head
 
 import Control.Monad.Identity (Identity)
 
-ws = many $ do {many1 (oneOf " \n"); many divisionLine; return()}
+ws = many $ do {many1 (oneOf " \n"); return()}
+ignore = many $ thingsToIgnore
 
-divisionLine = do {string "--"; many (char '-'); char '\n'; return()}
+thingsToIgnore = variablesDeclaration <|> theorem <|> moduleInstance <|> divisionLine <|> do{(oneOf " \n"); return()}
+
+divisionLine = do try $ do {string "--"; many (char '-'); char '\n'; ignore; return()}
+
+variablesDeclaration = do try $ do string "VARIABLE"
+                                   optional (char 'S')
+                                   ws
+                                   identifier `sepBy` (try $ comma)
+                                   ignore
+                                   return()
+
+theorem = do try $ do {string "THEOREM"; ws; manyTill anyChar (char '\n'); ignore; return()}
+moduleInstance = do try $ do {string "INSTANCE"; ws; identifier; ignore; return()}
 
 identifier = many1 (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
-constant = do c <- oneOf ['A'..'Z']
-              cs <- many (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
-              return (c:cs)
+constant = do try $ do c <- oneOf ['A'..'Z']
+                       cs <- many (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
+                       return (c:cs)
 
 reserved = ",;.(){}\"/\\[]"
 comma = do {ws; char ','; ws; return ()}
@@ -30,7 +43,7 @@ specification = do h <- moduleHeader
                    ds <- many definition
                    ws
                    many $ char '='
-                   ws
+                   ignore
                    eof
                    return (Module h ds)
 
@@ -38,14 +51,27 @@ moduleHeader = do many (char '-')
                   string " MODULE "
                   name <- identifier
                   ws
+                  divisionLine
                   documentation <- many comment
-                  ws
+                  ignore
                   return (Header name documentation)
 
-comment = do string "(*"
+comment = do try $ do string "(*"
              c <- anyChar `manyTill` (do try $ string "*)")
-             ws
+             ignore
              return (c)
+          <|>
+          do try $ do string "\\* "
+             c <- anyChar `manyTill` (char '\n')
+             ignore
+             return (c)
+
+declaration = do try $ do string "CONSTANT"
+                          optional (char 'S')
+                          ws
+                          cs <- constant `sepBy` (try $ comma)
+                          ignore
+                          return (cs)
 
 parameters = identifier `sepBy` comma
 
@@ -54,7 +80,7 @@ call = do try $ do i <- identifier
                    ws
                    ps <- parameters
                    char ')'
-                   ws
+                   ignore
                    return (i, ps)
        <|>
        do try $ do i <- identifier
@@ -64,12 +90,14 @@ call = do try $ do i <- identifier
 
 definition = do {c <- comment; return (Comment c)}
              <|>
+             do try $ do {cs <- declaration; return (Constants cs)}
+             <|>
              do try $ do (i, ps) <- call
                          string "=="
                          ws
                          doc <- many comment
                          a <- action
-                         ws
+                         ignore
                          return (Definition i ps doc a)
 
 orAction = do string "\\/"
@@ -164,7 +192,7 @@ set = do try $ do {s1 <- atomSet; string "\\cup"; ws; s2 <- set; ws; return (Uni
       atomSet
 
 atomSet = do char '{'
-             vs <- value `sepBy` comma
+             vs <- value `sepBy` (try $ comma)
              char '}'
              ws
              return (Set vs)
@@ -172,7 +200,7 @@ atomSet = do char '{'
           do {i <- identifier; ws; return (Ref i)}
 
 record = do try $ do char '['
-                     ms <- mapping `sepBy` comma
+                     ms <- mapping `sepBy` (try $ comma)
                      char ']'
                      ws
                      return (Record ms)
