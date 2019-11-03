@@ -14,10 +14,10 @@ generate (Spec (Module h ds) i n) = let code = map definition (filter (not . (in
 header :: Header -> String
 header (Header i doc) = "defmodule " ++ pascal i ++ " do\n" ++ moduleDoc doc
 
-moduleDoc doc = "@moduledoc \"\"\"\n" ++ (intercalate "\n" doc) ++ "\n\"\"\"\n"
+moduleDoc doc = "@moduledoc \"\"\"\n" ++ (intercalate "\n" (map cleanTrailing doc)) ++ "\n\"\"\"\n"
 
 funDoc doc = "@doc \"\"\"\n" ++ (intercalate "\n" doc) ++ "\n\"\"\"\n"
-comment doc = intercalate "\n" (map ((++) "# ") doc) ++ "\n"
+comment doc = intercalate "\n" (map (((++) "# ") . cleanTrailing) doc) ++ "\n"
 
 ini (Definition _ _ doc a) (Header i _) = comment doc ++ pascal i ++ ".main(%{\n" ++ intercalate ",\n" (conditionsToVariables (pascal i) a) ++ "\n})\n"
 
@@ -30,28 +30,28 @@ initOrNext i n d = (isNamed i d) || (isNamed n d)
 definition :: Definition -> String
 definition (Definition i ps doc a) = let (conditions, actions) = actionsAndConditions ps a
                                       in funDoc doc ++ declaration (i ++ "Condition") ps ++ condition ps conditions ++ "\nend\n\n" ++ declaration i ps ++ action ps actions ++ "\nend\n\n"
-definition (Comment s) = "# " ++ s
+definition (Comment s) = "# " ++ cleanTrailing s
 
 declaration i ps =  "def " ++ snake i ++ "(" ++ parameters ps ++ ") do\n"
 
 condition :: [Parameter] -> [String] -> String
-condition _ [] = "True\n"
+condition _ [] = "  True\n"
 condition ps cs = identAndSeparate " and" cs
 
 action :: [Parameter] -> [String] -> String
-action ps [] = "variables"
+action ps [] = "  variables\n"
 action ps as = let (otherActions, actions) = partition preassignment as
                    initialVariables = case actions of
-                                        [] -> "variables"
-                                        _ -> "%{\n" ++ identAndSeparate "," actions ++ "\n}\n"
-               in intercalate " |> " (initialVariables:otherActions)
+                                        [] -> []
+                                        _ -> ["%{\n" ++ identAndSeparate "," actions ++ "\n}"]
+               in ident (merge (initialVariables ++ otherActions))
 
 actionsAndConditions :: [Parameter] -> Action -> ([String], [String])
 actionsAndConditions ps (Condition p) = (predicate ps p, [])
 actionsAndConditions ps (Primed i v) = ([], [i ++ ": " ++ value ps v])
 actionsAndConditions _ (Unchanged is) = ([], map unchanged is)
 actionsAndConditions ps (ActionAnd as) = unzipAndFold (map (actionsAndConditions ps) as)
-actionsAndConditions _ (ActionCall i ps) = ([call (i ++ "Condition") ("variables":ps)], [call i ps])
+actionsAndConditions _ (ActionCall i ps) = ([call (i ++ "Condition") ("variables":ps)], [call i ("variables":ps)])
 actionsAndConditions ps (ActionOr as) = ([], [decide ps (map (actionsAndConditions ps) as)])
 
 -- Used for Init definition
@@ -76,15 +76,15 @@ predicate ps (Inequality v1 v2) = [value ps v1 ++ " != " ++ value ps v2]
 predicate ps (RecordBelonging v1 v2) = ["Enum.member?(" ++ value ps v1 ++ ", " ++ value ps v2 ++ ")"]
 
 decide :: [Parameter] -> [([String], [String])] -> String
-decide ps ls = let conditionsAndActions = "conditions_and_actions = [\n" ++ intercalate ", " (map (conditionActionTuple ps) ls) ++ "\n]\n"
+decide ps ls = let conditionsAndActions = "conditions_and_actions = [\n" ++ ident (intercalate ", " (map (conditionActionTuple ps) ls)) ++ "\n]\n"
                    tryPossibilities = "possible_states = for {condition, action} <- conditions_and_actions,\n\
                                       \into: MapSet.new,\n\
                                       \do: if condition, do: action, else: nil\n\n\
                                       \possible_states = MapSet.delete(possible_states, nil)\n\n\
                                       \if MapSet.size(possible_states) == 1 do\n\
-                                      \Enum.head(MapSet.to_list(possible_states))\n\
+                                      \  Enum.head(MapSet.to_list(possible_states))\n\
                                       \else\n\
-                                      \raise 'Not enough information to decide'\n\
+                                      \  raise 'Not enough information to decide'\n\
                                       \end\n"
               in "(\n" ++ conditionsAndActions ++ tryPossibilities ++ ")"
 
@@ -96,7 +96,7 @@ value ps (RecordValue r) = record ps r
 value _ (LiteralValue l) = literal l
 value ps (Index i k) = index ps i k
 
-conditionActionTuple ps (cs, as) = "{\n  " ++ condition ps cs ++ ",\n  (" ++ action ps as ++ ")\n}"
+conditionActionTuple ps (cs, as) = "{\n" ++ condition ps cs ++ ",\n" ++action ps as ++ "\n}"
 
 parameters ps = intercalate ", " ("variables": ps)
 extraParameters ps = intercalate ", " ps
@@ -107,14 +107,23 @@ set ps (Union (Set [v]) s) = "MapSet.put(" ++ set ps s ++ ", " ++ value ps v ++ 
 set ps (Union  s (Set [v])) = "MapSet.put(" ++ set ps s ++ ", " ++ value ps v ++ ")"
 set ps (Union s1 s2) = "MapSet.union(" ++ set ps s1 ++ ", " ++ set ps s2 ++ ")"
 
-record ps (Record rs) = intercalate " ++ " (map (mapping ps) rs) ++ " |> Enum.into(%{})"
+record ps (Record rs) = let (literals, generations) = partition isLiteral rs 
+                            g = intercalate " ++ " (map (mapping ps) generations) -- merge
+                            l = intercalate ", " (map (mapping ps) literals)
+                        in if g == [] then l else g ++ " |> Enum.into(%{" ++ l ++ "})"
 record ps (Except i k v) = "Map.put(" ++ variable ps i ++ ", " ++ k ++ ", " ++ value ps v ++ ")"
 
-mapping ps ((Key i), v) = "[{" ++ i ++ ", " ++ value ps v ++ "}]"
+isLiteral ((Key _), _) = True
+isLiteral _ = False
+
+mapping ps ((Key i), v) = "%{" ++ i ++ ": " ++ value ps v ++ "}"
 mapping ps ((All i a), v) = value ps a ++ " |> Enum.map(fn (" ++ i ++ ") -> {" ++ i ++ ", " ++ value ps v ++ "} end)"
 
 literal (Str s) = show s
 literal (Numb n) = show n
+
+merge [m] = m
+merge (m:ms) = "Map.merge(\n  " ++ m ++ ",\n" ++ ident (merge ms) ++ ")\n"
 
 variable :: [Parameter] -> Identifier -> String
 variable ps i = if elem i ps then snake i else "variables[:" ++ snake i ++ "]"
@@ -129,7 +138,10 @@ unzipAndFold = foldr (\x (a, b) -> (fst x ++ a, snd x ++ b)) ([],[])
 snake i = Casing.toQuietSnake (Casing.fromAny i)
 pascal i = Casing.toPascal (Casing.fromAny i)
 
-ident block = intercalate "\n" (map ((++) "  ") (lines block))
+ident block = intercalate "\n" (map tabIfline (lines block))
+
+tabIfline [] = []
+tabIfline xs = "  " ++ xs
 
 preassignment as = (head as) == '(' || dropWhile (/= ':') as == []
 
@@ -139,3 +151,8 @@ isNamed _ _ = False
 findIdentifier i ds = case find (isNamed i) ds of
                         Just a -> a
                         Nothing -> error("Definition not found: " ++ (show i))
+
+allSpaces s = dropWhile (== ' ') s == []
+
+cleanTrailing [] = []
+cleanTrailing (x:xs) = if allSpaces xs then [x] else x:(cleanTrailing xs)
