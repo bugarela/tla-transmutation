@@ -1,21 +1,22 @@
 defmodule TwoPhaseCommit do
-@moduledoc """
-*************************************************************************
- This specification is discussed in "Two-Phase Commit", Lecture 6 of the
- TLA+ Video Course.  It describes the Two-Phase Commit protocol, in
- which a transaction manager (TM) coordinates the resource managers
- (RMs) to implement the Transaction Commit specification of module
- TCommit.  In this specification, RMs spontaneously issue Prepared
- messages.  We ignore the Prepare messages that the TM can send to the
- RMs.
- 
- For simplicity, we also eliminate Abort messages sent by an RM when it
- decides to abort.  Such a message would cause the TM to abort the
- transaction, an event represented here by the TM spontaneously deciding
- to abort.
-*************************************************************************
-"""
-  @rm<value for RM>
+  @moduledoc """
+  *************************************************************************
+   This specification is discussed in "Two-Phase Commit", Lecture 6 of the
+   TLA+ Video Course.  It describes the Two-Phase Commit protocol, in
+   which a transaction manager (TM) coordinates the resource managers
+   (RMs) to implement the Transaction Commit specification of module
+   TCommit.  In this specification, RMs spontaneously issue Prepared
+   messages.  We ignore the Prepare messages that the TM can send to the
+   RMs.
+   
+   For simplicity, we also eliminate Abort messages sent by an RM when it
+   decides to abort.  Such a message would cause the TM to abort the
+   transaction, an event represented here by the TM spontaneously deciding
+   to abort.
+  *************************************************************************
+  """
+  @oracle spawn(Oracle, :listen, [])
+  @rm "<value for RM>"
   def rm, do: @rm
   # *********************************************************************
   #  In the protocol, processes communicate with one another by sending
@@ -52,50 +53,48 @@ defmodule TwoPhaseCommit do
   # *************************************************************************
   @doc """
   ***********************************************************************
-   The TM receives a "Prepared" message from resource manager r.  We     
-   could add the additional enabling condition r \notin tmPrepared,      
-   which disables the action if the TM has already received this         
-   message.  But there is no need, because in that case the action has   
-   no effect; it leaves the state unchanged.                             
+   The TM receives a "Prepared" message from resource manager r.  We
+   could add the additional enabling condition r \notin tmPrepared,
+   which disables the action if the TM has already received this
+   message.  But there is no need, because in that case the action has
+   no effect; it leaves the state unchanged.
   ***********************************************************************
   """
   def tm_rcv_prepared_condition(variables, r) do
-    variables[:tm_state] == "init" and
-    Enum.member?(%{type: "Prepared"}, %{rm: r}, variables[:msgs])
+    variables[:tm_state] == "init" and Enum.member?(variables[:msgs], %{type: "Prepared", rm: r})
   end
 
   def tm_rcv_prepared(variables, r) do
     %{
-      tmPrepared: MapSet.put(variables[:tm_prepared], r),
-      rmState: variables[:rm_state],
-      tmState: variables[:tm_state],
+      tm_prepared: MapSet.put(variables[:tm_prepared], r),
+      rm_state: variables[:rm_state],
+      tm_state: variables[:tm_state],
       msgs: variables[:msgs]
     }
   end
 
   @doc """
   ***********************************************************************
-   The TM commits the transaction; enabled iff the TM is in its initial  
-   state and every RM has sent a "Prepared" message.                     
+   The TM commits the transaction; enabled iff the TM is in its initial
+   state and every RM has sent a "Prepared" message.
   ***********************************************************************
   """
   def tm_commit_condition(variables) do
-    variables[:tm_state] == "init" and
-    variables[:tm_prepared] == constants[:RM]
+    variables[:tm_state] == "init" and variables[:tm_prepared] == @rm
   end
 
   def tm_commit(variables) do
     %{
-      tmState: "done",
+      tm_state: "done",
       msgs: MapSet.put(variables[:msgs], %{type: "Commit"}),
-      rmState: variables[:rm_state],
-      tmPrepared: variables[:tm_prepared]
+      rm_state: variables[:rm_state],
+      tm_prepared: variables[:tm_prepared]
     }
   end
 
   @doc """
   ***********************************************************************
-   The TM spontaneously aborts the transaction.                          
+   The TM spontaneously aborts the transaction.
   ***********************************************************************
   """
   def tm_abort_condition(variables) do
@@ -104,16 +103,16 @@ defmodule TwoPhaseCommit do
 
   def tm_abort(variables) do
     %{
-      tmState: "done",
+      tm_state: "done",
       msgs: MapSet.put(variables[:msgs], %{type: "Abort"}),
-      rmState: variables[:rm_state],
-      tmPrepared: variables[:tm_prepared]
+      rm_state: variables[:rm_state],
+      tm_prepared: variables[:tm_prepared]
     }
   end
 
   @doc """
   ***********************************************************************
-   Resource manager r prepares.                                          
+   Resource manager r prepares.
   ***********************************************************************
   """
   def rm_prepare_condition(variables, r) do
@@ -122,17 +121,17 @@ defmodule TwoPhaseCommit do
 
   def rm_prepare(variables, r) do
     %{
-      rmState: Map.put(variables[:rm_state], r, "prepared"),
-      msgs: MapSet.put(variables[:msgs], %{type: "Prepared"}, %{rm: r}),
-      tmState: variables[:tm_state],
-      tmPrepared: variables[:tm_prepared]
+      rm_state: Map.put(variables[:rm_state], r, "prepared"),
+      msgs: MapSet.put(variables[:msgs], %{type: "Prepared", rm: r}),
+      tm_state: variables[:tm_state],
+      tm_prepared: variables[:tm_prepared]
     }
   end
 
   @doc """
   ***********************************************************************
-   Resource manager r spontaneously decides to abort.  As noted above, r 
-   does not send any message in our simplified spec.                     
+   Resource manager r spontaneously decides to abort.  As noted above, r
+   does not send any message in our simplified spec.
   ***********************************************************************
   """
   def rm_choose_to_abort_condition(variables, r) do
@@ -141,45 +140,45 @@ defmodule TwoPhaseCommit do
 
   def rm_choose_to_abort(variables, r) do
     %{
-      rmState: Map.put(variables[:rm_state], r, "aborted"),
-      tmState: variables[:tm_state],
-      tmPrepared: variables[:tm_prepared],
+      rm_state: Map.put(variables[:rm_state], r, "aborted"),
+      tm_state: variables[:tm_state],
+      tm_prepared: variables[:tm_prepared],
       msgs: variables[:msgs]
     }
   end
 
   @doc """
   ***********************************************************************
-   Resource manager r is told by the TM to commit.                       
+   Resource manager r is told by the TM to commit.
   ***********************************************************************
   """
   def rm_rcv_commit_msg_condition(variables, r) do
-    Enum.member?(%{type: "Commit"}, variables[:msgs])
+    Enum.member?(variables[:msgs], %{type: "Commit"})
   end
 
   def rm_rcv_commit_msg(variables, r) do
     %{
-      rmState: Map.put(variables[:rm_state], r, "committed"),
-      tmState: variables[:tm_state],
-      tmPrepared: variables[:tm_prepared],
+      rm_state: Map.put(variables[:rm_state], r, "committed"),
+      tm_state: variables[:tm_state],
+      tm_prepared: variables[:tm_prepared],
       msgs: variables[:msgs]
     }
   end
 
   @doc """
   ***********************************************************************
-   Resource manager r is told by the TM to abort.                        
+   Resource manager r is told by the TM to abort.
   ***********************************************************************
   """
   def rm_rcv_abort_msg_condition(variables, r) do
-    Enum.member?(%{type: "Abort"}, variables[:msgs])
+    Enum.member?(variables[:msgs], %{type: "Abort"})
   end
 
   def rm_rcv_abort_msg(variables, r) do
     %{
-      rmState: Map.put(variables[:rm_state], r, "aborted"),
-      tmState: variables[:tm_state],
-      tmPrepared: variables[:tm_prepared],
+      rm_state: Map.put(variables[:rm_state], r, "aborted"),
+      tm_state: variables[:tm_state],
+      tm_prepared: variables[:tm_prepared],
       msgs: variables[:msgs]
     }
   end
@@ -219,28 +218,35 @@ defmodule TwoPhaseCommit do
 
   """
   def main(variables) do
-  (
-  conditions_and_actions = [
-    {
-      tm_commit_condition(variables),
-      tm_commit(variables)
-    }, {
-      tm_abort_condition(variables),
-      tm_abort(variables)
-    }
-  ]
-  possible_states = for {condition, action} <- conditions_and_actions,
-  into: MapSet.new,
-  do: if condition, do: action, else: nil
+    IO.puts (inspect variables)
 
-  possible_states = MapSet.delete(possible_states, nil)
-
-  if MapSet.size(possible_states) == 1 do
-    Enum.head(MapSet.to_list(possible_states))
-  else
-    raise 'Not enough information to decide'
+    main(
+      decide_action(
+        "Next",
+        [
+          %{ action: "TMCommit()", condition: tm_commit_condition(variables), state: tm_commit(variables) },
+          %{ action: "TMAbort()", condition: tm_abort_condition(variables), state: tm_abort(variables) }
+        ]
+      )
+    )
   end
-  )
+
+  def decide_action(origin, actions) do
+    possible_actions = Enum.filter(actions, fn(action) -> action[:condition] end)
+    different_states = Enum.uniq_by(possible_actions, fn(action) -> action[:state] end)
+
+    if Enum.count(different_states) == 1 do
+      Enum.at(possible_actions, 0)[:state]
+    else
+      actions_names = Enum.map(possible_actions, fn(action) -> action[:action] end)
+      send @oracle, {self(), origin, actions_names}
+
+      n = receive do
+        {:ok, n} -> n
+      end
+
+      Enum.at(possible_actions, n)[:state]
+    end
   end
 end
 
@@ -248,8 +254,8 @@ end
 #  The initial predicate.
 # ***********************************************************************
 TwoPhaseCommit.main(%{
-rmState: constants[:RM] |> Enum.map(fn (r) -> {r, "working"} end) |> Enum.into(%{}),
-tmState: "init",
-tmPrepared: MapSet.new([]),
-msgs: MapSet.new([])
+  rm_state: TwoPhaseCommit.rm |> Enum.map(fn (r) -> {r, "working"} end) |> Enum.into(%{}),
+  tm_state: "init",
+  tm_prepared: MapSet.new([]),
+  msgs: MapSet.new([])
 })
