@@ -24,4 +24,4 @@ data Record = Record [(Key, Value)] | Except Identifier Identifier Value derivin
 
 data Predicate = Equality Value Value | Inequality Value Value | RecordBelonging Value Value deriving(Show)
 
-data Action = Condition Predicate | Primed Identifier Value | Unchanged [Identifier] | ActionNot Action | ActionAnd [Action] | ActionOr [Action] | ActionCall Identifier [Parameter] deriving(Show)
+data Action = Condition Predicate | Primed Identifier Value | Unchanged [Identifier] | ActionNot Action | ActionAnd [Action] | ActionOr [Action] | ActionCall Identifier [Parameter] | If Predicate Action Action deriving(Show)

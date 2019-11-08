@@ -24,7 +24,7 @@ comment doc = intercalate "\n" (map (((++) "# ") . cleanTrailing) doc) ++ "\n"
 ini (Definition _ _ doc a) (Header i _) = comment doc ++ pascal i ++ ".main(%{\n" ++ identAndSeparate "," (conditionsToVariables (pascal i) a) ++ "\n})\n"
 
 next (Definition _ _ doc a) = let (_, actions) = actionsAndConditions [] a
-                              in funDoc doc ++ "def main(variables) do\n" ++ ident(logState ++ "main(\n" ++ (intercalate "\n"  (actions)) ++ "\n)") ++ "\nend\n"
+                              in funDoc doc ++ "def main(variables) do\n" ++ ident(logState ++ "main(\n" ++ (intercalate "\n"  (actions)) ++ "\n)") ++ "\nend\n" -- Usar action e não intercalate
 
 initOrNext :: String -> String -> Definition -> Bool
 initOrNext i n d = (isNamed i d) || (isNamed n d)

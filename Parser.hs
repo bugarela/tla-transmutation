@@ -12,7 +12,7 @@ import Control.Monad.Identity (Identity)
 ws = many $ do {many1 (oneOf " \n"); return()}
 ignore = many $ thingsToIgnore
 
-thingsToIgnore = variablesDeclaration <|> theorem <|> moduleInstance <|> divisionLine <|> do{(oneOf " \n"); return()}
+thingsToIgnore = variablesDeclaration <|> theorem <|> moduleInstance <|> extends <|> divisionLine <|> do{(oneOf " \n"); return()}
 
 divisionLine = do try $ do {string "--"; many (char '-'); char '\n'; ignore; return()}
 
@@ -25,6 +25,7 @@ variablesDeclaration = do try $ do string "VARIABLE"
 
 theorem = do try $ do {string "THEOREM"; ws; manyTill anyChar (char '\n'); ignore; return()}
 moduleInstance = do try $ do {string "INSTANCE"; ws; identifier; ignore; return()}
+extends = do try $ do {string "EXTENDS"; ws; identifier; ignore; return()}
 
 identifier = many1 (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
 constant = do try $ do c <- oneOf ['A'..'Z']
@@ -125,6 +126,17 @@ action = do {p <- predicate; return (Condition p)}
             return (Unchanged vs)
          <|>
          do {(i, ps) <- call; return (ActionCall i ps)}
+         <|>
+         do try $ do string "IF"
+                     ws
+                     p <- predicate
+                     string "THEN"
+                     ws
+                     at <- action
+                     string "ELSE"
+                     ws
+                     af <- action
+                     return (If p at af)
          <|>
          do try $ do {ws; as <- many1 andAction; return (ActionAnd as)}
          <|>
