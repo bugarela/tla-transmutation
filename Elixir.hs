@@ -81,7 +81,7 @@ actionsAndConditions g (Exists i v a) = enumMap g v i a
 actionsAndConditions g (If p t e) = let cp = predicate g p
                                         (ct, at) = actionsAndConditions g t
                                         (ce, ae) = actionsAndConditions g e
-                                        c = "((" ++ condition (cp ++ ct) ++ ") or (" ++ condition (cp ++ ce) ++ "))"
+                                        c = "((" ++ condition (cp ++ ct) ++ ") or (not (" ++ condition cp ++ ") and " ++ condition ce ++ "))"
                                         a = unlines ["if " ++ condition cp ++ " do",
                                                      ident (action at),
                                                      "else",
@@ -98,7 +98,7 @@ enumMap g v i d = let (cs, as) = actionsAndConditions g d
 
 initialState :: Context -> Action -> String
 initialState g (ActionAnd as) = action (map (initialState g) as)
-initialState g (Condition (Equality (Arith (Var i)) v)) = "%{ " ++ snake i ++ ": " ++ value g v ++ " }"
+initialState g (Condition (Equality (Arith (Ref i)) v)) = "%{ " ++ snake i ++ ": " ++ value g v ++ " }"
 initialState _ p = error("Init condition ambiguous: " ++ show p)
 
 unchanged is = let u = \i -> snake i ++ ": variables[:" ++ snake i ++ "]"
@@ -153,12 +153,16 @@ cnst g i = case dropWhile (\d ->snd d /= "module") g of
               ms -> fst (head ms) ++ "." ++ snake i
 
 expression _ (Num d) = show d
-expression g (Var i) = reference g i
-expression g (Neg a) = "-" ++ expression g a
-expression g (Add a b) = expression g a ++ " + " ++ expression g b
-expression g (Sub a b) = expression g a ++ " - " ++ expression g b
-expression g (Mul a b) = expression g a ++ " * " ++ expression g b
-expression g (Div a b) = expression g a ++ " / " ++ expression g b
+expression g (Ref i) = reference g i
+expression g (Neg a) = "-" ++ expression' g a
+expression g (Add a b) = expression' g a ++ " + " ++ expression' g b
+expression g (Sub a b) = expression' g a ++ " - " ++ expression' g b
+expression g (Mul a b) = expression' g a ++ " * " ++ expression' g b
+expression g (Div a b) = expression' g a ++ " / " ++ expression' g b
+
+expression' _ (Num d) = show d
+expression' g (Ref i) = reference g i
+expression' g e = "(" ++ expression g e ++ ")"
 
 parameters ps = intercalate ", " ("variables": ps)
 

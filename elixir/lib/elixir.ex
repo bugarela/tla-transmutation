@@ -14,7 +14,7 @@ defmodule JarrosDeAgua do
 
   def enche_pequeno(variables) do
     %{
-      jarro_pequeno: 3.0,
+      jarro_pequeno: 3,
       jarro_grande: variables[:jarro_grande]
     }
   end
@@ -29,7 +29,7 @@ defmodule JarrosDeAgua do
 
   def enche_grande(variables) do
     %{
-      jarro_grande: 5.0,
+      jarro_grande: 5,
       jarro_pequeno: variables[:jarro_pequeno]
     }
   end
@@ -44,7 +44,7 @@ defmodule JarrosDeAgua do
 
   def esvazia_pequeno(variables) do
     %{
-      jarro_pequeno: 0.0,
+      jarro_pequeno: 0,
       jarro_grande: variables[:jarro_grande]
     }
   end
@@ -59,7 +59,7 @@ defmodule JarrosDeAgua do
 
   def esvazia_grande(variables) do
     %{
-      jarro_grande: 0.0,
+      jarro_grande: 0,
       jarro_pequeno: variables[:jarro_pequeno]
     }
   end
@@ -69,19 +69,19 @@ defmodule JarrosDeAgua do
 
   """
   def pequeno_para_grande_condition(variables) do
-    ((variables[:jarro_grande] + variables[:jarro_pequeno] <= 5.0) or (variables[:jarro_grande] + variables[:jarro_pequeno] <= 5.0))
+    ((variables[:jarro_grande] + variables[:jarro_pequeno] <= 5) or (not (variables[:jarro_grande] + variables[:jarro_pequeno] <= 5) and True))
   end
 
   def pequeno_para_grande(variables) do
-    if variables[:jarro_grande] + variables[:jarro_pequeno] <= 5.0 do
+    if variables[:jarro_grande] + variables[:jarro_pequeno] <= 5 do
       %{
         jarro_grande: variables[:jarro_grande] + variables[:jarro_pequeno],
-        jarro_pequeno: 0.0
+        jarro_pequeno: 0
       }
     else
       %{
-        jarro_grande: 5.0,
-        jarro_pequeno: variables[:jarro_pequeno] - 5.0 - variables[:jarro_grande]
+        jarro_grande: 5,
+        jarro_pequeno: variables[:jarro_pequeno] - (5 - variables[:jarro_grande])
       }
     end
   end
@@ -91,19 +91,19 @@ defmodule JarrosDeAgua do
 
   """
   def grande_para_pequeno_condition(variables) do
-    ((variables[:jarro_grande] + variables[:jarro_pequeno] <= 3.0) or (variables[:jarro_grande] + variables[:jarro_pequeno] <= 3.0))
+    ((variables[:jarro_grande] + variables[:jarro_pequeno] <= 3) or (not (variables[:jarro_grande] + variables[:jarro_pequeno] <= 3) and True))
   end
 
   def grande_para_pequeno(variables) do
-    if variables[:jarro_grande] + variables[:jarro_pequeno] <= 3.0 do
+    if variables[:jarro_grande] + variables[:jarro_pequeno] <= 3 do
       %{
-        jarro_grande: 0.0,
+        jarro_grande: 0,
         jarro_pequeno: variables[:jarro_grande] + variables[:jarro_pequeno]
       }
     else
       %{
-        jarro_grande: variables[:jarro_pequeno] - 3.0 - variables[:jarro_grande],
-        jarro_pequeno: 3.0
+        jarro_grande: variables[:jarro_pequeno] - (3 - variables[:jarro_grande]),
+        jarro_pequeno: 3
       }
     end
   end
@@ -152,7 +152,7 @@ end
 JarrosDeAgua.main(
 
   %{
-    jarro_grande: 0.0,
-    jarro_pequeno: 0.0
+    jarro_grande: 0,
+    jarro_pequeno: 0
   }
 )

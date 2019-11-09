@@ -227,17 +227,15 @@ primed = do try $ do i <- identifier
                      ws
                      return (i)
 
-value = do {e <- arithmeticExpression; ws; return (Arith e)}
-        <|>
-        do {l <- literal; return (l)}
-        <|>
-        do {r <- record; return (r)}
+value = do {r <- record; return (r)}
         <|>
         do try $ do {i <- identifier; char '['; k <- identifier; char ']'; ws; return (Index i k)}
         <|>
         do {s <- set; return (s)}
         <|>
-        do {i <- identifier; ws; return (Ref i)}
+        do try $ do {e <- arithmeticExpression; ws; return (Arith e)}
+        <|>
+        do {l <- literal; return (l)}
 
 set = do try $ do {s1 <- atomSet; string "\\cup"; ws; s2 <- set; ws; return (Union s1 s2)}
       <|>
@@ -249,7 +247,7 @@ atomSet = do char '{'
              ws
              return (Set vs)
           <|>
-          do {i <- identifier; ws; return (Ref i)}
+          do {e <- arithmeticExpression; ws; return (Arith e)}
 
 record = do try $ do char '['
                      ms <- mapping `sepBy` (try $ comma)
@@ -276,35 +274,3 @@ record = do try $ do char '['
 literal = do try $ do {char '\"'; cs <- many1 (noneOf reserved); char '\"'; ws; return (Str cs)}
 
 arithmeticExpression = Math.build
-
--- arithmeticExpression = buildExpressionParser arithmeticOperators arithmeticAtom
---                        <|>
---                        arithmeticAtom
-                       -- do char '('
-                       --    ws
-                       --    e <- arithmeticExpression
-                       --    ws
-                       --    char ')'
-                       --    ws
-                       --    return e
-
--- arithmeticOperators :: [[Operator String u Identity ArithmeticExpression]]
--- arithmeticOperators = [[Prefix (ws >> char '-' >> ws >> return (Neg))],
-
---                         [Infix  (ws >> char '*' >> ws >> return (Mult)) AssocLeft,
---                          Infix  (ws >> char '/' >> ws >> return (Div)) AssocLeft],
-
---                         [Infix  (ws >> char '+' >> ws >> return (Add)) AssocLeft,
---                          Infix  (ws >> char '-' >> ws >> return (Sub)) AssocLeft]]
-
--- arithmeticAtom = do try $ do {n <- number; return (Val (Numb n))}
---                  <|>
---                  do try $ do {i <- identifier; return (Val (Ref i))}
---                  <|>
---                  do char '('
---                     ws
---                     e <- arithmeticExpression
---                     ws
---                     char ')'
---                     ws
---                     return e

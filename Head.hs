@@ -28,7 +28,7 @@ data Action = Condition Predicate | Primed Identifier Value | Unchanged [Identif
             | ActionAnd [Action] | ActionOr [Action] | ActionCall Identifier [Parameter]
             | If Predicate Action Action | Exists Identifier Value Action deriving(Show)
 
-data Value = Set [Value] | Ref Identifier | Union Value Value
+data Value = Set [Value] | Union Value Value
            | Record [(Key, Value)] | Except Identifier Identifier Value
-           | Str String | Arith (Expr Double) | Index Identifier Identifier deriving(Show)
+           | Str String | Arith Expr | Index Identifier Identifier deriving(Show)
 
