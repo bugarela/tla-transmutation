@@ -34,6 +34,7 @@ constant = do try $ do c <- oneOf ['A'..'Z']
 
 reserved = ",;.(){}\"/\\[]"
 comma = do {ws; char ','; ws; return ()}
+infOr = do {ws; string "\\/"; ws; return ()}
 
 parseFile a = do f <- readFile a
                  let e = parse specification "Error:" (f)
@@ -141,6 +142,18 @@ action = do {p <- predicate; return (Condition p)}
          do try $ do {ws; as <- many1 andAction; return (ActionAnd as)}
          <|>
          do try $ do {ws; as <- many1 orAction; return (ActionOr as)}
+         <|>
+         do try $ do string "\\E"
+                     ws
+                     i <- identifier
+                     ws
+                     string "\\in"
+                     ws
+                     v <- value
+                     char ':'
+                     ws
+                     as <- action `sepBy` infOr
+                     return (Exists i v (ActionOr as))
 
 predicate = do try $ do v1 <- value
                         char '='

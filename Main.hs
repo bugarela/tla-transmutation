@@ -17,6 +17,6 @@ elixir a init next = do ls <- parseFile a
 file a init next = do ls <- parseFile a
                       case ls of
                         Left e -> print e
-                        Right (m, ds) -> writeFile "out.exs" (generate (Spec m init next ds))
+                        Right (m, ds) -> writeFile "elixir/lib/elixir.ex" (generate (Spec m init next ds))
                       return ()
 

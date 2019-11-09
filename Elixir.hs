@@ -48,7 +48,7 @@ mainCall (Module i _) s = pascal i ++ ".main(\n" ++ ident s ++ "\n)\n"
 ini g (Definition _ _ doc a) = comment doc ++ initialState g a
 
 next g (Definition _ _ doc a) = let (_, actions) = actionsAndConditions g a
-                                in funDoc doc ++ "def main(variables) do\n" ++ ident (logState ++ "main" ++ (action actions)) ++ "\nend\n" 
+                                in funDoc doc ++ "def main(variables) do\n" ++ ident (logState ++ "main" ++ (action actions)) ++ "\nend\n"
 
 
 condition :: [String] -> String
@@ -74,6 +74,13 @@ actionsAndConditions _ (Unchanged is) = ([], [unchanged is])
 actionsAndConditions g (ActionAnd as) = unzipAndFold (map (actionsAndConditions g) as)
 actionsAndConditions _ (ActionCall i ps) = ([call (i ++ "Condition") ("variables":ps)], [call i ("variables":ps)])
 actionsAndConditions g (ActionOr as) = ([], [decide g as])
+actionsAndConditions g (Exists i v a) = enumMap g v i a
+
+enumMap :: Context -> Value -> Identifier -> Action -> ([String], [String])
+enumMap g v i d = let (cs, as) = actionsAndConditions g d
+                      c = "Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> " ++ condition cs ++ "end)"
+                      a = "Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> " ++ action as ++ "end)"
+                  in ([c], [a])
 
 initialState :: Context -> Action -> String
 initialState g (ActionAnd as) = action (map (initialState g) as)
@@ -96,6 +103,7 @@ decide g as = let actionsMaps = map (actionMap g) as
                   list = "[\n" ++ ident (intercalate ",\n" actionsMaps) ++ "\n]\n"
               in "(\n" ++ ident ("decide_action(\n  \"Next\",\n" ++ ident list ++ "\n)\n") ++ "\n)"
 
+-- actionMap g (Exists i v as) ="Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> " ++ code ++ "end)
 actionMap g a = let (cs, as) = actionsAndConditions g a
                     n = "action: \"" ++ actionName a ++ "\""
                     c = "condition: " ++ condition cs
@@ -116,6 +124,7 @@ value g (Record rs) = let (literals, generations) = partition isLiteral rs
 value g (Except i k v) = "Map.put(" ++ reference g i ++ ", " ++ k ++ ", " ++ value g v ++ ")"
 value _ (Str s) = show s
 value _ (Numb n) = show n
+
 
 reference g i = if elem (i, "param") g then i else
                   if elem (i, "const") g then cnst g i else

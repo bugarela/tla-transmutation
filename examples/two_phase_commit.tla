@@ -134,9 +134,9 @@ RMRcvAbortMsg(r) ==
 
 TPNext ==
   \/ TMCommit \/ TMAbort
-  (* \/ \E r \in RM : *)
-  (*      TMRcvPrepared(r) \/ RMPrepare(r) \/ RMChooseToAbort(r) *)
-  (*        \/ RMRcvCommitMsg(r) \/ RMRcvAbortMsg(r) *)
+  \/ \E r \in RM :
+       TMRcvPrepared(r) \/ RMPrepare(r) \/ RMChooseToAbort(r)
+         \/ RMRcvCommitMsg(r) \/ RMRcvAbortMsg(r)
 -----------------------------------------------------------------------------
 (***************************************************************************)
 (* The material below this point is not discussed in Video Lecture 6.  It  *)
