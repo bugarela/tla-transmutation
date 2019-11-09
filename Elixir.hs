@@ -5,6 +5,7 @@ import Data.List.Extra
 import qualified Text.Casing as Casing -- cabal install casing
 
 import Head
+import Math
 import Snippets
 import DocHandler
 
@@ -77,6 +78,17 @@ actionsAndConditions g (ActionAnd as) = unzipAndFold (map (actionsAndConditions 
 actionsAndConditions _ (ActionCall i ps) = ([call (i ++ "Condition") ("variables":ps)], [call i ("variables":ps)])
 actionsAndConditions g (ActionOr as) = ([], [decide g as])
 actionsAndConditions g (Exists i v a) = enumMap g v i a
+actionsAndConditions g (If p t e) = let cp = predicate g p
+                                        (ct, at) = actionsAndConditions g t
+                                        (ce, ae) = actionsAndConditions g e
+                                        c = "((" ++ condition (cp ++ ct) ++ ") or (" ++ condition (cp ++ ce) ++ "))"
+                                        a = unlines ["if " ++ condition cp ++ " do",
+                                                     ident (action at),
+                                                     "else",
+                                                     ident (action ae),
+                                                     "end"]
+                                    in ([c], [a])
+
 
 enumMap :: Context -> Value -> Identifier -> Action -> ([String], [String])
 enumMap g v i d = let (cs, as) = actionsAndConditions g d
@@ -86,7 +98,7 @@ enumMap g v i d = let (cs, as) = actionsAndConditions g d
 
 initialState :: Context -> Action -> String
 initialState g (ActionAnd as) = action (map (initialState g) as)
-initialState g (Condition (Equality (Ref i) v)) = "%{ " ++ snake i ++ ": " ++ value g v ++ " }"
+initialState g (Condition (Equality (Arith (Var i)) v)) = "%{ " ++ snake i ++ ": " ++ value g v ++ " }"
 initialState _ p = error("Init condition ambiguous: " ++ show p)
 
 unchanged is = let u = \i -> snake i ++ ": variables[:" ++ snake i ++ "]"
@@ -98,6 +110,10 @@ call i ps = snake i ++ "(" ++ intercalate ", " (ps) ++ ")"
 predicate :: Context -> Predicate -> [String]
 predicate g (Equality v1 v2) = [value g v1 ++ " == " ++ value g v2]
 predicate g (Inequality v1 v2) = [value g v1 ++ " != " ++ value g v2]
+predicate g (Gt v1 v2) = [value g v1 ++ " > " ++ value g v2]
+predicate g (Lt v1 v2) = [value g v1 ++ " < " ++ value g v2]
+predicate g (Gte v1 v2) = [value g v1 ++ " >= " ++ value g v2]
+predicate g (Lte v1 v2) = [value g v1 ++ " <= " ++ value g v2]
 predicate g (RecordBelonging v1 v2) = ["Enum.member?(" ++ value g v2 ++ ", " ++ value g v1 ++ ")"]
 
 decide :: Context -> [Action] -> String
@@ -115,7 +131,6 @@ actionMap g a = let (cs, as) = actionsAndConditions g a
                 in "%{ " ++ intercalate ", " [n,c,s] ++  " }"
 
 value :: Context -> Value -> String
-value g (Ref i) = reference g i
 value g (Index i k) = index g i k
 value g (Set vs) = "MapSet.new([" ++ intercalate ", " (map (value g) vs) ++ "])"
 value g (Union (Set [v]) s) = "MapSet.put(" ++ value g s ++ ", " ++ value g v ++ ")"
@@ -126,9 +141,8 @@ value g (Record rs) = let (literals, generations) = partition isLiteral rs
                           l = "%{ " ++ intercalate ", " (map (mapping g) literals) ++ " }"
                       in if m == [] then l else m ++ " |> Enum.into(" ++ l ++ ")"
 value g (Except i k v) = "Map.put(" ++ reference g i ++ ", " ++ k ++ ", " ++ value g v ++ ")"
+value g (Arith e) = expression g e
 value _ (Str s) = show s
-value _ (Numb n) = show n
-
 
 reference g i = if elem (i, "param") g then i else
                   if elem (i, "const") g then cnst g i else
@@ -137,6 +151,14 @@ reference g i = if elem (i, "param") g then i else
 cnst g i = case dropWhile (\d ->snd d /= "module") g of
               [] -> "@" ++ snake i
               ms -> fst (head ms) ++ "." ++ snake i
+
+expression _ (Num d) = show d
+expression g (Var i) = reference g i
+expression g (Neg a) = "-" ++ expression g a
+expression g (Add a b) = expression g a ++ " + " ++ expression g b
+expression g (Sub a b) = expression g a ++ " - " ++ expression g b
+expression g (Mul a b) = expression g a ++ " * " ++ expression g b
+expression g (Div a b) = expression g a ++ " / " ++ expression g b
 
 parameters ps = intercalate ", " ("variables": ps)
 
@@ -174,7 +196,7 @@ mapAndJoin f ls = intercalate "\n" (map f ls)
 tabIfline [] = []
 tabIfline xs = "  " ++ xs
 
-preassignment as = (head as) == '(' || dropWhile (/= ':') as == []
+preassignment as = (head as) == '(' || take 2 as == "if" || dropWhile (/= ':') as == []
 
 isNamed i (Definition id _ _ _) = i == id
 isNamed _ _ = False

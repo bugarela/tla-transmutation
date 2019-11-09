@@ -1,5 +1,7 @@
 module Head where
 
+import Math
+
 type Identifier = String
 type Parameter = Identifier
 type Constant = Identifier
@@ -17,7 +19,10 @@ data Definition = Definition Identifier [Parameter] Documentation Action | Const
 
 data Key = Key Identifier | All Identifier Value deriving(Show)
 
-data Predicate = Equality Value Value | Inequality Value Value | RecordBelonging Value Value deriving(Show)
+data Predicate = Equality Value Value | Inequality Value Value
+               | Gt Value Value | Lt Value Value
+               | Gte Value Value | Lte Value Value
+               | RecordBelonging Value Value deriving(Show)
 
 data Action = Condition Predicate | Primed Identifier Value | Unchanged [Identifier] | ActionNot Action
             | ActionAnd [Action] | ActionOr [Action] | ActionCall Identifier [Parameter]
@@ -25,4 +30,5 @@ data Action = Condition Predicate | Primed Identifier Value | Unchanged [Identif
 
 data Value = Set [Value] | Ref Identifier | Union Value Value
            | Record [(Key, Value)] | Except Identifier Identifier Value
-           | Str String | Numb Double | Index Identifier Identifier deriving(Show)
+           | Str String | Arith (Expr Double) | Index Identifier Identifier deriving(Show)
+

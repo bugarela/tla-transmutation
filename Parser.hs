@@ -2,6 +2,7 @@ module Parser where
 
 import Text.Parsec
 import Text.Parsec.Expr
+import Math as Math -- cabal install ParserFunction
 import qualified Text.Parsec.Token as Token
 import Text.Parsec.Language
 import Data.Char
@@ -9,7 +10,8 @@ import Head
 
 import Control.Monad.Identity (Identity)
 
-ws = many $ do {many1 (oneOf " \n"); return()}
+import Debug.Trace
+
 ignore = many $ thingsToIgnore
 
 thingsToIgnore = variablesDeclaration <|> theorem <|> moduleInstance <|> extends <|> divisionLine <|> do{(oneOf " \n"); return()}
@@ -38,6 +40,7 @@ infOr = do {ws; string "\\/"; ws; return ()}
 
 parseFile a = do f <- readFile a
                  let e = parse specification "Error:" (f)
+                 -- let e = parse arithmeticExpression "Error:" (f)
                  return e
 
 specification = do (n, d) <- moduleHeader
@@ -114,7 +117,18 @@ andAction = do string "/\\"
                ws
                return a
 
-action = do {p <- predicate; return (Condition p)}
+action =  do string "IF"
+             ws
+             p <- predicate
+             string "THEN"
+             ws
+             at <- action
+             string "ELSE"
+             ws
+             af <- action
+             return (If p at af)
+         <|>
+         do {p <- predicate; return (Condition p)}
          <|>
          do {p <- primed; char '='; ws; v <- value; return (Primed p v)}
          <|>
@@ -127,17 +141,6 @@ action = do {p <- predicate; return (Condition p)}
             return (Unchanged vs)
          <|>
          do {(i, ps) <- call; return (ActionCall i ps)}
-         <|>
-         do try $ do string "IF"
-                     ws
-                     p <- predicate
-                     string "THEN"
-                     ws
-                     at <- action
-                     string "ELSE"
-                     ws
-                     af <- action
-                     return (If p at af)
          <|>
          do try $ do {ws; as <- many1 andAction; return (ActionAnd as)}
          <|>
@@ -166,6 +169,30 @@ predicate = do try $ do v1 <- value
                         ws
                         v2 <- value
                         return (Inequality v1 v2)
+            <|>
+            do try $ do v1 <- value
+                        char '>'
+                        ws
+                        v2 <- value
+                        return (Gt v1 v2)
+            <|>
+            do try $ do v1 <- value
+                        char '<'
+                        ws
+                        v2 <- value
+                        return (Lt v1 v2)
+            <|>
+            do try $ do v1 <- value
+                        string ">="
+                        ws
+                        v2 <- value
+                        return (Gte v1 v2)
+            <|>
+            do try $ do v1 <- value
+                        string "=<"
+                        ws
+                        v2 <- value
+                        return (Lte v1 v2)
             <|>
             do try $ do v1 <- value
                         string "\\in"
@@ -200,7 +227,9 @@ primed = do try $ do i <- identifier
                      ws
                      return (i)
 
-value = do {l <- literal; return (l)}
+value = do {e <- arithmeticExpression; ws; return (Arith e)}
+        <|>
+        do {l <- literal; return (l)}
         <|>
         do {r <- record; return (r)}
         <|>
@@ -244,16 +273,38 @@ record = do try $ do char '['
             ws
             return (Except i k v)
 
-literal = do try $ do n <- number
-                      return (Numb n)
-          <|>
-          do try $ do {char '\"'; cs <- many1 (noneOf reserved); char '\"'; ws; return (Str cs)}
+literal = do try $ do {char '\"'; cs <- many1 (noneOf reserved); char '\"'; ws; return (Str cs)}
 
-number = do try $ do f <- Token.float (Token.makeTokenParser emptyDef)
-                     ws
-                     return (f)
-         <|>
-         do try $ do digits <- many1 digit
-                     let n = foldl (\x d -> 10*x + fromIntegral (digitToInt d)) 0 digits
-                     ws
-                     return (n)
+arithmeticExpression = Math.build
+
+-- arithmeticExpression = buildExpressionParser arithmeticOperators arithmeticAtom
+--                        <|>
+--                        arithmeticAtom
+                       -- do char '('
+                       --    ws
+                       --    e <- arithmeticExpression
+                       --    ws
+                       --    char ')'
+                       --    ws
+                       --    return e
+
+-- arithmeticOperators :: [[Operator String u Identity ArithmeticExpression]]
+-- arithmeticOperators = [[Prefix (ws >> char '-' >> ws >> return (Neg))],
+
+--                         [Infix  (ws >> char '*' >> ws >> return (Mult)) AssocLeft,
+--                          Infix  (ws >> char '/' >> ws >> return (Div)) AssocLeft],
+
+--                         [Infix  (ws >> char '+' >> ws >> return (Add)) AssocLeft,
+--                          Infix  (ws >> char '-' >> ws >> return (Sub)) AssocLeft]]
+
+-- arithmeticAtom = do try $ do {n <- number; return (Val (Numb n))}
+--                  <|>
+--                  do try $ do {i <- identifier; return (Val (Ref i))}
+--                  <|>
+--                  do char '('
+--                     ws
+--                     e <- arithmeticExpression
+--                     ws
+--                     char ')'
+--                     ws
+--                     return e
