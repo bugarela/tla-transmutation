@@ -39,14 +39,14 @@ parseFile a = do f <- readFile a
                  let e = parse specification "Error:" (f)
                  return e
 
-specification = do h <- moduleHeader
+specification = do (n, d) <- moduleHeader
                    ws
                    ds <- many definition
                    ws
                    many $ char '='
                    ignore
                    eof
-                   return (Module h ds)
+                   return (Module n d, ds)
 
 moduleHeader = do many (char '-')
                   string " MODULE "
@@ -55,7 +55,7 @@ moduleHeader = do many (char '-')
                   divisionLine
                   documentation <- many comment
                   ignore
-                  return (Header name documentation)
+                  return (name, documentation)
 
 comment = do try $ do string "(*"
              c <- anyChar `manyTill` (do try $ string "*)")
@@ -187,17 +187,15 @@ primed = do try $ do i <- identifier
                      ws
                      return (i)
 
-value = do {l <- literal; return (LiteralValue l)}
+value = do {l <- literal; return (l)}
         <|>
-        do {r <- record; return (RecordValue r)}
+        do {r <- record; return (r)}
         <|>
         do try $ do {i <- identifier; char '['; k <- identifier; char ']'; ws; return (Index i k)}
         <|>
-        do {c <- constant; ws; return (Constant c)}
+        do {s <- set; return (s)}
         <|>
-        do {s <- set; return (SetValue s)}
-        <|>
-        do {i <- identifier; ws; return (Variable i)}
+        do {i <- identifier; ws; return (Ref i)}
 
 set = do try $ do {s1 <- atomSet; string "\\cup"; ws; s2 <- set; ws; return (Union s1 s2)}
       <|>

@@ -11,12 +11,12 @@ parse a = do ls <- parseFile a
 elixir a init next = do ls <- parseFile a
                         case ls of
                           Left e -> print e
-                          Right ls -> putStrLn (generate (Spec ls init next))
+                          Right (m, ds) -> putStrLn (generate (Spec m init next ds))
                         return ()
 
 file a init next = do ls <- parseFile a
                       case ls of
                         Left e -> print e
-                        Right ls -> writeFile "out.exs" (generate (Spec ls init next))
+                        Right (m, ds) -> writeFile "out.exs" (generate (Spec m init next ds))
                       return ()
 

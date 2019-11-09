@@ -61,7 +61,7 @@ defmodule TwoPhaseCommit do
   ***********************************************************************
   """
   def tm_rcv_prepared_condition(variables, r) do
-    variables[:tm_state] == "init" and Enum.member?(variables[:msgs], %{type: "Prepared", rm: r})
+    variables[:tm_state] == "init" and Enum.member?(variables[:msgs], %{ type: "Prepared", rm: r })
   end
 
   def tm_rcv_prepared(variables, r) do
@@ -72,6 +72,7 @@ defmodule TwoPhaseCommit do
       msgs: variables[:msgs]
     }
   end
+
 
   @doc """
   ***********************************************************************
@@ -86,11 +87,12 @@ defmodule TwoPhaseCommit do
   def tm_commit(variables) do
     %{
       tm_state: "done",
-      msgs: MapSet.put(variables[:msgs], %{type: "Commit"}),
+      msgs: MapSet.put(variables[:msgs], %{ type: "Commit" }),
       rm_state: variables[:rm_state],
       tm_prepared: variables[:tm_prepared]
     }
   end
+
 
   @doc """
   ***********************************************************************
@@ -104,11 +106,12 @@ defmodule TwoPhaseCommit do
   def tm_abort(variables) do
     %{
       tm_state: "done",
-      msgs: MapSet.put(variables[:msgs], %{type: "Abort"}),
+      msgs: MapSet.put(variables[:msgs], %{ type: "Abort" }),
       rm_state: variables[:rm_state],
       tm_prepared: variables[:tm_prepared]
     }
   end
+
 
   @doc """
   ***********************************************************************
@@ -122,11 +125,12 @@ defmodule TwoPhaseCommit do
   def rm_prepare(variables, r) do
     %{
       rm_state: Map.put(variables[:rm_state], r, "prepared"),
-      msgs: MapSet.put(variables[:msgs], %{type: "Prepared", rm: r}),
+      msgs: MapSet.put(variables[:msgs], %{ type: "Prepared", rm: r }),
       tm_state: variables[:tm_state],
       tm_prepared: variables[:tm_prepared]
     }
   end
+
 
   @doc """
   ***********************************************************************
@@ -147,13 +151,14 @@ defmodule TwoPhaseCommit do
     }
   end
 
+
   @doc """
   ***********************************************************************
    Resource manager r is told by the TM to commit.
   ***********************************************************************
   """
   def rm_rcv_commit_msg_condition(variables, r) do
-    Enum.member?(variables[:msgs], %{type: "Commit"})
+    Enum.member?(variables[:msgs], %{ type: "Commit" })
   end
 
   def rm_rcv_commit_msg(variables, r) do
@@ -165,13 +170,14 @@ defmodule TwoPhaseCommit do
     }
   end
 
+
   @doc """
   ***********************************************************************
    Resource manager r is told by the TM to abort.
   ***********************************************************************
   """
   def rm_rcv_abort_msg_condition(variables, r) do
-    Enum.member?(variables[:msgs], %{type: "Abort"})
+    Enum.member?(variables[:msgs], %{ type: "Abort" })
   end
 
   def rm_rcv_abort_msg(variables, r) do
@@ -182,6 +188,7 @@ defmodule TwoPhaseCommit do
       msgs: variables[:msgs]
     }
   end
+
 
   #  \/ \E r \in RM :
   #       TMRcvPrepared(r) \/ RMPrepare(r) \/ RMChooseToAbort(r)
@@ -250,12 +257,14 @@ defmodule TwoPhaseCommit do
   end
 end
 
-# ***********************************************************************
-#  The initial predicate.
-# ***********************************************************************
-TwoPhaseCommit.main(%{
-  rm_state: TwoPhaseCommit.rm |> Enum.map(fn (r) -> {r, "working"} end) |> Enum.into(%{}),
-  tm_state: "init",
-  tm_prepared: MapSet.new([]),
-  msgs: MapSet.new([])
-})
+TwoPhaseCommit.main(
+  # ***********************************************************************
+  #  The initial predicate.
+  # ***********************************************************************
+  %{
+    rm_state: TwoPhaseCommit.rm |> Enum.map(fn (r) -> {r, "working"} end) |> Enum.into(%{  }),
+    tm_state: "init",
+    tm_prepared: MapSet.new([]),
+    msgs: MapSet.new([])
+  }
+)

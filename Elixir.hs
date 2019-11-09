@@ -1,138 +1,150 @@
 module Elixir where
 
 import Data.List
+import Data.List.Extra
 import qualified Text.Casing as Casing -- cabal install casing
 
 import Head
 import Snippets
+import DocHandler
 
 generate :: Spec -> String
-generate (Spec (Module h ds) i n) = let code = map definition (filter (not . (initOrNext i n)) ds)
-                                        initialization = ini (findIdentifier i ds) h
-                                        nextState = next (findIdentifier n ds)
-                                    in header h ++ (intercalate "\n" (map ident (code ++ [nextState, decideAction]))) ++ "\nend\n\n" ++ initialization
+generate (Spec m i n ds) = let defs = filter (not . (specialDef i n)) ds
+                               cs = findConstants ds
+                               defInit = findIdentifier i ds
+                               defNext = findIdentifier n ds
+                           in spec m cs defs defInit defNext
 
-header :: Header -> String
-header (Header i doc) = "defmodule " ++ pascal i ++ " do\n" ++ ident (moduleDoc doc ++ oracleDelaration)
+spec :: Module -> [Constant] -> [Definition] -> Init -> Next -> String
+spec m cs ds di dn = let g = map (\c -> (c, "const")) cs
+                         state = ini (g ++ moduleContext m) di
+                     in concat [moduleHeader m,
+                                ident (concat [
+                                          mapAndJoin constant cs,
+                                          mapAndJoin (definition g) ds,
+                                          "\n",
+                                          next g dn,
+                                          decideAction
+                                          ]
+                                      ),
+                                "\nend\n\n",
+                                mainCall m state]
 
-moduleDoc doc = "@moduledoc \"\"\"\n" ++ (intercalate "\n" (map cleanTrailing doc)) ++ "\n\"\"\"\n"
-oracleDelaration = "@oracle spawn(Oracle, :listen, [])\n\n"
+moduleHeader :: Module -> String
+moduleHeader (Module i doc) = "defmodule " ++ pascal i ++ " do\n" ++ ident (moduleDoc doc ++ oracleDelaration)
 
-funDoc doc = "@doc \"\"\"\n" ++ (intercalate "\n" (map cleanTrailing doc)) ++ "\n\"\"\"\n"
-comment doc = intercalate "\n" (map (((++) "# ") . cleanTrailing) doc) ++ "\n"
+moduleContext (Module m _) = [(m,"module")]
 
-ini (Definition _ _ doc a) (Header i _) = comment doc ++ pascal i ++ ".main(%{\n" ++ identAndSeparate "," (conditionsToVariables (pascal i) a) ++ "\n})\n"
+constant c =  let s = snake c in "@" ++ s ++ " \"<value for " ++ c ++ ">\"\ndef " ++ s ++ ", do: @" ++ s ++ "\n"
 
-next (Definition _ _ doc a) = let (_, actions) = actionsAndConditions [] a
-                              in funDoc doc ++ "def main(variables) do\n" ++ ident(logState ++ "main(\n" ++ (intercalate "\n"  (actions)) ++ "\n)") ++ "\nend\n" -- Usar action e não intercalate
+definition :: Context -> Definition -> String
+definition g (Definition i ps doc a) = let g' = g ++ map (\p -> (p, "param")) ps
+                                           (conditions, actions) = actionsAndConditions g' a
+                                       in funDoc doc ++ declaration (i ++ "Condition") ps ++ ident (condition conditions) ++ "\nend\n\n" ++ declaration i ps ++ ident (action actions) ++ "\nend\n\n"
+definition _ (Comment s) = "# " ++ cleanTrailing s
 
-initOrNext :: String -> String -> Definition -> Bool
-initOrNext i n d = (isNamed i d) || (isNamed n d)
+mainCall (Module i _) s = pascal i ++ ".main(\n" ++ ident s ++ "\n)\n"
 
-definition :: Definition -> String
-definition (Definition i ps doc a) = let (conditions, actions) = actionsAndConditions ps a
-                                      in funDoc doc ++ declaration (i ++ "Condition") ps ++ ident (condition conditions) ++ "\nend\n\n" ++ declaration i ps ++ ident (action actions) ++ "\nend\n\n"
-definition (Constants cs) = intercalate "\n" (map constant cs)
-definition (Comment s) = "# " ++ cleanTrailing s
+ini g (Definition _ _ doc a) = comment doc ++ initialState g a
 
-declaration i ps =  "def " ++ snake i ++ "(" ++ parameters ps ++ ") do\n"
+next g (Definition _ _ doc a) = let (_, actions) = actionsAndConditions g a
+                                in funDoc doc ++ "def main(variables) do\n" ++ ident (logState ++ "main" ++ (action actions)) ++ "\nend\n" 
 
-condition :: [Parameter] -> String
+
+condition :: [String] -> String
 condition [] = "True"
 condition cs = intercalate " and " cs
 
 action :: [String] -> String
 action [] = "variables"
 action as = let (otherActions, actions) = partition preassignment as
+                kvs = intercalate ",\n" (map keyValue actions)
                 initialVariables = case actions of
                                      [] -> []
-                                     _ -> ["%{\n" ++ identAndSeparate "," actions ++ "\n}"]
-            in merge (initialVariables ++ otherActions)
+                                     _ -> ["%{\n" ++ ident kvs ++ "\n}"]
+            in mapMerge (initialVariables ++ otherActions)
 
 actionName (ActionCall i ps) = i ++ "(" ++ intercalate ", " ps ++ ")"
 actionName a = show a
 
-actionsAndConditions :: [Parameter] -> Action -> ([String], [String])
-actionsAndConditions ps (Condition p) = (predicate ps p, [])
-actionsAndConditions ps (Primed i v) = ([], [snake i ++ ": " ++ value ps v])
-actionsAndConditions _ (Unchanged is) = ([], map unchanged is)
-actionsAndConditions ps (ActionAnd as) = unzipAndFold (map (actionsAndConditions ps) as)
+actionsAndConditions :: Context -> Action -> ([String], [String])
+actionsAndConditions g (Condition p) = (predicate g p, [])
+actionsAndConditions g (Primed i v) = ([], ["%{ " ++ snake i ++ ": " ++ value g v ++ " }"])
+actionsAndConditions _ (Unchanged is) = ([], [unchanged is])
+actionsAndConditions g (ActionAnd as) = unzipAndFold (map (actionsAndConditions g) as)
 actionsAndConditions _ (ActionCall i ps) = ([call (i ++ "Condition") ("variables":ps)], [call i ("variables":ps)])
-actionsAndConditions ps (ActionOr as) = ([], [decide ps as])
+actionsAndConditions g (ActionOr as) = ([], [decide g as])
 
--- Used for Init definition
-conditionsToVariables :: Identifier -> Action -> [String]
-conditionsToVariables m (Condition p) = case p of
-                                      (Equality v1 v2) -> case v1 of
-                                                           (Variable i) -> [snake i ++ ": " ++ value [m] v2]
-                                                           (SetValue (Ref i)) -> [snake i ++ ": " ++ value [m] v2]
-                                                           _ -> error("Init condition ambiguous: " ++ show p)
-                                      _ -> error("Init condition ambiguous: " ++ show p)
-conditionsToVariables m (ActionAnd as) = foldr (++) [] (map (conditionsToVariables m) as)
+initialState :: Context -> Action -> String
+initialState g (ActionAnd as) = action (map (initialState g) as)
+initialState g (Condition (Equality (Ref i) v)) = "%{ " ++ snake i ++ ": " ++ value g v ++ " }"
+initialState _ p = error("Init condition ambiguous: " ++ show p)
 
-unchanged i = snake i ++ ": variables[:" ++ snake i ++ "]"
+unchanged is = let u = \i -> snake i ++ ": variables[:" ++ snake i ++ "]"
+               in "%{ " ++ intercalate ",\n" (map u is) ++ " }"
 
 call i [] = snake i
 call i ps = snake i ++ "(" ++ intercalate ", " (ps) ++ ")"
 
-predicate :: [Parameter] -> Predicate -> [String]
-predicate ps (Equality v1 v2) = [value ps v1 ++ " == " ++ value ps v2]
-predicate ps (Inequality v1 v2) = [value ps v1 ++ " != " ++ value ps v2]
-predicate ps (RecordBelonging v1 v2) = ["Enum.member?(" ++ value ps v2 ++ ", " ++ value ps v1 ++ ")"]
+predicate :: Context -> Predicate -> [String]
+predicate g (Equality v1 v2) = [value g v1 ++ " == " ++ value g v2]
+predicate g (Inequality v1 v2) = [value g v1 ++ " != " ++ value g v2]
+predicate g (RecordBelonging v1 v2) = ["Enum.member?(" ++ value g v2 ++ ", " ++ value g v1 ++ ")"]
 
-decide :: [Parameter] -> [Action] -> String
-decide ps as = let actionsMaps = map (actionMap ps) as
-                   conditionsAndActions = "[\n" ++ ident (intercalate ",\n" actionsMaps) ++ "\n]\n"
-               in ident ("decide_action(\n  \"Next\",\n" ++ ident conditionsAndActions ++ "\n)\n")
+decide :: Context -> [Action] -> String
+decide g as = let actionsMaps = map (actionMap g) as
+                  list = "[\n" ++ ident (intercalate ",\n" actionsMaps) ++ "\n]\n"
+              in "(\n" ++ ident ("decide_action(\n  \"Next\",\n" ++ ident list ++ "\n)\n") ++ "\n)"
 
-actionMap ps a = let (cs, as) = actionsAndConditions ps a
-                     n = "action: \"" ++ actionName a ++ "\""
-                     c = "condition: " ++ condition cs
-                     s = "state: " ++ action as
-                 in "%{ " ++ intercalate ", " [n,c,s] ++  " }"
+actionMap g a = let (cs, as) = actionsAndConditions g a
+                    n = "action: \"" ++ actionName a ++ "\""
+                    c = "condition: " ++ condition cs
+                    s = "state: " ++ action as
+                in "%{ " ++ intercalate ", " [n,c,s] ++  " }"
 
-value :: [Parameter] -> Value -> String
-value ps (Variable i) = variable ps i
-value [m] (Constant c) = m ++ "." ++ snake c -- outside module
-value [] (Constant c) = "@" ++ snake c -- inside module
-value ps (SetValue s) = set ps s
-value ps (RecordValue r) = record ps r
-value _ (LiteralValue l) = literal l
-value ps (Index i k) = index ps i k
+value :: Context -> Value -> String
+value g (Ref i) = reference g i
+value g (Index i k) = index g i k
+value g (Set vs) = "MapSet.new([" ++ intercalate ", " (map (value g) vs) ++ "])"
+value g (Union (Set [v]) s) = "MapSet.put(" ++ value g s ++ ", " ++ value g v ++ ")"
+value g (Union s (Set [v])) = "MapSet.put(" ++ value g s ++ ", " ++ value g v ++ ")"
+value g (Union s1 s2) = "MapSet.union(" ++ value g s1 ++ ", " ++ value g s2 ++ ")"
+value g (Record rs) = let (literals, generations) = partition isLiteral rs
+                          m = intercalate " ++ " (map (mapping g) generations) -- merge
+                          l = "%{ " ++ intercalate ", " (map (mapping g) literals) ++ " }"
+                      in if m == [] then l else m ++ " |> Enum.into(" ++ l ++ ")"
+value g (Except i k v) = "Map.put(" ++ reference g i ++ ", " ++ k ++ ", " ++ value g v ++ ")"
+value _ (Str s) = show s
+value _ (Numb n) = show n
 
-constant c = let s = snake c in "@" ++ s ++ " \"<value for " ++ c ++ ">\"\ndef " ++ s ++ ", do: @" ++ s
+reference g i = if elem (i, "param") g then i else
+                  if elem (i, "const") g then cnst g i else
+                    variable i
+
+cnst g i = case dropWhile (\d ->snd d /= "module") g of
+              [] -> "@" ++ snake i
+              ms -> fst (head ms) ++ "." ++ snake i
 
 parameters ps = intercalate ", " ("variables": ps)
-extraParameters ps = intercalate ", " ps
-
-set ps (Set vs) = "MapSet.new([" ++ intercalate ", " (map (value ps) vs) ++ "])"
-set ps (Ref i) = variable ps i
-set ps (Union (Set [v]) s) = "MapSet.put(" ++ set ps s ++ ", " ++ value ps v ++ ")"
-set ps (Union  s (Set [v])) = "MapSet.put(" ++ set ps s ++ ", " ++ value ps v ++ ")"
-set ps (Union s1 s2) = "MapSet.union(" ++ set ps s1 ++ ", " ++ set ps s2 ++ ")"
-
-record ps (Record rs) = let (literals, generations) = partition isLiteral rs 
-                            g = intercalate " ++ " (map (mapping ps) generations) -- merge
-                            l = "%{" ++ intercalate ", " (map (mapping ps) literals) ++ "}"
-                        in if g == [] then l else g ++ " |> Enum.into(" ++ l ++ ")"
-record ps (Except i k v) = "Map.put(" ++ variable ps i ++ ", " ++ k ++ ", " ++ value ps v ++ ")"
 
 isLiteral ((Key _), _) = True
 isLiteral _ = False
 
-mapping ps ((Key i), v) = snake i ++ ": " ++ value ps v
-mapping ps ((All i a), v) = value ps a ++ " |> Enum.map(fn (" ++ i ++ ") -> {" ++ i ++ ", " ++ value ps v ++ "} end)"
+mapping g ((Key i), v) = snake i ++ ": " ++ value g v
+mapping g ((All i a), v) = value g a ++ " |> Enum.map(fn (" ++ i ++ ") -> {" ++ i ++ ", " ++ value g v ++ "} end)"
 
-literal (Str s) = show s
-literal (Numb n) = show n
 
-merge [m] = m
-merge (m:ms) = "Map.merge(\n  " ++ m ++ ",\n" ++ ident (merge ms) ++ ")\n"
+keyValue a = drop 3 (dropEnd 2 a)
 
-variable :: [Parameter] -> Identifier -> String
-variable ps i = if elem i ps then snake i else "variables[:" ++ snake i ++ "]"
+mapMerge [m] = m
+mapMerge (m:ms) = "Map.merge(\n  " ++ m ++ ",\n" ++ ident (mapMerge ms) ++ ")\n"
 
-index ps i k = variable ps i ++ "[" ++ k ++ "]"
+variable :: Identifier -> String
+variable i = "variables[:" ++ snake i ++ "]"
+
+declaration i ps =  "def " ++ snake i ++ "(" ++ parameters ps ++ ") do\n"
+
+index ps i k = variable i ++ "[" ++ k ++ "]"
 
 identAndSeparate sep ls = (intercalate (sep ++ "\n") (map ((++) "  ") ls))
 
@@ -144,6 +156,8 @@ pascal i = Casing.toPascal (Casing.fromAny i)
 
 ident block = intercalate "\n" (map tabIfline (lines block))
 
+mapAndJoin f ls = intercalate "\n" (map f ls)
+
 tabIfline [] = []
 tabIfline xs = "  " ++ xs
 
@@ -152,11 +166,13 @@ preassignment as = (head as) == '(' || dropWhile (/= ':') as == []
 isNamed i (Definition id _ _ _) = i == id
 isNamed _ _ = False
 
+specialDef :: String -> String -> Definition -> Bool
+specialDef _ _ (Constants _) = True
+specialDef i n d = (isNamed i d) || (isNamed n d)
+
+findConstants ds = concat (map (\d -> case d of {Constants cs -> cs; _ -> [] }) ds)
+
 findIdentifier i ds = case find (isNamed i) ds of
                         Just a -> a
                         Nothing -> error("Definition not found: " ++ (show i))
 
-allSpaces s = dropWhile (== ' ') s == []
-
-cleanTrailing [] = []
-cleanTrailing (x:xs) = if allSpaces xs then [x] else x:(cleanTrailing xs)
