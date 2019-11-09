@@ -64,8 +64,10 @@ action as = let (otherActions, actions) = partition preassignment as
                                      _ -> ["%{\n" ++ ident kvs ++ "\n}"]
             in mapMerge (initialVariables ++ otherActions)
 
-actionName (ActionCall i ps) = i ++ "(" ++ intercalate ", " ps ++ ")"
+actionName (ActionCall i ps) = i ++ "(" ++ intercalate ", " (map interpolate ps) ++ ")"
 actionName a = show a
+
+interpolate i = "#{inspect " ++ i ++ "}"
 
 actionsAndConditions :: Context -> Action -> ([String], [String])
 actionsAndConditions g (Condition p) = (predicate g p, [])
@@ -100,10 +102,12 @@ predicate g (RecordBelonging v1 v2) = ["Enum.member?(" ++ value g v2 ++ ", " ++ 
 
 decide :: Context -> [Action] -> String
 decide g as = let actionsMaps = map (actionMap g) as
-                  list = "[\n" ++ ident (intercalate ",\n" actionsMaps) ++ "\n]\n"
+                  list = "List.flatten([\n" ++ ident (intercalate ",\n" actionsMaps) ++ "\n])\n"
               in "(\n" ++ ident ("decide_action(\n  \"Next\",\n" ++ ident list ++ "\n)\n") ++ "\n)"
 
--- actionMap g (Exists i v as) ="Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> " ++ code ++ "end)
+actionMap g (Exists i v (ActionOr as)) = let l = map (actionMap g) as
+                                             s = intercalate ",\n" l
+                                         in "Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> [\n" ++ ident s ++ "\n] end\n)"
 actionMap g a = let (cs, as) = actionsAndConditions g a
                     n = "action: \"" ++ actionName a ++ "\""
                     c = "condition: " ++ condition cs
