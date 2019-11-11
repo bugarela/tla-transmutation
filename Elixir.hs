@@ -77,11 +77,10 @@ actionsAndConditions _ (Unchanged is) = ([], [unchanged is])
 actionsAndConditions g (ActionAnd as) = unzipAndFold (map (actionsAndConditions g) as)
 actionsAndConditions _ (ActionCall i ps) = ([call (i ++ "Condition") ("variables":ps)], [call i ("variables":ps)])
 actionsAndConditions g (ActionOr as) = ([], [decide g as])
-actionsAndConditions g (Exists i v a) = enumMap g v i a
 actionsAndConditions g (If p t e) = let cp = predicate g p
                                         (ct, at) = actionsAndConditions g t
                                         (ce, ae) = actionsAndConditions g e
-                                        c = "((" ++ condition (cp ++ ct) ++ ") or (not (" ++ condition cp ++ ") and " ++ condition ce ++ "))"
+                                        c = if ct ++ ce == [] then "True" else eitherCondition cp ct ce
                                         a = unlines ["if " ++ condition cp ++ " do",
                                                      ident (action at),
                                                      "else",
@@ -89,12 +88,13 @@ actionsAndConditions g (If p t e) = let cp = predicate g p
                                                      "end"]
                                     in ([c], [a])
 
+-- actionsAndConditions g (Exists i v a) = enumMap g v i a
 
-enumMap :: Context -> Value -> Identifier -> Action -> ([String], [String])
-enumMap g v i d = let (cs, as) = actionsAndConditions g d
-                      c = "Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> " ++ condition cs ++ "end)"
-                      a = "Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> " ++ action as ++ "end)"
-                  in ([c], [a])
+-- enumMap :: Context -> Value -> Identifier -> Action -> ([String], [String])
+-- enumMap g v i d = let (cs, as) = actionsAndConditions g d
+--                       c = "Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> " ++ condition cs ++ "end)"
+--                       a = "Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> " ++ action as ++ "end)"
+--                   in ([c], [a])
 
 initialState :: Context -> Action -> String
 initialState g (ActionAnd as) = action (map (initialState g) as)
@@ -119,7 +119,7 @@ predicate g (RecordBelonging v1 v2) = ["Enum.member?(" ++ value g v2 ++ ", " ++ 
 decide :: Context -> [Action] -> String
 decide g as = let actionsMaps = map (actionMap g) as
                   list = "List.flatten([\n" ++ ident (intercalate ",\n" actionsMaps) ++ "\n])\n"
-              in "(\n" ++ ident ("decide_action(\n  \"Next\",\n" ++ ident list ++ "\n)\n") ++ "\n)"
+              in "(\n" ++ ident ("decide_action(\n" ++ ident list ++ "\n)\n") ++ "\n)"
 
 actionMap g (Exists i v (ActionOr as)) = let l = map (actionMap g) as
                                              s = intercalate ",\n" l
@@ -163,6 +163,12 @@ expression g (Div a b) = expression' g a ++ " / " ++ expression' g b
 expression' _ (Num d) = show d
 expression' g (Ref i) = reference g i
 expression' g e = "(" ++ expression g e ++ ")"
+
+eitherCondition cp ct ce = unlines ["if " ++ condition cp ++ " do",
+                                     ident (condition ct),
+                                     "else",
+                                     ident (condition ce),
+                                     "end"]
 
 parameters ps = intercalate ", " ("variables": ps)
 

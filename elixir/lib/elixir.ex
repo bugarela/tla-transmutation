@@ -1,144 +1,138 @@
-defmodule JarrosDeAgua do
-  @moduledoc """
-   TypeOK == /\ jarro_pequeno \in 0..3
-             /\ jarro_grande  \in 0..5
-  """
+defmodule EfetivacaoEmDuasFases do
   require Oracle
-  @oracle spawn(Oracle, :listen, [])
-  @doc """
+  @oracle spawn(Oracle, :start, [])
 
-  """
-  def enche_pequeno_condition(variables) do
-    True
+  @gr MapSet.new(["r1", "r2"])
+  def gr, do: @gr
+  def gt_recebe_prepara_condition(variables, g) do
+    variables[:estado_gt] == "inicio" and Enum.member?(variables[:msgs], %{ tipo: "EstouPreparado", gr: g })
   end
 
-  def enche_pequeno(variables) do
+  def gt_recebe_prepara(variables, g) do
     %{
-      jarro_pequeno: 3,
-      jarro_grande: variables[:jarro_grande]
+      g_rs_preparados: MapSet.put(variables[:g_rs_preparados], g),
+      estado_gr: variables[:estado_gr],
+      estado_gt: variables[:estado_gt],
+      msgs: variables[:msgs]
     }
   end
 
 
-  @doc """
-
-  """
-  def enche_grande_condition(variables) do
-    True
+  def gt_efetiva_condition(variables) do
+    variables[:estado_gt] == "inicio" and variables[:g_rs_preparados] == @gr
   end
 
-  def enche_grande(variables) do
+  def gt_efetiva(variables) do
     %{
-      jarro_grande: 5,
-      jarro_pequeno: variables[:jarro_pequeno]
+      estado_gt: "termino",
+      msgs: MapSet.put(variables[:msgs], %{ tipo: "Efetive" }),
+      estado_gr: variables[:estado_gr],
+      g_rs_preparados: variables[:g_rs_preparados]
     }
   end
 
 
-  @doc """
-
-  """
-  def esvazia_pequeno_condition(variables) do
-    True
+  def gt_aborta_condition(variables) do
+    variables[:estado_gt] == "inicio"
   end
 
-  def esvazia_pequeno(variables) do
+  def gt_aborta(variables) do
     %{
-      jarro_pequeno: 0,
-      jarro_grande: variables[:jarro_grande]
+      estado_gt: "termino",
+      msgs: MapSet.put(variables[:msgs], %{ tipo: "Aborte" }),
+      estado_gr: variables[:estado_gr],
+      g_rs_preparados: variables[:g_rs_preparados]
     }
   end
 
 
-  @doc """
-
-  """
-  def esvazia_grande_condition(variables) do
-    True
+  def gr_prepara_condition(variables, g) do
+    variables[:estado_gr][g] == "trabalhando"
   end
 
-  def esvazia_grande(variables) do
+  def gr_prepara(variables, g) do
     %{
-      jarro_grande: 0,
-      jarro_pequeno: variables[:jarro_pequeno]
+      estado_gr: Map.put(variables[:estado_gr], g, "preparado"),
+      msgs: MapSet.put(variables[:msgs], %{ tipo: "EstouPreparado", gr: g }),
+      estado_gt: variables[:estado_gt],
+      g_rs_preparados: variables[:g_rs_preparados]
     }
   end
 
 
-  @doc """
-
-  """
-  def pequeno_para_grande_condition(variables) do
-    ((variables[:jarro_grande] + variables[:jarro_pequeno] <= 5) or (not (variables[:jarro_grande] + variables[:jarro_pequeno] <= 5) and True))
+  def gr_ecolhe_abortar_condition(variables, g) do
+    variables[:estado_gr][g] == "trabalhando"
   end
 
-  def pequeno_para_grande(variables) do
-    if variables[:jarro_grande] + variables[:jarro_pequeno] <= 5 do
-      %{
-        jarro_grande: variables[:jarro_grande] + variables[:jarro_pequeno],
-        jarro_pequeno: 0
-      }
-    else
-      %{
-        jarro_grande: 5,
-        jarro_pequeno: variables[:jarro_pequeno] - (5 - variables[:jarro_grande])
-      }
-    end
+  def gr_ecolhe_abortar(variables, g) do
+    %{
+      estado_gr: Map.put(variables[:estado_gr], g, "abortado"),
+      estado_gt: variables[:estado_gt],
+      g_rs_preparados: variables[:g_rs_preparados],
+      msgs: variables[:msgs]
+    }
   end
 
 
-  @doc """
-
-  """
-  def grande_para_pequeno_condition(variables) do
-    ((variables[:jarro_grande] + variables[:jarro_pequeno] <= 3) or (not (variables[:jarro_grande] + variables[:jarro_pequeno] <= 3) and True))
+  def gr_recebe_msg_efetive_condition(variables, g) do
+    Enum.member?(variables[:msgs], %{ tipo: "Efetive" })
   end
 
-  def grande_para_pequeno(variables) do
-    if variables[:jarro_grande] + variables[:jarro_pequeno] <= 3 do
-      %{
-        jarro_grande: 0,
-        jarro_pequeno: variables[:jarro_grande] + variables[:jarro_pequeno]
-      }
-    else
-      %{
-        jarro_grande: variables[:jarro_pequeno] - (3 - variables[:jarro_grande]),
-        jarro_pequeno: 3
-      }
-    end
+  def gr_recebe_msg_efetive(variables, g) do
+    %{
+      estado_gr: Map.put(variables[:estado_gr], g, "efetivado"),
+      estado_gt: variables[:estado_gt],
+      g_rs_preparados: variables[:g_rs_preparados],
+      msgs: variables[:msgs]
+    }
   end
 
 
-  @doc """
+  def gr_recebe_msg_aborte_condition(variables, g) do
+    Enum.member?(variables[:msgs], %{ tipo: "Aborte" })
+  end
 
-  """
+  def gr_recebe_msg_aborte(variables, g) do
+    %{
+      estado_gr: Map.put(variables[:estado_gr], g, "abortado"),
+      estado_gt: variables[:estado_gt],
+      g_rs_preparados: variables[:g_rs_preparados],
+      msgs: variables[:msgs]
+    }
+  end
+
+
   def main(variables) do
     IO.puts (inspect variables)
 
     main(
       decide_action(
-        "Next",
         List.flatten([
-          %{ action: "EnchePequeno()", condition: enche_pequeno_condition(variables), state: enche_pequeno(variables) },
-          %{ action: "EncheGrande()", condition: enche_grande_condition(variables), state: enche_grande(variables) },
-          %{ action: "EsvaziaPequeno()", condition: esvazia_pequeno_condition(variables), state: esvazia_pequeno(variables) },
-          %{ action: "EsvaziaGrande()", condition: esvazia_grande_condition(variables), state: esvazia_grande(variables) },
-          %{ action: "PequenoParaGrande()", condition: pequeno_para_grande_condition(variables), state: pequeno_para_grande(variables) },
-          %{ action: "GrandeParaPequeno()", condition: grande_para_pequeno_condition(variables), state: grande_para_pequeno(variables) }
+          %{ action: "GTEfetiva()", condition: gt_efetiva_condition(variables), state: gt_efetiva(variables) },
+          %{ action: "GTAborta()", condition: gt_aborta_condition(variables), state: gt_aborta(variables) },
+          Enum.map(@gr, fn (g) -> [
+            %{ action: "GTRecebePrepara(#{inspect g})", condition: gt_recebe_prepara_condition(variables, g), state: gt_recebe_prepara(variables, g) },
+            %{ action: "GRPrepara(#{inspect g})", condition: gr_prepara_condition(variables, g), state: gr_prepara(variables, g) },
+            %{ action: "GREcolheAbortar(#{inspect g})", condition: gr_ecolhe_abortar_condition(variables, g), state: gr_ecolhe_abortar(variables, g) },
+            %{ action: "GRRecebeMsgEfetive(#{inspect g})", condition: gr_recebe_msg_efetive_condition(variables, g), state: gr_recebe_msg_efetive(variables, g) },
+            %{ action: "GRRecebeMsgAborte(#{inspect g})", condition: gr_recebe_msg_aborte_condition(variables, g), state: gr_recebe_msg_aborte(variables, g) }
+          ] end
+          )
         ])
       )
     )
   end
 
-  def decide_action(origin, actions) do
+  def decide_action(actions) do
     possible_actions = Enum.filter(actions, fn(action) -> action[:condition] end)
     different_states = Enum.uniq_by(possible_actions, fn(action) -> action[:state] end)
 
     if Enum.count(different_states) == 1 do
+      IO.puts "Model decided: #{inspect Enum.at(possible_actions, 0)[:action]}"
       Enum.at(possible_actions, 0)[:state]
     else
       actions_names = Enum.map(possible_actions, fn(action) -> action[:action] end)
-      send @oracle, {self(), origin, actions_names}
+      send @oracle, {self(), actions_names}
 
       n = receive do
         {:ok, n} -> n
@@ -149,10 +143,12 @@ defmodule JarrosDeAgua do
   end
 end
 
-JarrosDeAgua.main(
-
+IO.gets("start? ")
+EfetivacaoEmDuasFases.main(
   %{
-    jarro_grande: 0,
-    jarro_pequeno: 0
+    estado_gr: EfetivacaoEmDuasFases.gr |> Enum.map(fn (g) -> {g, "trabalhando"} end) |> Enum.into(%{  }),
+    estado_gt: "inicio",
+    g_rs_preparados: MapSet.new([]),
+    msgs: MapSet.new([])
   }
 )

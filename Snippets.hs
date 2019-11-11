@@ -2,7 +2,7 @@ module Snippets where
 
 decideAction = unlines [
              "",
-             "def decide_action(origin, actions) do",
+             "def decide_action(actions) do",
              "  possible_actions = Enum.filter(actions, fn(action) -> action[:condition] end)",
              "  different_states = Enum.uniq_by(possible_actions, fn(action) -> action[:state] end)",
              "",
@@ -10,7 +10,7 @@ decideAction = unlines [
              "    Enum.at(possible_actions, 0)[:state]",
              "  else",
              "    actions_names = Enum.map(possible_actions, fn(action) -> action[:action] end)",
-             "    send @oracle, {self(), origin, actions_names}",
+             "    send @oracle, {self(), actions_names}",
              "",
              "    n = receive do",
              "      {:ok, n} -> n",
@@ -23,4 +23,4 @@ decideAction = unlines [
 
 logState = "IO.puts (inspect variables)\n\n"
 
-oracleDelaration = "require Oracle\n@oracle spawn(Oracle, :listen, [])\n\n"
+oracleDelaration = "require Oracle\n@oracle spawn(Oracle, :listen, [])\n\n\n"
