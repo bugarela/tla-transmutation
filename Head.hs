@@ -6,7 +6,7 @@ type Identifier = String
 type Parameter = Identifier
 type Constant = Identifier
 type Documentation = [String]
-type ElixirCode = [String]
+type ElixirCode = String
 type Init = Definition
 type Next = Definition
 type Context = [(Identifier, String)]
@@ -22,7 +22,8 @@ data Key = Key Identifier | All Identifier Value deriving(Show)
 data Predicate = Equality Value Value | Inequality Value Value
                | Gt Value Value | Lt Value Value
                | Gte Value Value | Lte Value Value
-               | RecordBelonging Value Value deriving(Show)
+               | RecordBelonging Value Value
+               | Not Predicate deriving(Show)
 
 data Action = Condition Predicate | Primed Identifier Value | Unchanged [Identifier] | ActionNot Action
             | ActionAnd [Action] | ActionOr [Action] | ActionCall Identifier [Parameter]
@@ -30,5 +31,5 @@ data Action = Condition Predicate | Primed Identifier Value | Unchanged [Identif
 
 data Value = Set [Value] | Union Value Value
            | Record [(Key, Value)] | Except Identifier Identifier Value
-           | Str String | Arith Expr | Index Identifier Identifier deriving(Show)
+           | Str String | Arith Expr | Index Value Identifier deriving(Show)
 
