@@ -15,9 +15,13 @@ defmodule TwoPhaseCommit do
    to abort.
   *************************************************************************
   """
-  @oracle spawn(Oracle, :listen, [])
-  @rm "<value for RM>"
+  require ManagersOracle
+  @oracle spawn(ManagersOracle, :start, [])
+
+  @rm MapSet.new(["r1", "r2"])
   def rm, do: @rm
+
+
   # *********************************************************************
   #  In the protocol, processes communicate with one another by sending
   #  messages.  For simplicity, we represent message passing with the
@@ -190,9 +194,6 @@ defmodule TwoPhaseCommit do
   end
 
 
-  #  \/ \E r \in RM :
-  #       TMRcvPrepared(r) \/ RMPrepare(r) \/ RMChooseToAbort(r)
-  #         \/ RMRcvCommitMsg(r) \/ RMRcvAbortMsg(r)
   # *************************************************************************
   #  The material below this point is not discussed in Video Lecture 6.  It
   #  will be explained in Video Lecture 8.
@@ -221,24 +222,28 @@ defmodule TwoPhaseCommit do
   #  RMs, a configuration with 50816 reachable states, in a little over a
   #  minute on a 1 GHz PC.
   # *************************************************************************
-  @doc """
-
-  """
   def main(variables) do
     IO.puts (inspect variables)
 
     main(
       decide_action(
-        "Next",
-        [
+        List.flatten([
           %{ action: "TMCommit()", condition: tm_commit_condition(variables), state: tm_commit(variables) },
-          %{ action: "TMAbort()", condition: tm_abort_condition(variables), state: tm_abort(variables) }
-        ]
+          %{ action: "TMAbort()", condition: tm_abort_condition(variables), state: tm_abort(variables) },
+          Enum.map(@rm, fn (r) -> [
+            %{ action: "TMRcvPrepared(#{inspect r})", condition: tm_rcv_prepared_condition(variables, r), state: tm_rcv_prepared(variables, r) },
+            %{ action: "RMPrepare(#{inspect r})", condition: rm_prepare_condition(variables, r), state: rm_prepare(variables, r) },
+            %{ action: "RMChooseToAbort(#{inspect r})", condition: rm_choose_to_abort_condition(variables, r), state: rm_choose_to_abort(variables, r) },
+            %{ action: "RMRcvCommitMsg(#{inspect r})", condition: rm_rcv_commit_msg_condition(variables, r), state: rm_rcv_commit_msg(variables, r) },
+            %{ action: "RMRcvAbortMsg(#{inspect r})", condition: rm_rcv_abort_msg_condition(variables, r), state: rm_rcv_abort_msg(variables, r) }
+          ] end
+          )
+        ])
       )
     )
   end
 
-  def decide_action(origin, actions) do
+  def decide_action(actions) do
     possible_actions = Enum.filter(actions, fn(action) -> action[:condition] end)
     different_states = Enum.uniq_by(possible_actions, fn(action) -> action[:state] end)
 
@@ -246,7 +251,7 @@ defmodule TwoPhaseCommit do
       Enum.at(possible_actions, 0)[:state]
     else
       actions_names = Enum.map(possible_actions, fn(action) -> action[:action] end)
-      send @oracle, {self(), origin, actions_names}
+      send @oracle, {self(), actions_names}
 
       n = receive do
         {:ok, n} -> n

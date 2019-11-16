@@ -229,7 +229,7 @@ primed = do try $ do i <- identifier
 
 value = do {r <- record; return (r)}
         <|>
-        do try $ do {i <- identifier; char '['; k <- identifier; char ']'; ws; return (Index i k)}
+        do try $ do {i <- identifier; char '['; k <- identifier; char ']'; ws; return (Index (Arith (Ref i)) k)}
         <|>
         do {s <- set; return (s)}
         <|>

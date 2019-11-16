@@ -11,12 +11,14 @@ defmodule Gerenciador do
     receive do
       {p, as} -> show_options(as)
     end
+
     listen(input)
   end
 
   def read do
-    {i, _} = Integer.parse(IO.gets("choice: "))
-    send :global.whereis_name("oracle"), {:escolha, i}
+    {i, _} = Integer.parse(IO.gets("Escolha Gerenciador de Recursos: "))
+
+    send :global.whereis_name("oracle"), {:choice, i}
 
     read()
   end

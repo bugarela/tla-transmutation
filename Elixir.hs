@@ -1,6 +1,7 @@
 module Elixir where
 
 import Data.List
+import Data.List.Extra
 
 import Head
 import Math
@@ -14,6 +15,8 @@ generate (Spec m i n ds) = let defs = filter (not . (specialDef i n)) ds
                                defInit = findIdentifier i ds
                                defNext = findIdentifier n ds
                            in spec m cs defs defInit defNext
+
+filename (Module m _) = snake m ++ ".ex"
 
 {-- \vdash --}
 -- (MOD)

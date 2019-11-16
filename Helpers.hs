@@ -20,7 +20,7 @@ call i [] = snake i
 call i ps = snake i ++ "(" ++ intercalate ", " (ps) ++ ")"
 
 -- (IF) helpers
-ifExpr c e t = unlines ["if " ++ c ++ " do",
+ifExpr c t e = unlines ["if " ++ c ++ " do",
                         ident t,
                         "else",
                         ident e,

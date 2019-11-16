@@ -23,4 +23,4 @@ decideAction = unlines [
 
 logState = "IO.puts (inspect variables)\n\n"
 
-oracleDelaration = "require Oracle\n@oracle spawn(Oracle, :listen, [])\n\n\n"
+oracleDelaration = "require Oracle\n@oracle spawn(Oracle, :start, [])\n\n\n"
