@@ -11,6 +11,7 @@ Notice that this covers only a small portion of TLA+ definitions and it is yet t
 #### For running the generated code
 * Elixir
 * Erlang
+
 [Instructions for installation with asdf package manager](https://elixirgirls.com/install-guides/linux.html)
 
 ## Build

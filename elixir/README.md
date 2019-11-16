@@ -1,21 +1,7 @@
-# Elixir
+# Elixir Environment
 
-**TODO: Add description**
+This is a bootstrap mix project where the generated code can be ran, with some oracle examples to help simulate interaction with multiple processes.
 
-## Installation
+The default oracle will read input each time it needs help choosing the next action. If you change the Oracle spawned by the generated code to the `RandomOracle`, the choices will be done randomly with a 1 second interval so the output is human readable.
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `elixir` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:elixir, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/elixir](https://hexdocs.pm/elixir).
-
+Run with `mix`
