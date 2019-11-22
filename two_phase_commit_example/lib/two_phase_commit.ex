@@ -223,7 +223,8 @@ defmodule TwoPhaseCommit do
   #  minute on a 1 GHz PC.
   # *************************************************************************
   def main(variables) do
-    IO.puts (inspect variables)
+    IEx.Helpers.clear
+    IO.puts (inspect(variables, pretty: true))
 
     main(
       decide_action(
@@ -231,11 +232,11 @@ defmodule TwoPhaseCommit do
           %{ action: "TMCommit()", condition: tm_commit_condition(variables), state: tm_commit(variables) },
           %{ action: "TMAbort()", condition: tm_abort_condition(variables), state: tm_abort(variables) },
           Enum.map(@rm, fn (r) -> [
-            %{ action: "TMRcvPrepared(#{inspect r})", condition: tm_rcv_prepared_condition(variables, r), state: tm_rcv_prepared(variables, r) },
-            %{ action: "RMPrepare(#{inspect r})", condition: rm_prepare_condition(variables, r), state: rm_prepare(variables, r) },
-            %{ action: "RMChooseToAbort(#{inspect r})", condition: rm_choose_to_abort_condition(variables, r), state: rm_choose_to_abort(variables, r) },
-            %{ action: "RMRcvCommitMsg(#{inspect r})", condition: rm_rcv_commit_msg_condition(variables, r), state: rm_rcv_commit_msg(variables, r) },
-            %{ action: "RMRcvAbortMsg(#{inspect r})", condition: rm_rcv_abort_msg_condition(variables, r), state: rm_rcv_abort_msg(variables, r) }
+            %{ action: "TMRcvPrepared(#{r})", condition: tm_rcv_prepared_condition(variables, r), state: tm_rcv_prepared(variables, r) },
+            %{ action: "RMPrepare(#{r})", condition: rm_prepare_condition(variables, r), state: rm_prepare(variables, r) },
+            %{ action: "RMChooseToAbort(#{r})", condition: rm_choose_to_abort_condition(variables, r), state: rm_choose_to_abort(variables, r) },
+            %{ action: "RMRcvCommitMsg(#{r})", condition: rm_rcv_commit_msg_condition(variables, r), state: rm_rcv_commit_msg(variables, r) },
+            %{ action: "RMRcvAbortMsg(#{r})", condition: rm_rcv_abort_msg_condition(variables, r), state: rm_rcv_abort_msg(variables, r) }
           ] end
           )
         ])
@@ -262,6 +263,7 @@ defmodule TwoPhaseCommit do
   end
 end
 
+IO.gets("start?")
 TwoPhaseCommit.main(
   # ***********************************************************************
   #  The initial predicate.

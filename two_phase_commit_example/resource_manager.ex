@@ -1,9 +1,9 @@
-defmodule Gerenciador do
+defmodule ResourceManager do
   def start(id) do
     Node.connect(:oracle@localhost)
     :global.register_name(id, self())
 
-    spawn(Gerenciador, :read, [])
+    spawn(ResourceManager, :read, [])
     listen(:undefined)
   end
 
@@ -24,9 +24,11 @@ defmodule Gerenciador do
   end
 
   def show_options(as) do
-    IO.puts(inspect as)
+    IEx.Helpers.clear
+    IO.puts Enum.join(as, "\n")
+    IO.puts ""
   end
 end
 
 [arg1] = System.argv
-Gerenciador.start(arg1)
+ResourceManager.start(arg1)

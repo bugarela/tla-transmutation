@@ -35,7 +35,8 @@ defmodule ManagersOracle do
   def show_transaction_manager_choices(as) do
     transaction_manager_choices = Enum.filter(as, fn (a) -> a =~ "TM" end)
 
-    IO.puts (inspect transaction_manager_choices)
+    IO.puts Enum.join(transaction_manager_choices, "\n")
+    IO.puts ""
   end
 
   def read do
