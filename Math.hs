@@ -25,6 +25,7 @@ data Expr = Num Integer
             | Sub Expr Expr
             | Mul Expr Expr
             | Div Expr Expr
+            | Mod Expr Expr
            deriving Show
 
 build :: P.Parser Expr
@@ -35,6 +36,7 @@ table =
   [ [ prefix "-" Neg ]
   , [ binary "*" Mul P.AssocLeft, binary "/ " Div P.AssocLeft ]
   , [ binary "+" Add P.AssocLeft, binary "-" Sub P.AssocLeft ]
+  , [ binary "%" Mod P.AssocLeft ]
   ] where binary s f a = P.Infix  (P.try (P.string s) >> ws >> return f) a
           prefix s f   = P.Prefix (P.try (P.string s) >> ws >> return f)
 

@@ -27,7 +27,7 @@ variablesDeclaration = do try $ do string "VARIABLE"
 
 theorem = do try $ do {string "THEOREM"; ws; manyTill anyChar (char '\n'); ignore; return()}
 moduleInstance = do try $ do {string "INSTANCE"; ws; identifier; ignore; return()}
-extends = do try $ do {string "EXTENDS"; ws; identifier; ignore; return()}
+extends = do try $ do {string "EXTENDS"; ws; identifier `sepBy` (try $ comma); ignore; return()}
 
 identifier = many1 (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
 constant = do try $ do c <- oneOf ['A'..'Z']
@@ -37,6 +37,7 @@ constant = do try $ do c <- oneOf ['A'..'Z']
 reserved = ",;.(){}\"/\\[]"
 comma = do {ws; char ','; ws; return ()}
 infOr = do {ws; string "\\/"; ws; return ()}
+infAnd = do {ws; string "/\\"; ws; return ()}
 
 parseFile a = do f <- readFile a
                  let e = parse specification "Error:" (f)
@@ -49,6 +50,7 @@ specification = do (n, d) <- moduleHeader
                    ws
                    many $ char '='
                    ignore
+                   many comment
                    eof
                    return (Module n d, ds)
 
@@ -158,47 +160,84 @@ action =  do string "IF"
                      as <- action `sepBy` infOr
                      return (Exists i v (ActionOr as))
 
-predicate = do try $ do v1 <- value
-                        char '='
+
+predicate = do try $ do char '('
                         ws
-                        v2 <- value
-                        return (Equality v1 v2)
-            <|>
-            do try $ do v1 <- value
-                        char '#'
+                        ps <- atomPredicate `sepBy` infAnd
+                        char ')'
                         ws
-                        v2 <- value
-                        return (Inequality v1 v2)
-            <|>
-            do try $ do v1 <- value
-                        char '>'
-                        ws
-                        v2 <- value
-                        return (Gt v1 v2)
-            <|>
-            do try $ do v1 <- value
-                        char '<'
-                        ws
-                        v2 <- value
-                        return (Lt v1 v2)
-            <|>
-            do try $ do v1 <- value
-                        string ">="
-                        ws
-                        v2 <- value
-                        return (Gte v1 v2)
-            <|>
-            do try $ do v1 <- value
-                        string "=<"
-                        ws
-                        v2 <- value
-                        return (Lte v1 v2)
-            <|>
-            do try $ do v1 <- value
-                        string "\\in"
-                        ws
-                        v2 <- value
-                        return (RecordBelonging v1 v2)
+                        return (And ps)
+           <|>
+           do try $ do char '('
+                       ws
+                       ps <- atomPredicate `sepBy` infOr
+                       char ')'
+                       ws
+                       return (Or ps)
+           <|> atomPredicate
+
+atomPredicate = do try $ do v1 <- value
+                            char '='
+                            ws
+                            v2 <- value
+                            return (Equality v1 v2)
+                <|>
+                do try $ do v1 <- value
+                            char '#'
+                            ws
+                            v2 <- value
+                            return (Inequality v1 v2)
+                <|>
+                do try $ do v1 <- value
+                            char '>'
+                            ws
+                            v2 <- value
+                            return (Gt v1 v2)
+                <|>
+                do try $ do v1 <- value
+                            char '<'
+                            ws
+                            v2 <- value
+                            return (Lt v1 v2)
+                <|>
+                do try $ do v1 <- value
+                            string ">="
+                            ws
+                            v2 <- value
+                            return (Gte v1 v2)
+                <|>
+                do try $ do v1 <- value
+                            string "<="
+                            ws
+                            v2 <- value
+                            return (Lte v1 v2)
+                <|>
+                do try $ do v1 <- value
+                            string "\\in"
+                            ws
+                            v2 <- value
+                            return (RecordBelonging v1 v2)
+                <|>
+                do try $ do v1 <- value
+                            string "\\notin"
+                            ws
+                            v2 <- value
+                            return (RecordNotBelonging v1 v2)
+                <|>
+                do try $ do string "\\A"
+                            ws
+                            (i, v, p) <- inFilter
+                            return (ForAll i v p)
+
+inFilter = do i <- identifier
+              ws
+              string "\\in"
+              ws
+              v <- value
+              char ':'
+              ws
+              p <- predicate
+              return (i, v, p)
 
 mapping = do try $ do ws
                       i <- identifier
@@ -227,9 +266,18 @@ primed = do try $ do i <- identifier
                      ws
                      return (i)
 
-value = do {r <- record; return (r)}
+value = do try $ do string "Cardinality("
+                    ws
+                    s <- set
+                    char ')'
+                    ws
+                    return (Cardinality s)
         <|>
-        do try $ do {i <- identifier; char '['; k <- identifier; char ']'; ws; return (Index (Arith (Ref i)) k)}
+        do {r <- record; return (r)}
+        <|>
+        do try $ do {i <- identifier; char '['; k <- identifier; char ']'; ws; return (Index (Arith (Ref i)) (Arith (Ref k)))}
+        <|>
+        do try $ do {i <- identifier; char '['; k <- literal; char ']'; ws; return (Index (Arith (Ref i)) k)}
         <|>
         do {s <- set; return (s)}
         <|>
@@ -241,11 +289,17 @@ set = do try $ do {s1 <- atomSet; string "\\cup"; ws; s2 <- set; ws; return (Uni
       <|>
       atomSet
 
-atomSet = do char '{'
-             vs <- value `sepBy` (try $ comma)
-             char '}'
-             ws
-             return (Set vs)
+atomSet = do try $ do char '{'
+                      vs <- value `sepBy` (try $ comma)
+                      char '}'
+                      ws
+                      return (Set vs)
+          <|>
+          do try $ do char '{'
+                      (i, v, p) <- inFilter
+                      char '}'
+                      ws
+                      return (Filtered i v p)
           <|>
           do {e <- arithmeticExpression; ws; return (Arith e)}
 

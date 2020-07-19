@@ -20,11 +20,7 @@ call i [] = snake i
 call i ps = snake i ++ "(" ++ intercalate ", " (ps) ++ ")"
 
 -- (IF) helpers
-ifExpr c t e = unlines ["if " ++ c ++ " do",
-                        ident t,
-                        "else",
-                        ident e,
-                        "end"]
+ifExpr c t e = "(if " ++ c ++ ", do: " ++ t ++ ", else: " ++ e ++ ")"
 
 -- (REC-LIT) helpers
 isLiteral ((Key _), _) = True
@@ -32,12 +28,21 @@ isLiteral _ = False
 
 -- (INFO-*) helpers
 actionName (ActionCall i ps) = i ++ "(" ++ intercalate ", " (map interpolate ps) ++ ")"
-actionName a = show a
+actionName a = escape (show a)
 
+escape cs = foldr (++) "" (map escape' cs)
+
+escape' :: Char -> String
+escape' c | c `elem` regexChars = '\\' : [c]
+          | otherwise = [c]
+              where regexChars = "\\+()^$.{}]|\""
 -- Others
+enclose s = "(" ++ s ++ ")"
+
 cFold :: [ElixirCode] -> ElixirCode
 cFold [] = "True"
-cFold cs = intercalate " and " cs
+cFold [c] = c
+cFold cs = "Enum.all?([" ++ intercalate ", " cs ++ "])"
 
 aFold :: [ElixirCode] -> ElixirCode
 aFold [] = "variables"
@@ -86,3 +91,4 @@ findConstants ds = concat (map (\d -> case d of {Constants cs -> cs; _ -> [] }) 
 findIdentifier i ds = case find (isNamed i) ds of
                         Just a -> a
                         Nothing -> error("Definition not found: " ++ (show i))
+

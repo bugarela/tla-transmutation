@@ -23,13 +23,17 @@ data Predicate = Equality Value Value | Inequality Value Value
                | Gt Value Value | Lt Value Value
                | Gte Value Value | Lte Value Value
                | RecordBelonging Value Value
+               | RecordNotBelonging Value Value
+               | And [Predicate]
+               | Or [Predicate]
+               | ForAll Identifier Value Predicate
                | Not Predicate deriving(Show)
 
 data Action = Condition Predicate | Primed Identifier Value | Unchanged [Identifier] | ActionNot Action
             | ActionAnd [Action] | ActionOr [Action] | ActionCall Identifier [Parameter]
             | If Predicate Action Action | Exists Identifier Value Action deriving(Show)
 
-data Value = Set [Value] | Union Value Value
+data Value = Set [Value] | Union Value Value | Filtered Identifier Value Predicate | Cardinality Value
            | Record [(Key, Value)] | Except Identifier Identifier Value
-           | Str String | Arith Expr | Index Value Identifier deriving(Show)
+           | Str String | Arith Expr | Index Value Value deriving(Show)
 

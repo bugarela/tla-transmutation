@@ -95,6 +95,8 @@ action g (Primed i v) = "%{ " ++ snake i ++ ": " ++ value g v ++ " }"
 action _ (Unchanged is) =  let u = \i -> snake i ++ ": variables[:" ++ snake i ++ "]"
                            in "%{ " ++ intercalate ",\n" (map u is) ++ " }"
 
+action g a = decide g [a]
+
 {-- \vdash_p --}
 predicate :: Context -> Predicate -> ElixirCode
 
@@ -113,9 +115,20 @@ predicate g (Lte v1 v2) = value g v1 ++ " <= " ++ value g v2
 -- (PRED-IN)
 predicate g (RecordBelonging v1 v2) = "Enum.member?(" ++ value g v2 ++ ", " ++ value g v1 ++ ")"
 
+-- [new] (PRED-NOTIN)
+predicate g (RecordNotBelonging v1 v2) = "not " ++ predicate g (RecordBelonging v1 v2)
+
 -- (PRED-NOT)
 predicate g (Not p) = "not " ++ predicate g p
 
+-- [new] (PRED-AND)
+predicate g (And ps) =  intercalate " and " (map (predicate g) ps)
+
+-- [new] (PRED-OR)
+predicate g (Or ps) =  intercalate " or " (map (predicate g) ps)
+
+-- [new] (PRED-ALL)
+predicate g (ForAll i v p) = "Enum.all?(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ predicate g p ++ " end)"
 
 {-- \vdash_init --}
 initialState :: Context -> Action -> ElixirCode
@@ -160,7 +173,7 @@ actionInfo g a = let (cs, as) = actionsAndConditions g a
 value :: Context -> Value -> ElixirCode
 
 -- (REC-INDEX)
-value g (Index v k) = value g v ++ "[" ++ k ++ "]"
+value g (Index v k) = value g v ++ "[" ++ value g k ++ "]"
 
 -- (SET-LIT)
 value g (Set vs) = "MapSet.new([" ++ intercalate ", " (map (value g) vs) ++ "])"
@@ -169,6 +182,12 @@ value g (Set vs) = "MapSet.new([" ++ intercalate ", " (map (value g) vs) ++ "])"
 value g (Union (Set [v]) s) = "MapSet.put(" ++ value g s ++ ", " ++ value g v ++ ")"
 value g (Union s (Set [v])) = "MapSet.put(" ++ value g s ++ ", " ++ value g v ++ ")"
 value g (Union s1 s2) = "MapSet.union(" ++ value g s1 ++ ", " ++ value g s2 ++ ")"
+
+-- [new] (SET-FILT)
+value g (Filtered i v p) = "Enum.filter(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ predicate g p ++ " end)"
+
+-- [new] (SET-CAR)
+value g (Cardinality s) = "Enum.count(" ++ value g s ++ ")"
 
 -- (REC-LIT) and (REC-EX), aggregated to ensure ordering
 value g (Record rs) = let (literals, generations) = partition isLiteral rs
@@ -203,10 +222,9 @@ expression g (Add a b) = expression' g a ++ " + " ++ expression' g b
 expression g (Sub a b) = expression' g a ++ " - " ++ expression' g b
 expression g (Mul a b) = expression' g a ++ " * " ++ expression' g b
 expression g (Div a b) = expression' g a ++ " / " ++ expression' g b
+expression g (Mod a b) = "rem(" ++ expression' g a ++ ", " ++ expression' g b ++ ")"
 
 expression' _ (Num d) = show d
 expression' g (Ref i) = reference g i
 expression' g e = "(" ++ expression g e ++ ")"
-
-
 
