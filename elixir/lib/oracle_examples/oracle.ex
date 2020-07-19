@@ -7,7 +7,7 @@ defmodule Oracle do
   end
 
   def listen do
-    IO.puts "Oracle at [#{inspect self}] is listening"
+    IO.puts "Oracle at [#{inspect self()}] is listening"
 
     receive do
       {p, as} -> send p, {:ok, input_option(as)}

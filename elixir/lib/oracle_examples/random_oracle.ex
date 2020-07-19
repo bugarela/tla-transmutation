@@ -1,6 +1,6 @@
 defmodule RandomOracle do
   def start do
-    IO.puts "RandomOracle at [#{inspect self}] is listening"
+    IO.puts "RandomOracle at [#{inspect self()}] is listening"
 
     receive do
       {p, as} -> send p, {:ok, random_choice(as)}
