@@ -60,15 +60,15 @@ actionsAndConditions :: Context -> Action -> ([ElixirCode], [ElixirCode])
 actionsAndConditions _ (ActionCall i ps) = ([call (i ++ "Condition") ("variables":ps)], [call i ("variables":ps)])
 
 -- (AND)
-actionsAndConditions g (ActionAnd as) = let (acs, aas) = partition isCondition as
-                                            conditions = map toCondition acs
-                                            (cs, oas) = unzipAndFold (map (actionsAndConditions g) aas)
-                                        in ([predicate g (And conditions)] ++ cs, oas)
+actionsAndConditions g (ActionAnd as) = let cs = partitionCondition (ActionAnd as)
+                                            (ics, ias) = unzipAndFold (map (actionsAndConditions g) as)
+                                        in ((predicate g (And cs)):ics, ias)
 
 -- (OR)
-actionsAndConditions g (ActionOr as) = let (ocs, oas) = partition isCondition as
-                                           conditions = map toCondition ocs
-                                       in ([predicate g (Or conditions)], [decide g oas])
+actionsAndConditions g (ActionOr as) = let cs = partitionCondition (ActionOr as)
+                                           (ics, ias) = unzipAndFold (map (actionsAndConditions g) as)
+                                           c = orFold (if cs /= [] then ((predicate g (Or cs)):ics) else ics)
+                                       in ([c], [decide g as])
 
 -- (IF)
 actionsAndConditions g (If p t e) = let cp = predicate g p
@@ -80,6 +80,14 @@ actionsAndConditions g (If p t e) = let cp = predicate g p
 
 -- (COND)
 actionsAndConditions g (Condition p) = ([predicate g p], [])
+
+-- [new] (EXT)
+actionsAndConditions g (Exists i v a) = let (cs, as) = actionsAndConditions g a
+                                            scs = intercalate ",\n" cs
+                                            c = "Enum.any?(" ++ value g v ++ ", fn (" ++ i ++ ") -> [\n" ++ ident scs ++ "\n] end\n)"
+                                            sas = intercalate ",\n" as
+                                            aa = "Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> [\n" ++ ident sas ++ "\n] end\n)"
+                                        in ([c], [aa])
 
 -- (ACT)
 actionsAndConditions g a = ([], [action g a])
@@ -101,8 +109,6 @@ action g (Primed i v) = "%{ " ++ snake i ++ ": " ++ value g v ++ " }"
 action _ (Unchanged is) =  let u = \i -> snake i ++ ": variables[:" ++ snake i ++ "]"
                            in "%{ " ++ intercalate ",\n" (map u is) ++ " }"
 
-action g a = decide g [a]
-
 {-- \vdash_p --}
 predicate :: Context -> Predicate -> ElixirCode
 
@@ -117,6 +123,9 @@ predicate g (Gt v1 v2) = value g v1 ++ " > " ++ value g v2
 predicate g (Lt v1 v2) = value g v1 ++ " < " ++ value g v2
 predicate g (Gte v1 v2) = value g v1 ++ " >= " ++ value g v2
 predicate g (Lte v1 v2) = value g v1 ++ " <= " ++ value g v2
+
+-- [new] (PRED-CALL)
+predicate g (ConditionCall i ps) = call (i ++ "Condition") ("variables":ps)
 
 -- (PRED-IN)
 predicate g (RecordBelonging v1 v2) = "Enum.member?(" ++ value g v2 ++ ", " ++ value g v1 ++ ")"
@@ -164,10 +173,10 @@ next g (Definition _ _ doc a) = let (_, actions) = actionsAndConditions g a
 
 {-- \vdash_i -}
 actionInfo :: Context -> Action -> ElixirCode
--- (INFO-EX)
-actionInfo g (Exists i v (ActionOr as)) = let l = map (actionInfo g) as
-                                              s = intercalate ",\n" l
-                                          in "Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> [\n" ++ ident s ++ "\n] end\n)"
+-- -- (INFO-EX)
+-- actionInfo g (Exists i v (ActionOr as)) = let l = map (actionInfo g) as
+--                                               s = intercalate ",\n" l
+--                                           in "Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> [\n" ++ ident s ++ "\n] end\n)"
 
 -- (INFO-DEF)
 actionInfo g a = let (cs, as) = actionsAndConditions g a

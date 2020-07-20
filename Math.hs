@@ -26,7 +26,7 @@ data Expr = Num Integer
             | Mul Expr Expr
             | Div Expr Expr
             | Mod Expr Expr
-           deriving Show
+           deriving (Show, Eq)
 
 build :: P.Parser Expr
 build = do P.try $ P.buildExpressionParser table (P.try $ factor) <|> factor

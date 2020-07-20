@@ -53,12 +53,17 @@ aFold as = let (otherActions, actions) = partition preassignment as
                                     _ -> ["%{\n" ++ ident kvs ++ "\n}"]
            in mapMerge (initialVariables ++ otherActions)
 
+orFold :: [ElixirCode] -> ElixirCode
+orFold [] = "True"
+orFold [c] = c
+orFold cs = "Enum.any?([" ++ intercalate ", " cs ++ "])"
+
 keyValue a = drop 3 (dropEnd 2 a)
 
 mapMerge [m] = m
 mapMerge (m:ms) = "Map.merge(\n  " ++ m ++ ",\n" ++ ident (mapMerge ms) ++ ")\n"
 
-preassignment as = (head as) == '(' || take 2 as == "if" || dropWhile (/= ':') as == []
+preassignment as = (head as) == '(' || take 2 as == "if" || dropWhile (/= ':') as == [] || take 4 as == "Enum"
 
 interpolate i = "#{inspect " ++ i ++ "}"
 
@@ -82,14 +87,12 @@ tabIfline xs = "  " ++ xs
 isNamed i (Definition id _ _ _) = i == id
 isNamed _ _ = False
 
-isCondition (Condition _) = True
-isCondition (ActionOr as) = all isCondition as
-isCondition (ActionAnd as) = all isCondition as
-isCondition _ = False
-
-toCondition (Condition c) = c
-toCondition (ActionOr cs) = Or (map toCondition cs)
-toCondition (ActionAnd cs) = And (map toCondition cs)
+partitionCondition (Condition c) = [c]
+partitionCondition (ActionCall c ps) = [ConditionCall c ps]
+partitionCondition (ActionOr cs) = let ics = foldr (++) [] (map partitionCondition cs) in if ics /= [] then [Or ics] else []
+partitionCondition (ActionAnd cs) = let ics = foldr (++) [] (map partitionCondition cs) in if ics /= [] then [And ics] else []
+partitionCondition (Exists i v (ActionOr cs)) = let ics = foldr (++) [] (map partitionCondition cs) in if ics /= [] then [Or ics] else []
+partitionCondition _ = []
 
 specialDef :: String -> String -> Definition -> Bool
 specialDef _ _ (Constants _) = True
