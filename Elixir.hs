@@ -56,14 +56,19 @@ definition _ (Comment s) = "# " ++ cleanTrailing s
 {-- \vdash_d --}
 actionsAndConditions :: Context -> Action -> ([ElixirCode], [ElixirCode])
 
--- (AND)
-actionsAndConditions g (ActionAnd as) = unzipAndFold (map (actionsAndConditions g) as)
-
 -- (CALL)
 actionsAndConditions _ (ActionCall i ps) = ([call (i ++ "Condition") ("variables":ps)], [call i ("variables":ps)])
 
+-- (AND)
+actionsAndConditions g (ActionAnd as) = let (acs, aas) = partition isCondition as
+                                            conditions = map toCondition acs
+                                            (cs, oas) = unzipAndFold (map (actionsAndConditions g) aas)
+                                        in ([predicate g (And conditions)] ++ cs, oas)
+
 -- (OR)
-actionsAndConditions g (ActionOr as) = ([], [decide g as])
+actionsAndConditions g (ActionOr as) = let (ocs, oas) = partition isCondition as
+                                           conditions = map toCondition ocs
+                                       in ([predicate g (Or conditions)], [decide g oas])
 
 -- (IF)
 actionsAndConditions g (If p t e) = let cp = predicate g p
@@ -80,6 +85,7 @@ actionsAndConditions g (Condition p) = ([predicate g p], [])
 actionsAndConditions g a = ([], [action g a])
 
 decide :: Context -> [Action] -> ElixirCode
+decide g [] = ""
 decide g as = let infos = map (actionInfo g) as
                   list = "List.flatten([\n" ++ ident (intercalate ",\n" infos) ++ "\n])\n"
               in "(\n" ++ ident ("decide_action(\n" ++ ident list ++ "\n)\n") ++ "\n)"
@@ -122,13 +128,15 @@ predicate g (RecordNotBelonging v1 v2) = "not " ++ predicate g (RecordBelonging 
 predicate g (Not p) = "not " ++ predicate g p
 
 -- [new] (PRED-AND)
+predicate g (And []) = "True"
 predicate g (And ps) =  intercalate " and " (map (predicate g) ps)
 
 -- [new] (PRED-OR)
+predicate g (Or []) = "True"
 predicate g (Or ps) =  intercalate " or " (map (predicate g) ps)
 
 -- [new] (PRED-ALL)
-predicate g (ForAll i v p) = "Enum.all?(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ predicate g p ++ " end)"
+predicate g (ForAll i v p) = "Enum.all?(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ predicate ((i, "param"):g) p ++ " end)"
 
 {-- \vdash_init --}
 initialState :: Context -> Action -> ElixirCode
@@ -184,7 +192,7 @@ value g (Union s (Set [v])) = "MapSet.put(" ++ value g s ++ ", " ++ value g v ++
 value g (Union s1 s2) = "MapSet.union(" ++ value g s1 ++ ", " ++ value g s2 ++ ")"
 
 -- [new] (SET-FILT)
-value g (Filtered i v p) = "Enum.filter(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ predicate g p ++ " end)"
+value g (Filtered i v p) = "Enum.filter(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ predicate ((i, "param"):g) p ++ " end)"
 
 -- [new] (SET-CAR)
 value g (Cardinality s) = "Enum.count(" ++ value g s ++ ")"
@@ -203,7 +211,8 @@ value g (Arith e) = expression g e
 value _ (Str s) = show s
 
 mapping g ((Key i), v) = snake i ++ ": " ++ value g v
-mapping g ((All i a), v) = value g a ++ " |> Enum.map(fn (" ++ i ++ ") -> {" ++ i ++ ", " ++ value g v ++ "} end)"
+mapping g ((All i a), v) = let ig = (i, "param"):g
+                           in value g a ++ " |> Enum.map(fn (" ++ i ++ ") -> {" ++ i ++ ", " ++ value ig v ++ "} end)"
 -- (VAL-*)
 reference g i = if elem (i, "param") g then i else 
                   if elem (i, "const") g then cnst g i else

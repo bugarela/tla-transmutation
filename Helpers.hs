@@ -62,7 +62,7 @@ preassignment as = (head as) == '(' || take 2 as == "if" || dropWhile (/= ':') a
 
 interpolate i = "#{inspect " ++ i ++ "}"
 
-declaration i ps =  "def " ++ snake i ++ "(" ++ intercalate ", " ("variables": ps) ++ ") do\n"
+declaration i ps =  "def " ++ snake i ++ "(" ++ intercalate ", " ("variables": ps) ++ ") do\n" ++ ident ("IO.puts(\"" ++ snake i ++ "\")") ++ "\n"
 
 identAndSeparate sep ls = (intercalate (sep ++ "\n") (map ((++) "  ") ls))
 
@@ -81,6 +81,15 @@ tabIfline xs = "  " ++ xs
 
 isNamed i (Definition id _ _ _) = i == id
 isNamed _ _ = False
+
+isCondition (Condition _) = True
+isCondition (ActionOr as) = all isCondition as
+isCondition (ActionAnd as) = all isCondition as
+isCondition _ = False
+
+toCondition (Condition c) = c
+toCondition (ActionOr cs) = Or (map toCondition cs)
+toCondition (ActionAnd cs) = And (map toCondition cs)
 
 specialDef :: String -> String -> Definition -> Bool
 specialDef _ _ (Constants _) = True
