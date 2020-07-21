@@ -168,15 +168,15 @@ next :: Context -> Definition -> ElixirCode
 
 -- (NEXT)
 next g (Definition _ _ doc a) = let (_, actions) = actionsAndConditions g a
-                                in funDoc doc ++ "def main(variables) do\n" ++ ident (logState ++ "main" ++ (aFold actions)) ++ "\nend\n"
+                                in funDoc doc ++ "def main(variables) do\n" ++ ident (logState ++ "main(" ++ (aFold actions)) ++ ")\nend\n"
 
 
 {-- \vdash_i -}
 actionInfo :: Context -> Action -> ElixirCode
--- -- (INFO-EX)
--- actionInfo g (Exists i v (ActionOr as)) = let l = map (actionInfo g) as
---                                               s = intercalate ",\n" l
---                                           in "Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> [\n" ++ ident s ++ "\n] end\n)"
+-- (INFO-EX)
+actionInfo g (Exists i v (ActionOr as)) = let l = map (actionInfo g) as
+                                              s = intercalate ",\n" l
+                                          in "Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> [\n" ++ ident s ++ "\n] end\n)"
 
 -- (INFO-DEF)
 actionInfo g a = let (cs, as) = actionsAndConditions g a
