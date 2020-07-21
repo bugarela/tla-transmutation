@@ -273,6 +273,8 @@ value = do try $ do string "Cardinality("
                     ws
                     return (Cardinality s)
         <|>
+        do try $ do {n1 <- Math.number; string ".."; n2 <- Math.number; ws; return (Range n1 n2)}
+        <|>
         do {r <- record; return (r)}
         <|>
         do try $ do {i <- identifier; char '['; k <- identifier; char ']'; ws; return (Index (Arith (Ref i)) (Arith (Ref k)))}
@@ -280,6 +282,8 @@ value = do try $ do string "Cardinality("
         do try $ do {i <- identifier; char '['; k <- literal; char ']'; ws; return (Index (Arith (Ref i)) k)}
         <|>
         do {s <- set; return (s)}
+        <|>
+        do try $ do {n1 <- Math.number; string ".."; n2 <- Math.number; ws; return (Range n1 n2)}
         <|>
         do try $ do {e <- arithmeticExpression; ws; return (Arith e)}
         <|>

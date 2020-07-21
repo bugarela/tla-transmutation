@@ -60,15 +60,12 @@ actionsAndConditions :: Context -> Action -> ([ElixirCode], [ElixirCode])
 actionsAndConditions _ (ActionCall i ps) = ([call (i ++ "Condition") ("variables":ps)], [call i ("variables":ps)])
 
 -- (AND)
-actionsAndConditions g (ActionAnd as) = let cs = partitionCondition (ActionAnd as)
-                                            (ics, ias) = unzipAndFold (map (actionsAndConditions g) as)
-                                        in ((predicate g (And cs)):ics, ias)
+actionsAndConditions g (ActionAnd as) = let (ics, ias) = unzipAndFold (map (actionsAndConditions g) as)
+                                        in ([cFold ics], ias)
 
 -- (OR)
-actionsAndConditions g (ActionOr as) = let cs = partitionCondition (ActionOr as)
-                                           (ics, ias) = unzipAndFold (map (actionsAndConditions g) as)
-                                           c = orFold (if cs /= [] then ((predicate g (Or cs)):ics) else ics)
-                                       in ([c], [decide g as])
+actionsAndConditions g (ActionOr as) = let (ics, ias) = unzipAndFold (map (actionsAndConditions g) as)
+                                       in ([orFold ics], [decide g as])
 
 -- (IF)
 actionsAndConditions g (If p t e) = let cp = predicate g p
@@ -82,12 +79,9 @@ actionsAndConditions g (If p t e) = let cp = predicate g p
 actionsAndConditions g (Condition p) = ([predicate g p], [])
 
 -- [new] (EXT)
-actionsAndConditions g (Exists i v a) = let (cs, as) = actionsAndConditions g a
-                                            scs = intercalate ",\n" cs
-                                            c = "Enum.any?(" ++ value g v ++ ", fn (" ++ i ++ ") -> [\n" ++ ident scs ++ "\n] end\n)"
-                                            sas = intercalate ",\n" as
-                                            aa = "Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> [\n" ++ ident sas ++ "\n] end\n)"
-                                        in ([c], [aa])
+actionsAndConditions g (Exists i v (ActionOr as)) = let (ics, _) = unzipAndFold (map (actionsAndConditions g) as)
+                                                        c = "Enum.any?(" ++ value g v ++ ", fn (" ++ i ++ ") ->" ++ orFold ics ++ "end\n)"
+                                                    in ([c], [decide g [Exists i v (ActionOr as)]])
 
 -- (ACT)
 actionsAndConditions g a = ([], [action g a])

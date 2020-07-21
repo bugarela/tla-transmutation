@@ -36,5 +36,5 @@ data Action = Condition Predicate | Primed Identifier Value | Unchanged [Identif
 
 data Value = Set [Value] | Union Value Value | Filtered Identifier Value Predicate | Cardinality Value
            | Record [(Key, Value)] | Except Identifier Identifier Value
-           | Str String | Arith Expr | Index Value Value deriving(Show, Eq)
+           | Str String | Arith Expr | Index Value Value | Range Expr Expr deriving(Show, Eq)
 

@@ -45,7 +45,7 @@ cFold [c] = c
 cFold cs = "Enum.all?([" ++ intercalate ", " cs ++ "])"
 
 aFold :: [ElixirCode] -> ElixirCode
-aFold [] = "variables"
+aFold [] = "%{}"
 aFold as = let (otherActions, actions) = partition preassignment as
                kvs = intercalate ",\n" (map keyValue actions)
                initialVariables = case actions of
@@ -63,11 +63,11 @@ keyValue a = drop 3 (dropEnd 2 a)
 mapMerge [m] = m
 mapMerge (m:ms) = "Map.merge(\n  " ++ m ++ ",\n" ++ ident (mapMerge ms) ++ ")\n"
 
-preassignment as = (head as) == '(' || take 2 as == "if" || dropWhile (/= ':') as == [] || take 4 as == "Enum"
+preassignment as = (head as) == '(' || take 2 as == "if" || dropWhile (/= ':') as == [] || take 4 as == "Enum" || take 3 as == "Map"
 
 interpolate i = "#{inspect " ++ i ++ "}"
 
-declaration i ps =  "def " ++ snake i ++ "(" ++ intercalate ", " ("variables": ps) ++ ") do\n" ++ ident ("IO.puts(\"" ++ snake i ++ "\")") ++ "\n"
+declaration i ps =  "def " ++ snake i ++ "(" ++ intercalate ", " ("variables": ps) ++ ") do\n"
 
 identAndSeparate sep ls = (intercalate (sep ++ "\n") (map ((++) "  ") ls))
 
