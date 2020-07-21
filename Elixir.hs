@@ -218,6 +218,7 @@ value g (Except i k v) = "Map.put(" ++ reference g i ++ ", " ++ k ++ ", " ++ val
 -- Others, not specified
 value g (Arith e) = expression g e
 value _ (Str s) = show s
+value g (Range n1 n2) = expression g n1 ++ ".." ++ expression g n2
 
 mapping g ((Key i), v) = snake i ++ ": " ++ value g v
 mapping g ((All i a), v) = let ig = (i, "param"):g
