@@ -1,24 +1,21 @@
-name: hpack
-version: 0.34.2
-synopsis: A modern format for Haskell packages
-description: See README at <https://github.com/sol/hpack#readme>
-maintainer: Simon Hengel <sol@typeful.net>
-github: sol/hpack
+name: tla-transmutation
+version: 0.0.1
+synopsis: Elixir code generation from TLA+ specifications
+description: See README at <https://github.com/gabrielamafra/tla-trasmutation>
+maintainer: Gabriela Mafra <hi@gabrielamafra.dev>
+github: gabrielamafra/tla-trasmutation
 category: Development
 
 ghc-options: -Wall
 
 dependencies:
   - base >= 4.9 && < 5
-  - parsec
   - split
+  - parsec
   - casing
   - extra
+  - mtl
 
 executable:
   main: Main.hs
   source-dirs: .
-  dependencies:
-    - hpack
-
-

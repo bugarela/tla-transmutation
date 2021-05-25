@@ -12,28 +12,29 @@ import Helpers
 generate :: Spec -> ElixirCode
 generate (Spec m i n ds) = let defs = filter (not . (specialDef i n)) ds
                                cs = findConstants ds
+                               vs = findVariables ds
                                defInit = findIdentifier i ds
                                defNext = findIdentifier n ds
-                           in spec m cs defs defInit defNext
+                           in spec m cs vs defs defInit defNext
 
 filename (Module m _) = snake m ++ ".ex"
 
 {-- \vdash --}
 -- (MOD)
-spec :: Module -> [Constant] -> [Definition] -> Init -> Next -> ElixirCode
-spec m cs ds di dn = let g = map (\c -> (c, "const")) cs
-                         state = ini (g ++ moduleContext m) di
-                     in concat [moduleHeader m,
-                                ident (concat [
-                                          constants cs,
-                                          mapAndJoin (definition g) ds,
-                                          "\n",
-                                          next g dn,
-                                          decideAction
-                                          ]
-                                      ),
-                                "\nend\n\n",
-                                mainCall m state]
+spec :: Module -> [Constant] -> [Variable] -> [Definition] -> Init -> Next -> ElixirCode
+spec m cs vs ds di dn = let g = map (\c -> (c, "const")) cs ++ map (\v -> (v, "variable")) vs
+                            state = ini (g ++ moduleContext m) di
+                        in concat [moduleHeader m,
+                                   ident (concat [
+                                             constants cs,
+                                             mapAndJoin (definition g) ds,
+                                             "\n",
+                                             next g dn,
+                                             decideAction
+                                             ]
+                                         ),
+                                   "\nend\n\n",
+                                   mainCall m state]
 
 {-- \vdash_const --}
 -- (CONST)
@@ -46,9 +47,13 @@ constants cs = unlines (map (\c -> let s = snake c
 {-- \vdash_dec --}
 -- (DEF)
 definition :: Context -> Definition -> ElixirCode
-definition g (Definition i ps doc a) = let g' = g ++ map (\p -> (p, "param")) ps
-                                           (conditions, actions) = actionsAndConditions g' a
-                                       in funDoc doc ++ declaration (i ++ "Condition") ps ++ ident (cFold conditions) ++ "\nend\n\n" ++ declaration i ps ++ ident (aFold actions) ++ "\nend\n\n"
+definition g (ActionDefinition i ps doc a) = let g' = g ++ map (\p -> (p, "param")) ps
+                                                 (conditions, actions) = actionsAndConditions g' a
+                                             in if actions == []
+                                                then declaration (i ++ "Condition") ps ++ ident (cFold conditions) ++ "\nend\n\n"
+                                                else funDoc doc ++ declaration (i ++ "Condition") ps ++ ident (cFold conditions) ++ "\nend\n\n" ++ declaration i ps ++ ident (aFold actions) ++ "\nend\n\n"
+
+definition g (ValueDefinition i v) = declaration i [] ++ ident (value g v) ++ "\nend\n\n"
 -- Comment translation, not specified
 definition _ (Comment s) = "# " ++ cleanTrailing s
 
@@ -57,21 +62,21 @@ definition _ (Comment s) = "# " ++ cleanTrailing s
 actionsAndConditions :: Context -> Action -> ([ElixirCode], [ElixirCode])
 
 -- (CALL)
-actionsAndConditions _ (ActionCall i ps) = ([call (i ++ "Condition") ("variables":ps)], [call i ("variables":ps)])
+actionsAndConditions g (ActionCall i ps) = ([call (i ++ "Condition") ("variables":map (value g) ps)], [call i ("variables":map (value g) ps)])
 
 -- (AND)
 actionsAndConditions g (ActionAnd as) = let (ics, ias) = unzipAndFold (map (actionsAndConditions g) as)
-                                        in ([cFold ics], ias)
+                                        in (if allUnchanged as then ["false"] else [cFold ics], ias)
 
 -- (OR)
 actionsAndConditions g (ActionOr as) = let (ics, ias) = unzipAndFold (map (actionsAndConditions g) as)
-                                       in ([orFold ics], [decide g as])
+                                       in (if allUnchanged as then ["false"] else [orFold ics], if ias == [] then [] else [decide g as])
 
 -- (IF)
 actionsAndConditions g (If p t e) = let cp = predicate g p
                                         (ct, at) = actionsAndConditions g t
                                         (ce, ae) = actionsAndConditions g e
-                                        c = ifExpr cp (cFold ct) (cFold ce)
+                                        c = ifExpr cp (if isUnchanged t then "false" else cFold ct) (if isUnchanged e then "false" else cFold ce)
                                         a = ifExpr cp (aFold at) (aFold ae)
                                     in ([c], [a])
 
@@ -79,11 +84,12 @@ actionsAndConditions g (If p t e) = let cp = predicate g p
 actionsAndConditions g (Condition p) = ([predicate g p], [])
 
 -- [new] (EXT)
-actionsAndConditions g (Exists i v (ActionOr as)) = let (ics, _) = unzipAndFold (map (actionsAndConditions g) as)
-                                                        c = "Enum.any?(" ++ value g v ++ ", fn (" ++ i ++ ") ->" ++ orFold ics ++ "end\n)"
+actionsAndConditions g (Exists i v (ActionOr as)) = let ig = (i, "param"):g
+                                                        (ics, _) = unzipAndFold (map (actionsAndConditions ig) as)
+                                                        c = "Enum.any?(" ++ value ig v ++ ", fn (" ++ i ++ ") ->" ++ orFold ics ++ "end\n)"
                                                     in ([c], [decide g [Exists i v (ActionOr as)]])
 
--- (ACT)
+-- (TRA)
 actionsAndConditions g a = ([], [action g a])
 
 decide :: Context -> [Action] -> ElixirCode
@@ -119,7 +125,7 @@ predicate g (Gte v1 v2) = value g v1 ++ " >= " ++ value g v2
 predicate g (Lte v1 v2) = value g v1 ++ " <= " ++ value g v2
 
 -- [new] (PRED-CALL)
-predicate g (ConditionCall i ps) = call (i ++ "Condition") ("variables":ps)
+predicate g (ConditionCall i ps) = call (i ++ "Condition") ("variables":map (value g) ps)
 
 -- (PRED-IN)
 predicate g (RecordBelonging v1 v2) = "Enum.member?(" ++ value g v2 ++ ", " ++ value g v1 ++ ")"
@@ -131,11 +137,9 @@ predicate g (RecordNotBelonging v1 v2) = "not " ++ predicate g (RecordBelonging 
 predicate g (Not p) = "not " ++ predicate g p
 
 -- [new] (PRED-AND)
-predicate g (And []) = "True"
 predicate g (And ps) =  intercalate " and " (map (predicate g) ps)
 
 -- [new] (PRED-OR)
-predicate g (Or []) = "True"
 predicate g (Or ps) =  intercalate " or " (map (predicate g) ps)
 
 -- [new] (PRED-ALL)
@@ -154,23 +158,24 @@ initialState g (Condition (Equality (Arith (Ref i)) v)) = "%{ " ++ snake i ++ ":
 initialState _ p = error("Init condition ambiguous: " ++ show p)
 
 -- Comment extraction
-ini g (Definition _ _ doc a) = comment doc ++ initialState g a
+ini g (ActionDefinition _ _ doc a) = comment doc ++ initialState g a
 
 
 {-- \vdash_next --}
 next :: Context -> Definition -> ElixirCode
 
 -- (NEXT)
-next g (Definition _ _ doc a) = let (_, actions) = actionsAndConditions g a
+next g (ActionDefinition _ _ doc a) = let (_, actions) = actionsAndConditions g a
                                 in funDoc doc ++ "def main(variables) do\n" ++ ident (logState ++ "main(" ++ (aFold actions)) ++ ")\nend\n"
 
 
 {-- \vdash_i -}
 actionInfo :: Context -> Action -> ElixirCode
 -- (INFO-EX)
-actionInfo g (Exists i v (ActionOr as)) = let l = map (actionInfo g) as
+actionInfo g (Exists i v (ActionOr as)) = let ig = (i, "param"):g
+                                              l = map (actionInfo ig) as
                                               s = intercalate ",\n" l
-                                          in "Enum.map(" ++ value g v ++ ", fn (" ++ i ++ ") -> [\n" ++ ident s ++ "\n] end\n)"
+                                          in "Enum.map(" ++ value ig v ++ ", fn (" ++ i ++ ") -> [\n" ++ ident s ++ "\n] end\n)"
 
 -- (INFO-DEF)
 actionInfo g a = let (cs, as) = actionsAndConditions g a
@@ -209,10 +214,16 @@ value g (Record rs) = let (literals, generations) = partition isLiteral rs
 -- (REC-EXCEPT)
 value g (Except i k v) = "Map.put(" ++ reference g i ++ ", " ++ k ++ ", " ++ value g v ++ ")"
 
+-- [new] (CASE)
+value g (Case ms) = "cond do\n" ++ intercalate "\n" (map (caseMatch g) ms) ++ "\nend\n"
+
 -- Others, not specified
 value g (Arith e) = expression g e
 value _ (Str s) = show s
 value g (Range n1 n2) = expression g n1 ++ ".." ++ expression g n2
+
+caseMatch g (Match p v) = predicate g p ++ " -> " ++ value g v
+caseMatch g (DefaultMatch v) = "true -> " ++ value g v
 
 mapping g ((Key i), v) = snake i ++ ": " ++ value g v
 mapping g ((All i a), v) = let ig = (i, "param"):g
@@ -220,7 +231,8 @@ mapping g ((All i a), v) = let ig = (i, "param"):g
 -- (VAL-*)
 reference g i = if elem (i, "param") g then i else 
                   if elem (i, "const") g then cnst g i else
-                    "variables[:" ++ snake i ++ "]"
+                    if elem (i, "variable") g then "variables[:" ++ snake i ++ "]" else
+                      i ++ "(variables)"
 
 cnst g i = case dropWhile (\d ->snd d /= "module") g of
               [] -> "@" ++ snake i

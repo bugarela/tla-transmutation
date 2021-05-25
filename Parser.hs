@@ -14,16 +14,16 @@ import Debug.Trace
 
 ignore = many $ thingsToIgnore
 
-thingsToIgnore = variablesDeclaration <|> theorem <|> moduleInstance <|> extends <|> divisionLine <|> do{(oneOf " \n"); return()}
+thingsToIgnore = theorem <|> moduleInstance <|> extends <|> divisionLine <|> do{(oneOf " \n"); return()}
 
 divisionLine = do try $ do {string "--"; many (char '-'); char '\n'; ignore; return()}
 
 variablesDeclaration = do try $ do string "VARIABLE"
                                    optional (char 'S')
                                    ws
-                                   identifier `sepBy` (try $ comma)
+                                   vs <- identifier `sepBy` (try $ comma)
                                    ignore
-                                   return()
+                                   return (vs)
 
 theorem = do try $ do {string "THEOREM"; ws; manyTill anyChar (char '\n'); ignore; return()}
 moduleInstance = do try $ do {string "INSTANCE"; ws; identifier; ignore; return()}
@@ -85,7 +85,7 @@ parameters = identifier `sepBy` comma
 call = do try $ do i <- identifier
                    char '('
                    ws
-                   ps <- parameters
+                   ps <- value `sepBy` comma
                    char ')'
                    ignore
                    return (i, ps)
@@ -94,18 +94,38 @@ call = do try $ do i <- identifier
                    ws
                    return (i, [])
 
+defSignature = do try $ do i <- identifier
+                           char '('
+                           ws
+                           ps <- parameters
+                           char ')'
+                           ignore
+                           return (i, ps)
+       <|>
+       do try $ do i <- identifier
+                   ws
+                   return (i, [])
 
 definition = do {c <- comment; return (Comment c)}
              <|>
              do try $ do {cs <- declaration; return (Constants cs)}
              <|>
-             do try $ do (i, ps) <- call
+             do try $ do {cs <- variablesDeclaration; return (Variables cs)}
+             <|>
+             do try $ do i <- identifier
+                         ws
+                         string "=="
+                         ws
+                         v <- value
+                         return (ValueDefinition i v)
+             <|>
+             do try $ do (i, ps) <- defSignature
                          string "=="
                          ws
                          doc <- many comment
                          a <- action
                          ignore
-                         return (Definition i ps doc a)
+                         return (ActionDefinition i ps doc a)
 
 orAction = do string "\\/"
               ws
@@ -229,6 +249,9 @@ atomPredicate = do try $ do v1 <- value
                             (i, v, p) <- inFilter
                             return (ForAll i v p)
 
+predicateConditionCall = do try $ do i <- identifier
+                                     return (ConditionCall i [])
+
 inFilter = do i <- identifier
               ws
               string "\\in"
@@ -273,6 +296,8 @@ value = do try $ do string "Cardinality("
                     ws
                     return (Cardinality s)
         <|>
+        do {c <- caseStatement; return (c)}
+        <|>
         do try $ do {n1 <- Math.number; string ".."; n2 <- Math.number; ws; return (Range n1 n2)}
         <|>
         do {r <- record; return (r)}
@@ -306,6 +331,28 @@ atomSet = do try $ do char '{'
                       return (Filtered i v p)
           <|>
           do {e <- arithmeticExpression; ws; return (Arith e)}
+
+caseMatch = do try $ do string "OTHER"
+                        ws
+                        string "->"
+                        ws
+                        v <- value
+                        ws
+                        return (DefaultMatch v)
+           <|>
+           do p <- (try $ predicate <|> predicateConditionCall)
+              ws
+              string "->"
+              ws
+              v <- value
+              ws
+              return (Match p v)
+
+caseStatement = do try $ do string "CASE"
+                            ws
+                            cs <- caseMatch `sepBy` (try $ do {ws; string "[]"; ws})
+                            ws
+                            return (Case cs)
 
 record = do try $ do char '['
                      ms <- mapping `sepBy` (try $ comma)

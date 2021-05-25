@@ -11,9 +11,9 @@
 module Math where
 
 import Control.Applicative ((<|>))
-import Control.Monad       (liftM, liftM2)
+-- import Control.Monad       (liftM, liftM2)
 import Data.Char
-import qualified Data.Map                           as M
+-- import qualified Data.Map                           as M
 import qualified Text.ParserCombinators.Parsec.Expr as P
 import qualified Text.ParserCombinators.Parsec      as P
 

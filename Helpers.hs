@@ -5,6 +5,7 @@ import Data.List.Extra
 import qualified Text.Casing as Casing -- cabal install casing
 
 import Head
+import Math
 import DocHandler
 import Snippets
 
@@ -40,7 +41,7 @@ escape' c | c `elem` regexChars = '\\' : [c]
 enclose s = "(" ++ s ++ ")"
 
 cFold :: [ElixirCode] -> ElixirCode
-cFold [] = "True"
+cFold [] = "true"
 cFold [c] = c
 cFold cs = "Enum.all?([" ++ intercalate ", " cs ++ "])"
 
@@ -54,18 +55,25 @@ aFold as = let (otherActions, actions) = partition preassignment as
            in mapMerge (initialVariables ++ otherActions)
 
 orFold :: [ElixirCode] -> ElixirCode
-orFold [] = "True"
+orFold [] = "true"
 orFold [c] = c
 orFold cs = "Enum.any?([" ++ intercalate ", " cs ++ "])"
+
+isUnchanged (Unchanged _) = True
+isUnchanged _ = False
+
+allUnchanged xs = dropWhile isUnchanged xs == []
 
 keyValue a = drop 3 (dropEnd 2 a)
 
 mapMerge [m] = m
 mapMerge (m:ms) = "Map.merge(\n  " ++ m ++ ",\n" ++ ident (mapMerge ms) ++ ")\n"
 
-preassignment as = (head as) == '(' || take 2 as == "if" || dropWhile (/= ':') as == [] || take 4 as == "Enum" || take 3 as == "Map"
+preassignment as = (head as) == '(' || take 2 as == "if" || dropWhile (/= ':') as == [] || take 4 as == "Enum" || take 3 as == "Map" || take 4 as == "List"
 
-interpolate i = "#{inspect " ++ i ++ "}"
+interpolate (Str i) = "#{inspect " ++ i ++ "}"
+interpolate (Arith (Ref i)) = "#{inspect " ++ i ++ "}"
+interpolate i = show i
 
 declaration i ps =  "def " ++ snake i ++ "(" ++ intercalate ", " ("variables": ps) ++ ") do\n"
 
@@ -84,7 +92,7 @@ mapAndJoin f ls = intercalate "\n" (map f ls)
 tabIfline [] = []
 tabIfline xs = "  " ++ xs
 
-isNamed i (Definition id _ _ _) = i == id
+isNamed i (ActionDefinition id _ _ _) = i == id
 isNamed _ _ = False
 
 partitionCondition (Condition c) = [c]
@@ -96,9 +104,12 @@ partitionCondition _ = []
 
 specialDef :: String -> String -> Definition -> Bool
 specialDef _ _ (Constants _) = True
+specialDef _ _ (Variables _) = True
 specialDef i n d = (isNamed i d) || (isNamed n d)
 
 findConstants ds = concat (map (\d -> case d of {Constants cs -> cs; _ -> [] }) ds)
+
+findVariables ds = concat (map (\d -> case d of {Variables cs -> cs; _ -> [] }) ds)
 
 findIdentifier i ds = case find (isNamed i) ds of
                         Just a -> a
