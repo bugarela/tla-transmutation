@@ -3,6 +3,8 @@ Elixir code generation from TLA+ specifications
 
 I've started to work on this for my bachelor thesis, which can be found [here](https://github.com/GabrielaMafra/bachelor-thesis) (Portuguese only).
 
+The formalization of the translation rules are available at [rules.pdf](rules.pdf)
+
 Notice that this covers only a small portion of TLA+ definitions and it is yet to be incremented with more translations. The Parser itself isn't able to recognize much. Contributions are welcome :D.
 
 ## Dependencies
