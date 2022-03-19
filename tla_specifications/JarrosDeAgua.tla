@@ -32,7 +32,9 @@ GrandeParaPequeno == IF jarro_grande + jarro_pequeno =< 3
                           /\ jarro_pequeno' = jarro_grande + jarro_pequeno
                      ELSE /\ jarro_grande'  = jarro_pequeno - (3 - jarro_grande)
                           /\ jarro_pequeno' = 3
-                          
+
+Inv == jarro_grande /= 4
+
 Next == \/ EnchePequeno 
         \/ EncheGrande    
         \/ EsvaziaPequeno 
