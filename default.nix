@@ -35,6 +35,10 @@ let
     nixpkgs.haskellPackages.hlint
     nixpkgs.haskellPackages.apply-refact
     nixpkgs.haskellPackages.hoogle
+    nixpkgs.haskellPackages.hindent
+    nixpkgs.haskellPackages.hasktags
+    nixpkgs.haskellPackages.happy
+    nixpkgs.haskellPackages.stylish-haskell
   ];
 in
 pkgs.stdenv.mkDerivation {

@@ -1,16 +1,8 @@
 module Parser where
 
-import Text.Parsec
-import Text.Parsec.Expr
-import Math -- cabal install ParserFunction
-import qualified Text.Parsec.Token as Token
-import Text.Parsec.Language
-import Data.Char
-import Head
-
-import Control.Monad.Identity (Identity)
-
-import Debug.Trace
+import           Head
+import           Math
+import           Text.Parsec
 
 ignore = many thingsToIgnore
 
@@ -21,13 +13,13 @@ divisionLine = do try $ do {string "--"; many (char '-'); char '\n'; ignore; ret
 variablesDeclaration = do try $ do string "VARIABLE"
                                    optional (char 'S')
                                    ws
-                                   vs <- identifier `sepBy` (try comma)
+                                   vs <- identifier `sepBy` try comma
                                    ignore
                                    return vs
 
 theorem = do try $ do {string "THEOREM"; ws; manyTill anyChar (char '\n'); ignore; return()}
 moduleInstance = do try $ do {string "INSTANCE"; ws; identifier; ignore; return()}
-extends = do try $ do {string "EXTENDS"; ws; identifier `sepBy` (try comma); ignore; return()}
+extends = do try $ do {string "EXTENDS"; ws; identifier `sepBy` try comma; ignore; return()}
 
 identifier = many1 (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
 constant = do try $ do c <- oneOf ['A'..'Z']
@@ -43,6 +35,8 @@ parseFile a = do f <- readFile a
                  let e = parse specification "Error:" f
                  -- let e = parse arithmeticExpression "Error:" (f)
                  return e
+
+parseState s = parse action ("Error parsing" ++ s ++ ":") s
 
 specification = do (n, d) <- moduleHeader
                    ws
@@ -76,7 +70,7 @@ comment = do try $ do string "(*"
 declaration = do try $ do string "CONSTANT"
                           optional (char 'S')
                           ws
-                          cs <- constant `sepBy` (try comma)
+                          cs <- constant `sepBy` try comma
                           ignore
                           return cs
 
@@ -286,30 +280,30 @@ value = do try $ do string "Cardinality("
                     ws
                     return (Cardinality s)
         <|>
-        do {c <- caseStatement; return c}
+        do {caseStatement;}
         <|>
         do try $ do {n1 <- Math.number; string ".."; n2 <- Math.number; ws; return (Range n1 n2)}
         <|>
-        do {r <- record; return r}
+        do {record;}
         <|>
         do try $ do {i <- identifier; char '['; k <- identifier; char ']'; ws; return (Index (Arith (Ref i)) (Arith (Ref k)))}
         <|>
         do try $ do {i <- identifier; char '['; k <- literal; char ']'; ws; return (Index (Arith (Ref i)) k)}
         <|>
-        do {s <- set; return s}
+        do {set;}
         <|>
         do try $ do {n1 <- Math.number; string ".."; n2 <- Math.number; ws; return (Range n1 n2)}
         <|>
         do try $ do {e <- arithmeticExpression; ws; return (Arith e)}
         <|>
-        do {l <- literal; return l}
+        do {literal;}
 
 set = do try $ do {s1 <- atomSet; string "\\cup"; ws; s2 <- set; ws; return (Union s1 s2)}
       <|>
       atomSet
 
 atomSet = do try $ do char '{'
-                      vs <- value `sepBy` (try comma)
+                      vs <- value `sepBy` try comma
                       char '}'
                       ws
                       return (Set vs)
@@ -345,7 +339,7 @@ caseStatement = do try $ do string "CASE"
                             return (Case cs)
 
 record = do try $ do char '['
-                     ms <- mapping `sepBy` (try comma)
+                     ms <- mapping `sepBy` try comma
                      char ']'
                      ws
                      return (Record ms)
