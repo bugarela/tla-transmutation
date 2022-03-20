@@ -23,6 +23,8 @@ let
   haskellDeps = ps: with ps; [
     base
     aeson
+    casing
+    extra
   ];
 
   ghc = haskellPackages.ghcWithPackages haskellDeps;
