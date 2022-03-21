@@ -303,6 +303,7 @@ set = do try $ do {s1 <- atomSet; string "\\cup"; ws; s2 <- set; ws; return (Uni
       atomSet
 
 atomSet = do try $ do char '{'
+                      ws
                       vs <- value `sepBy` try comma
                       char '}'
                       ws

@@ -15,10 +15,8 @@ defmodule TwoPhaseCommit do
    to abort.
   *************************************************************************
   """
-  require Oracle
-  @oracle spawn(Oracle, :start, [])
 
-  @rm "<value for RM>"
+  @rm MapSet.new(["r1", "r2"])
   def rm, do: @rm
 
 
@@ -65,7 +63,7 @@ defmodule TwoPhaseCommit do
   ***********************************************************************
   """
   def tm_rcv_prepared_condition(variables, r) do
-    variables[:tm_state] == "init" and Enum.member?(variables[:msgs], %{ type: "Prepared", rm: r })
+    Enum.all?([variables[:tm_state] == "init", Enum.member?(variables[:msgs], %{ type: "Prepared", rm: r })])
   end
 
   def tm_rcv_prepared(variables, r) do
@@ -85,7 +83,7 @@ defmodule TwoPhaseCommit do
   ***********************************************************************
   """
   def tm_commit_condition(variables) do
-    variables[:tm_state] == "init" and variables[:tm_prepared] == @rm
+    Enum.all?([variables[:tm_state] == "init", variables[:tm_prepared] == @rm])
   end
 
   def tm_commit(variables) do
@@ -222,11 +220,7 @@ defmodule TwoPhaseCommit do
   #  RMs, a configuration with 50816 reachable states, in a little over a
   #  minute on a 1 GHz PC.
   # *************************************************************************
-  def main(variables) do
-    IO.puts (inspect variables)
-
-    main(
-      decide_action(
+  def next(variables) do
         List.flatten([
           %{ action: "TMCommit()", condition: tm_commit_condition(variables), state: tm_commit(variables) },
           %{ action: "TMAbort()", condition: tm_abort_condition(variables), state: tm_abort(variables) },
@@ -239,37 +233,34 @@ defmodule TwoPhaseCommit do
           ] end
           )
         ])
-      )
-    )
+        end
+
+  def main(variables) do
+    IO.puts(inspect(variables))
+
+    actions = next(variables)
+
+    decide_action(actions)
   end
 
   def decide_action(actions) do
     possible_actions = Enum.filter(actions, fn(action) -> action[:condition] end)
     different_states = Enum.uniq_by(possible_actions, fn(action) -> action[:state] end)
 
-    if Enum.count(different_states) == 1 do
-      Enum.at(possible_actions, 0)[:state]
-    else
-      actions_names = Enum.map(possible_actions, fn(action) -> action[:action] end)
-      send @oracle, {self(), actions_names}
+    cond do
+      Enum.count(different_states) == 1 ->
+        Enum.at(possible_actions, 0)[:state]
+      Enum.empty?(different_states) ->
+        %{}
+      true ->
+        actions_names = Enum.map(possible_actions, fn(action) -> action[:action] end)
+        send @oracle, {self(), actions_names}
 
-      n = receive do
-        {:ok, n} -> n
-      end
+        n = receive do
+          {:ok, n} -> n
+        end
 
-      Enum.at(possible_actions, n)[:state]
+        Enum.at(possible_actions, n)[:state]
     end
   end
 end
-
-TwoPhaseCommit.main(
-  # ***********************************************************************
-  #  The initial predicate.
-  # ***********************************************************************
-  %{
-    rm_state: TwoPhaseCommit.rm |> Enum.map(fn (r) -> {r, "working"} end) |> Enum.into(%{  }),
-    tm_state: "init",
-    tm_prepared: MapSet.new([]),
-    msgs: MapSet.new([])
-  }
-)

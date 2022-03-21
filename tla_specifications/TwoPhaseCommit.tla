@@ -33,7 +33,7 @@ VARIABLES
     (* particular protocol, that's not a problem.                          *)
     (***********************************************************************)
 
-(* Messages == *)
+Messages ==
   (*************************************************************************)
   (* The set of all possible messages.  Messages of type "Prepared" are    *)
   (* sent from the RM indicated by the message's rm field to the TM.       *)
@@ -41,16 +41,16 @@ VARIABLES
   (* received by all RMs.  The set msgs contains just a single copy of     *)
   (* such a message.                                                       *)
   (*************************************************************************)
-  (* [type : {"Prepared"}, rm : RM]  \cup  [type : {"Commit", "Abort"}] *)
+  [type : {"Prepared"}, rm : RM]  \cup  [type : {"Commit", "Abort"}]
 
-(* TPTypeOK == *)
+TPTypeOK ==
   (*************************************************************************)
   (* The type-correctness invariant                                        *)
   (*************************************************************************)
-  (* /\ rmState \in [RM -> {"working", "prepared", "committed", "aborted"}] *)
-  (* /\ tmState \in {"init", "done"} *)
-  (* /\ tmPrepared \subseteq RM *)
-  (* /\ msgs \subseteq Messages *)
+  /\ rmState \in [RM -> {"working", "prepared", "committed", "aborted"}]
+  /\ tmState \in {"init", "done"}
+  /\ tmPrepared \subseteq RM
+  /\ msgs \subseteq Messages
 
 TPInit ==
   (*************************************************************************)
@@ -143,7 +143,7 @@ TPNext ==
 (* will be explained in Video Lecture 8.                                   *)
 (***************************************************************************)
 
-(* TPSpec == TPInit /\ [][TPNext]_<<rmState, tmState, tmPrepared, msgs>> *)
+TPSpec == TPInit /\ [][TPNext]_<<rmState, tmState, tmPrepared, msgs>>
   (*************************************************************************)
   (* The complete spec of the Two-Phase Commit protocol.                   *)
   (*************************************************************************)

@@ -1,19 +1,19 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+import System.Environment
 import Data.Aeson
 import Data.List
 import GHC.Generics
 import qualified Data.ByteString.Lazy as B
 
+import Head
 import Parser
 import Elixir
+import Helpers
 
-jsonFile :: FilePath
-jsonFile = "tla_specifications/states.json"
-
-getJSON :: IO B.ByteString
-getJSON = B.readFile jsonFile
+getJSON :: FilePath -> IO B.ByteString
+getJSON = B.readFile
 
 data Graph = Graph { nodes :: [Node], edges :: [Edge] } deriving (Show, Generic)
 data Node = Node { nodeId :: Integer, label :: String } deriving (Show, Generic)
@@ -35,18 +35,31 @@ instance FromJSON Edge where
          <*> v .: "head"
 
 
-genTests :: Graph -> Either String String
-genTests Graph{nodes=ns, edges=es} = case traverse (testForNode (Graph ns es)) ns of
-                                         Right ts -> Right (intercalate "\n" ts)
-                                         Left e -> Left e
+genTests :: String -> Graph -> Either String String
+genTests m Graph{nodes=ns, edges=es} = case traverse (testForNode m (Graph ns es)) ns of
+                                           Right ts -> Right (header m ++ intercalate "\n" ts ++ "\nend")
+                                           Left e -> Left e
 
-testForNode :: Graph -> Node -> Either String String
-testForNode g Node{nodeId=i, label=l} = do vs <- toMap Node{nodeId=i, label=l}
-                                           ss <- statesFromId g i >>= traverse toMap
-                                           return ("variables = " ++ vs ++ "\n expectedStates = [" ++ intercalate "\n" ss ++ "]")
+testForNode :: String -> Graph -> Node -> Either String String
+testForNode m g Node{nodeId=i, label=l} = do vs <- toMap Node{nodeId=i, label=l}
+                                             ss <- statesFromId g i >>= traverse toMap
+                                             return (unlines [
+                                                        "test \"fromState " ++ show i ++ "\" do",
+                                                        "  variables = " ++ vs,
+                                                        "",
+                                                        "  expectedStates = [" ++ intercalate ",\n" ss ++ "]",
+                                                        "",
+                                                        "  actions = " ++ m ++ ".next(variables)",
+                                                        "  states = Enum.map(actions, fn action -> action[:state] end)",
+                                                        "",
+                                                        "  assert Enum.sort(Enum.uniq(states)) == Enum.sort(Enum.uniq(expectedStates))",
+                                                        "  assert Enum.all?(actions, fn action -> Enum.member?(expectedStates, action[:state]) end)",
+                                                        "  assert Enum.all?(expectedStates, fn s -> Enum.member?(states, s) end)",
+                                                        "end"
+                                                        ])
 
 statesFromId :: Graph -> Integer -> Either String [Node]
-statesFromId Graph{nodes=ns, edges=es} i = let edgesFromId = filter (\Edge{nodeFrom=f, nodeTo=_} -> f == i) es
+statesFromId Graph{nodes=ns, edges=es} i = let edgesFromId = filter (\Edge{nodeFrom=f, nodeTo=t} -> f == i) es
                                                nodesIdsFromId = map (\Edge{nodeFrom=_, nodeTo=t} -> t) edgesFromId
                                             in traverse (findNode ns) nodesIdsFromId
 
@@ -65,11 +78,20 @@ unescape [] = []
 unescape [s] = [s]
 unescape(c1:c2:cs) = if c1 == '\\' && (c2 == '\\' || c2 == 'n') then (if c2 == 'n' then unescape cs else unescape (c2:cs)) else c1:unescape (c2:cs)
 
+header :: String -> String
+header m = unlines [
+  "defmodule " ++ m ++ "Test do",
+  "  use ExUnit.Case",
+  "  doctest " ++ m
+  ]
+
 main :: IO ()
 main = do
- d <- (eitherDecode <$> getJSON) :: IO (Either String Graph)
+ (moduleName:file:_) <- getArgs
+ d <- (eitherDecode <$> getJSON file) :: IO (Either String Graph)
  case d of
   Left err -> putStrLn err
-  Right ps -> case genTests ps of
+  Right ps -> case genTests moduleName ps of
     Left err -> putStrLn err
-    Right s -> putStrLn s
+    Right s -> let f = "elixir/test/generated_code/" ++ snake moduleName ++ "_test.exs"
+               in writeFile f s
