@@ -53,8 +53,6 @@ testForNode m g Node{nodeId=i, label=l} = do vs <- toMap Node{nodeId=i, label=l}
                                                         "  states = Enum.map(actions, fn action -> action[:state] end)",
                                                         "",
                                                         "  assert Enum.sort(Enum.uniq(states)) == Enum.sort(Enum.uniq(expectedStates))",
-                                                        "  assert Enum.all?(actions, fn action -> Enum.member?(expectedStates, action[:state]) end)",
-                                                        "  assert Enum.all?(expectedStates, fn s -> Enum.member?(states, s) end)",
                                                         "end"
                                                         ])
 

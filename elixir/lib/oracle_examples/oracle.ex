@@ -7,18 +7,18 @@ defmodule Oracle do
   end
 
   def listen do
-    IO.puts "Oracle at [#{inspect self()}] is listening"
+    IO.puts("Oracle at [#{inspect(self())}] is listening")
 
     receive do
-      {p, as} -> send p, {:ok, input_option(as)}
+      {:choose, p, _, as} -> send(p, {:ok, input_option(as)})
     end
 
     listen()
   end
 
   def input_option(actions) do
-    enumerated_actions = actions |> Enum.with_index |> Enum.map(fn({x, i}) -> "#{i} => #{x}" end)
-    IO.puts (inspect enumerated_actions)
+    enumerated_actions = actions |> Enum.with_index() |> Enum.map(fn {x, i} -> "#{i} => #{x}" end)
+    IO.puts(inspect(enumerated_actions))
 
     receive do
       {:choice, i} -> i
@@ -28,7 +28,7 @@ defmodule Oracle do
   def read do
     {i, _} = Integer.parse(IO.gets("Next Action: "))
 
-    send :global.whereis_name("oracle"), {:choice, i}
+    send(:global.whereis_name("oracle"), {:choice, i})
 
     read()
   end

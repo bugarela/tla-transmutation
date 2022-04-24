@@ -129,30 +129,38 @@ defmodule JarrosDeAgua do
     ])
   end
 
-  def main(variables) do
+  def main(oracle, variables, step) do
     IO.puts(inspect(variables))
 
     actions = next(variables)
 
-    decide_action(actions)
+    next_variables = decide_action(oracle, actions, step)
+    send(oracle, {:notify, step, variables, next_variables})
+
+    main(oracle, next_variables, step + 1)
   end
 
-  def decide_action(actions) do
+  def decide_action(oracle, actions, step) do
     possible_actions = Enum.filter(actions, fn action -> action[:condition] end)
     different_states = Enum.uniq_by(possible_actions, fn action -> action[:state] end)
 
-    if Enum.count(different_states) == 1 do
-      Enum.at(possible_actions, 0)[:state]
-    else
-      actions_names = Enum.map(possible_actions, fn action -> action[:action] end)
-      send(@oracle, {self(), actions_names})
+    cond do
+      Enum.count(different_states) == 1 -> Enum.at(possible_actions, 0)[:state]
+      Enum.count(different_states) == 0 ->
+        IO.puts("DEADLOCK")
+        exit(0)
+      true ->
+        # actions_names = Enum.map(possible_actions, fn action -> action[:action] end)
+        IO.inspect(different_states)
+        send(oracle, {:choose, self(), step, possible_actions})
 
-      n =
-        receive do
+        n =
+          receive do
           {:ok, n} -> n
+          {:stop} -> exit(0)
         end
 
-      Enum.at(possible_actions, n)[:state]
+        Enum.at(possible_actions, n)[:state]
     end
   end
 end

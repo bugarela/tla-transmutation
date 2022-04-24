@@ -36,7 +36,16 @@ parseFile a = do f <- readFile a
                  -- let e = parse arithmeticExpression "Error:" (f)
                  return e
 
-parseState s = parse action ("Error parsing" ++ s ++ ":") s
+parseState s = parse action ("Error parsing " ++ s ++ ":") s
+
+parseTrace t = parse trace ("Error parsing " ++ t ++ ":") t
+
+trace = many1 $ do string "State "
+                   _ <- many digit
+                   a <- action
+                   ignore
+                   return a
+
 
 specification = do (n, d) <- moduleHeader
                    ws
