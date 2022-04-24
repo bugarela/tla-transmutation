@@ -42,6 +42,9 @@ parseTrace t = parse trace ("Error parsing " ++ t ++ ":") t
 
 trace = many1 $ do string "State "
                    _ <- many digit
+                   string ": <"
+                   _ <- manyTill anyChar (try (char '>'))
+                   ignore
                    a <- action
                    ignore
                    return a
