@@ -34,14 +34,25 @@ data Predicate = Equality Value Value | Inequality Value Value
                | RecordNotBelonging Value Value
                | And [Predicate]
                | Or [Predicate]
-               | ForAll Identifier Value Predicate
                | Not Predicate
-               | ConditionCall Identifier [Value] deriving(Show, Eq)
+               | ConditionCall Identifier [Value]
+               | PExists Identifier Value Predicate
+               | PForAll Identifier Value Predicate
+               deriving(Show, Eq)
 
 data Action = Condition Predicate | Value Value | Primed Identifier Value | Unchanged [Identifier] | ActionNot Action
             | ActionAnd [Action] | ActionOr [Action] | ActionCall Identifier [Value]
-            | If Predicate Action Action | Exists Identifier Value Action deriving(Show, Eq)
+            | If Predicate Action Action | Exists Identifier Value Action | ForAll Identifier Value Action deriving(Show, Eq)
 
-data Value = Set [Value] | FunSet Value Value | SetTimes Value Value | Union Value Value | Filtered Identifier Value Predicate | Cardinality Value
-           | Record [(Key, Value)] | Except Identifier Identifier Value | Case [CaseMatch]
-           | Str String | Boolean Bool | FullSet String | Arith Expr | Index Value Value | Range Expr Expr deriving(Show, Eq)
+data Value = Set [Value] | Tuple [Value] | FunSet Value Value | SetTimes Value Value | Union Value Value | Filtered Identifier Value Predicate | Cardinality Value
+           | Record [(Key, Value)] | Except Identifier [(Value, Value)] | Case [CaseMatch] | Domain Value
+           | Str String | Boolean Bool | FullSet String | Arith Expr | Index Value Value | Range Expr Expr
+           | Num Integer
+           | Ref String
+           | Neg Value
+           | Add Value Value
+           | Sub Value Value
+           | Mul Value Value
+           | Div Value Value
+           | Mod Value Value
+           deriving (Show, Eq)
