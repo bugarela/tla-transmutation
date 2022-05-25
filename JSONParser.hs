@@ -1,5 +1,8 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TupleSections #-}
+
+module JSONParser where
 
 import qualified Head as H
 import Data.Aeson
@@ -11,9 +14,6 @@ type Kind = String
 
 jsonFile :: FilePath
 jsonFile = "tla_specifications/TokenTransfer2.json"
-
-getJSON :: IO B.ByteString
-getJSON = B.readFile jsonFile
 
 data Spec = Spec [Module] deriving (Show,Generic)
 
@@ -59,8 +59,8 @@ instance FromJSON Expression where
                                                            <*> obj .:? "name"
                                                            <*> obj .:? "value"
 
-convertSpec :: Spec -> Either String H.Spec
-convertSpec (Spec [Module i ds]) = fmap (H.Spec (H.Module i []) i i) (mapM convertDefinitions ds)
+convertSpec :: Spec -> Either String (H.Module, [H.Definition])
+convertSpec (Spec [Module i ds]) = fmap (H.Module i [],) (mapM convertDefinitions ds)
 
 convertDefinitions :: Declaration -> Either String H.Definition
 convertDefinitions (Declaration k n body) = case body of
@@ -129,7 +129,7 @@ convertValue (Expression k o as i v) = case k of
                                          _ -> Left ("Unknown value kind " ++ k)
 
 actionOperators :: [String]
-actionOperators = ["PRIME"]
+actionOperators = ["PRIME", "UNCHANGED"]
 
 convertPredicate :: Expression -> Either String H.Predicate
 convertPredicate (Expression k o as i v) = case k of
@@ -186,11 +186,15 @@ isPredicate (Expression k o as i v) = case o of
                                                          Nothing -> True
                                         Nothing -> True
 
-main :: IO ()
-main = do
- d <- (eitherDecode <$> getJSON) :: IO (Either String Spec)
- case d of
-  Left err -> putStrLn err
-  Right ps -> case convertSpec ps of
-    Left err -> putStrLn ("Error: " ++ err ++ show ps)
-    Right a -> print a
+parseJson :: FilePath -> IO (Either String (H.Module, [H.Definition]))
+parseJson file = do content <- B.readFile file
+                    return ((eitherDecode content :: Either String Spec) >>= convertSpec)
+
+-- main :: IO ()
+-- main = do
+--  d <- eitherDecode <$> B.readFile jsonFile
+--  case d of
+--   Left err -> putStrLn err
+--   Right ps -> case convertSpec ps of
+--     Left err -> putStrLn ("Error: " ++ err ++ show ps)
+--     Right a -> print a

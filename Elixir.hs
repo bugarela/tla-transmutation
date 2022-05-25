@@ -114,6 +114,10 @@ action g (Primed i v) = "%{ " ++ snake i ++ ": " ++ value g v ++ " }"
 action _ (Unchanged is) =  let u = \i -> snake i ++ ": variables[:" ++ snake i ++ "]"
                            in "%{ " ++ intercalate ",\n" (map u is) ++ " }"
 
+-- [new] needs testing
+action g (Value v) = value g v
+
+action _ a = error(show a)
 {-- \vdash_p --}
 predicate :: Context -> Predicate -> ElixirCode
 
@@ -223,6 +227,7 @@ value g (Case ms) = "cond do\n" ++ intercalate "\n" (map (caseMatch g) ms) ++ "\
 value g (Arith e) = expression g e
 value _ (Str s) = show s
 value g (Range n1 n2) = expression g n1 ++ ".." ++ expression g n2
+value _ (Boolean b) = if b then "true" else "false"
 
 caseMatch g (Match p v) = predicate g p ++ " -> " ++ value g v
 caseMatch g (DefaultMatch v) = "true -> " ++ value g v

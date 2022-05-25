@@ -1,0 +1,2009 @@
+{
+  "name": "ApalacheIR",
+  "version": "1.0",
+  "description": "https://apalache.informal.systems/docs/adr/005adr-json.html",
+  "modules": [
+    {
+      "kind": "TlaModule",
+      "name": "TokenTransfer2",
+      "declarations": [
+        {
+          "source": {
+            "filename": "TokenTransfer2",
+            "from": {
+              "line": 20,
+              "column": 5
+            },
+            "to": {
+              "line": 20,
+              "column": 12
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaConstDecl",
+          "name": "ACCOUNTS"
+        },
+        {
+          "source": {
+            "filename": "TokenTransfer2",
+            "from": {
+              "line": 17,
+              "column": 5
+            },
+            "to": {
+              "line": 17,
+              "column": 10
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaConstDecl",
+          "name": "CHAINS"
+        },
+        {
+          "source": {
+            "filename": "TokenTransfer2",
+            "from": {
+              "line": 25,
+              "column": 5
+            },
+            "to": {
+              "line": 25,
+              "column": 9
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaVarDecl",
+          "name": "banks"
+        },
+        {
+          "source": {
+            "filename": "typedefs",
+            "from": {
+              "line": 16,
+              "column": 1
+            },
+            "to": {
+              "line": 16,
+              "column": 25
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaOperDecl",
+          "name": "typedefs_included",
+          "formalParams": [
+            
+          ],
+          "isRecursive": false,
+          "body": {
+            "source": {
+              "filename": "typedefs",
+              "from": {
+                "line": 16,
+                "column": 22
+              },
+              "to": {
+                "line": 16,
+                "column": 25
+              }
+            },
+            "type": "Untyped",
+            "kind": "ValEx",
+            "value": {
+              "kind": "TlaBool",
+              "value": true
+            }
+          }
+        },
+        {
+          "source": {
+            "filename": "TokenTransfer2",
+            "from": {
+              "line": 28,
+              "column": 1
+            },
+            "to": {
+              "line": 32,
+              "column": 20
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaOperDecl",
+          "name": "Init",
+          "formalParams": [
+            
+          ],
+          "isRecursive": false,
+          "body": {
+            "source": {
+              "filename": "TokenTransfer2",
+              "from": {
+                "line": 29,
+                "column": 5
+              },
+              "to": {
+                "line": 32,
+                "column": 20
+              }
+            },
+            "type": "Untyped",
+            "kind": "OperEx",
+            "oper": "EXISTS3",
+            "args": [
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 29,
+                    "column": 5
+                  },
+                  "to": {
+                    "line": 32,
+                    "column": 20
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "b"
+              },
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 29,
+                    "column": 14
+                  },
+                  "to": {
+                    "line": 29,
+                    "column": 42
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "FUN_SET",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 29,
+                        "column": 16
+                      },
+                      "to": {
+                        "line": 29,
+                        "column": 33
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "SET_TIMES",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 29,
+                            "column": 16
+                          },
+                          "to": {
+                            "line": 29,
+                            "column": 21
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "CHAINS"
+                      },
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 29,
+                            "column": 26
+                          },
+                          "to": {
+                            "line": 29,
+                            "column": 33
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "ACCOUNTS"
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 29,
+                        "column": 38
+                      },
+                      "to": {
+                        "line": 29,
+                        "column": 40
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "ValEx",
+                    "value": {
+                      "kind": "TlaNatSet"
+                    }
+                  }
+                ]
+              },
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 30,
+                    "column": 9
+                  },
+                  "to": {
+                    "line": 32,
+                    "column": 20
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "AND",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 30,
+                        "column": 12
+                      },
+                      "to": {
+                        "line": 31,
+                        "column": 32
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "FORALL3",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 30,
+                            "column": 12
+                          },
+                          "to": {
+                            "line": 31,
+                            "column": 32
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "c"
+                      },
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 30,
+                            "column": 21
+                          },
+                          "to": {
+                            "line": 30,
+                            "column": 26
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "CHAINS"
+                      },
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 31,
+                            "column": 14
+                          },
+                          "to": {
+                            "line": 31,
+                            "column": 32
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "GT",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 31,
+                                "column": 14
+                              },
+                              "to": {
+                                "line": 31,
+                                "column": 28
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "OperEx",
+                            "oper": "FUN_APP",
+                            "args": [
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 31,
+                                    "column": 14
+                                  },
+                                  "to": {
+                                    "line": 31,
+                                    "column": 14
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "b"
+                              },
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 31,
+                                    "column": 14
+                                  },
+                                  "to": {
+                                    "line": 31,
+                                    "column": 28
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "OperEx",
+                                "oper": "TUPLE",
+                                "args": [
+                                  {
+                                    "source": {
+                                      "filename": "TokenTransfer2",
+                                      "from": {
+                                        "line": 31,
+                                        "column": 16
+                                      },
+                                      "to": {
+                                        "line": 31,
+                                        "column": 16
+                                      }
+                                    },
+                                    "type": "Untyped",
+                                    "kind": "NameEx",
+                                    "name": "c"
+                                  },
+                                  {
+                                    "source": {
+                                      "filename": "TokenTransfer2",
+                                      "from": {
+                                        "line": 31,
+                                        "column": 19
+                                      },
+                                      "to": {
+                                        "line": 31,
+                                        "column": 27
+                                      }
+                                    },
+                                    "type": "Untyped",
+                                    "kind": "ValEx",
+                                    "value": {
+                                      "kind": "TlaStr",
+                                      "value": "reserve"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 31,
+                                "column": 32
+                              },
+                              "to": {
+                                "line": 31,
+                                "column": 32
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "ValEx",
+                            "value": {
+                              "kind": "TlaInt",
+                              "value": 0
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 32,
+                        "column": 12
+                      },
+                      "to": {
+                        "line": 32,
+                        "column": 20
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "EQ",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 32,
+                            "column": 12
+                          },
+                          "to": {
+                            "line": 32,
+                            "column": 16
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "banks"
+                      },
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 32,
+                            "column": 20
+                          },
+                          "to": {
+                            "line": 32,
+                            "column": 20
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "b"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "source": {
+            "filename": "TokenTransfer2",
+            "from": {
+              "line": 35,
+              "column": 1
+            },
+            "to": {
+              "line": 42,
+              "column": 9
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaOperDecl",
+          "name": "LocalTransfer",
+          "formalParams": [
+            {
+              "kind": "OperParam",
+              "name": "chain",
+              "arity": 0
+            },
+            {
+              "kind": "OperParam",
+              "name": "from",
+              "arity": 0
+            },
+            {
+              "kind": "OperParam",
+              "name": "to",
+              "arity": 0
+            },
+            {
+              "kind": "OperParam",
+              "name": "amount",
+              "arity": 0
+            }
+          ],
+          "isRecursive": false,
+          "body": {
+            "source": {
+              "filename": "TokenTransfer2",
+              "from": {
+                "line": 36,
+                "column": 5
+              },
+              "to": {
+                "line": 42,
+                "column": 9
+              }
+            },
+            "type": "Untyped",
+            "kind": "OperEx",
+            "oper": "AND",
+            "args": [
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 36,
+                    "column": 8
+                  },
+                  "to": {
+                    "line": 36,
+                    "column": 35
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "GE",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 36,
+                        "column": 8
+                      },
+                      "to": {
+                        "line": 36,
+                        "column": 25
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "FUN_APP",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 36,
+                            "column": 8
+                          },
+                          "to": {
+                            "line": 36,
+                            "column": 12
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "banks"
+                      },
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 36,
+                            "column": 8
+                          },
+                          "to": {
+                            "line": 36,
+                            "column": 25
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "TUPLE",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 36,
+                                "column": 14
+                              },
+                              "to": {
+                                "line": 36,
+                                "column": 18
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "chain"
+                          },
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 36,
+                                "column": 21
+                              },
+                              "to": {
+                                "line": 36,
+                                "column": 24
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "from"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 36,
+                        "column": 30
+                      },
+                      "to": {
+                        "line": 36,
+                        "column": 35
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "NameEx",
+                    "name": "amount"
+                  }
+                ]
+              },
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 37,
+                    "column": 8
+                  },
+                  "to": {
+                    "line": 37,
+                    "column": 17
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "NE",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 37,
+                        "column": 8
+                      },
+                      "to": {
+                        "line": 37,
+                        "column": 11
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "NameEx",
+                    "name": "from"
+                  },
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 37,
+                        "column": 16
+                      },
+                      "to": {
+                        "line": 37,
+                        "column": 17
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "NameEx",
+                    "name": "to"
+                  }
+                ]
+              },
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 38,
+                    "column": 8
+                  },
+                  "to": {
+                    "line": 38,
+                    "column": 39
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "GE",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 38,
+                        "column": 8
+                      },
+                      "to": {
+                        "line": 38,
+                        "column": 34
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "MINUS",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 38,
+                            "column": 8
+                          },
+                          "to": {
+                            "line": 38,
+                            "column": 25
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "FUN_APP",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 38,
+                                "column": 8
+                              },
+                              "to": {
+                                "line": 38,
+                                "column": 12
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "banks"
+                          },
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 38,
+                                "column": 8
+                              },
+                              "to": {
+                                "line": 38,
+                                "column": 25
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "OperEx",
+                            "oper": "TUPLE",
+                            "args": [
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 38,
+                                    "column": 14
+                                  },
+                                  "to": {
+                                    "line": 38,
+                                    "column": 18
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "chain"
+                              },
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 38,
+                                    "column": 21
+                                  },
+                                  "to": {
+                                    "line": 38,
+                                    "column": 24
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "from"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 38,
+                            "column": 29
+                          },
+                          "to": {
+                            "line": 38,
+                            "column": 34
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "amount"
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 38,
+                        "column": 39
+                      },
+                      "to": {
+                        "line": 38,
+                        "column": 39
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "ValEx",
+                    "value": {
+                      "kind": "TlaInt",
+                      "value": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 39,
+                    "column": 8
+                  },
+                  "to": {
+                    "line": 42,
+                    "column": 9
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "EQ",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 39,
+                        "column": 8
+                      },
+                      "to": {
+                        "line": 39,
+                        "column": 13
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "PRIME",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 39,
+                            "column": 8
+                          },
+                          "to": {
+                            "line": 39,
+                            "column": 12
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "banks"
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 39,
+                        "column": 17
+                      },
+                      "to": {
+                        "line": 42,
+                        "column": 9
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "EXCEPT",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 39,
+                            "column": 18
+                          },
+                          "to": {
+                            "line": 39,
+                            "column": 22
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "banks"
+                      },
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 40,
+                            "column": 13
+                          },
+                          "to": {
+                            "line": 40,
+                            "column": 56
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "TUPLE",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 40,
+                                "column": 14
+                              },
+                              "to": {
+                                "line": 40,
+                                "column": 26
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "OperEx",
+                            "oper": "TUPLE",
+                            "args": [
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 40,
+                                    "column": 15
+                                  },
+                                  "to": {
+                                    "line": 40,
+                                    "column": 19
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "chain"
+                              },
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 40,
+                                    "column": 22
+                                  },
+                                  "to": {
+                                    "line": 40,
+                                    "column": 25
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "from"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 40,
+                            "column": 30
+                          },
+                          "to": {
+                            "line": 40,
+                            "column": 56
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "MINUS",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 40,
+                                "column": 30
+                              },
+                              "to": {
+                                "line": 40,
+                                "column": 47
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "OperEx",
+                            "oper": "FUN_APP",
+                            "args": [
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 40,
+                                    "column": 30
+                                  },
+                                  "to": {
+                                    "line": 40,
+                                    "column": 34
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "banks"
+                              },
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 40,
+                                    "column": 30
+                                  },
+                                  "to": {
+                                    "line": 40,
+                                    "column": 47
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "OperEx",
+                                "oper": "TUPLE",
+                                "args": [
+                                  {
+                                    "source": {
+                                      "filename": "TokenTransfer2",
+                                      "from": {
+                                        "line": 40,
+                                        "column": 36
+                                      },
+                                      "to": {
+                                        "line": 40,
+                                        "column": 40
+                                      }
+                                    },
+                                    "type": "Untyped",
+                                    "kind": "NameEx",
+                                    "name": "chain"
+                                  },
+                                  {
+                                    "source": {
+                                      "filename": "TokenTransfer2",
+                                      "from": {
+                                        "line": 40,
+                                        "column": 43
+                                      },
+                                      "to": {
+                                        "line": 40,
+                                        "column": 46
+                                      }
+                                    },
+                                    "type": "Untyped",
+                                    "kind": "NameEx",
+                                    "name": "from"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 40,
+                                "column": 51
+                              },
+                              "to": {
+                                "line": 40,
+                                "column": 56
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "amount"
+                          }
+                        ]
+                      },
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 41,
+                            "column": 13
+                          },
+                          "to": {
+                            "line": 41,
+                            "column": 56
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "TUPLE",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 41,
+                                "column": 14
+                              },
+                              "to": {
+                                "line": 41,
+                                "column": 24
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "OperEx",
+                            "oper": "TUPLE",
+                            "args": [
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 41,
+                                    "column": 15
+                                  },
+                                  "to": {
+                                    "line": 41,
+                                    "column": 19
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "chain"
+                              },
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 41,
+                                    "column": 22
+                                  },
+                                  "to": {
+                                    "line": 41,
+                                    "column": 23
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "to"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 41,
+                            "column": 30
+                          },
+                          "to": {
+                            "line": 41,
+                            "column": 56
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "PLUS",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 41,
+                                "column": 30
+                              },
+                              "to": {
+                                "line": 41,
+                                "column": 45
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "OperEx",
+                            "oper": "FUN_APP",
+                            "args": [
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 41,
+                                    "column": 30
+                                  },
+                                  "to": {
+                                    "line": 41,
+                                    "column": 34
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "banks"
+                              },
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 41,
+                                    "column": 30
+                                  },
+                                  "to": {
+                                    "line": 41,
+                                    "column": 45
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "OperEx",
+                                "oper": "TUPLE",
+                                "args": [
+                                  {
+                                    "source": {
+                                      "filename": "TokenTransfer2",
+                                      "from": {
+                                        "line": 41,
+                                        "column": 36
+                                      },
+                                      "to": {
+                                        "line": 41,
+                                        "column": 40
+                                      }
+                                    },
+                                    "type": "Untyped",
+                                    "kind": "NameEx",
+                                    "name": "chain"
+                                  },
+                                  {
+                                    "source": {
+                                      "filename": "TokenTransfer2",
+                                      "from": {
+                                        "line": 41,
+                                        "column": 43
+                                      },
+                                      "to": {
+                                        "line": 41,
+                                        "column": 44
+                                      }
+                                    },
+                                    "type": "Untyped",
+                                    "kind": "NameEx",
+                                    "name": "to"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 41,
+                                "column": 51
+                              },
+                              "to": {
+                                "line": 41,
+                                "column": 56
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "amount"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "source": {
+            "filename": "TokenTransfer2",
+            "from": {
+              "line": 52,
+              "column": 1
+            },
+            "to": {
+              "line": 54,
+              "column": 35
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaOperDecl",
+          "name": "ReservesInv",
+          "formalParams": [
+            
+          ],
+          "isRecursive": false,
+          "body": {
+            "source": {
+              "filename": "TokenTransfer2",
+              "from": {
+                "line": 53,
+                "column": 5
+              },
+              "to": {
+                "line": 54,
+                "column": 35
+              }
+            },
+            "type": "Untyped",
+            "kind": "OperEx",
+            "oper": "FORALL3",
+            "args": [
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 53,
+                    "column": 5
+                  },
+                  "to": {
+                    "line": 54,
+                    "column": 35
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "chain"
+              },
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 53,
+                    "column": 18
+                  },
+                  "to": {
+                    "line": 53,
+                    "column": 23
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "CHAINS"
+              },
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 54,
+                    "column": 9
+                  },
+                  "to": {
+                    "line": 54,
+                    "column": 35
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "GT",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 54,
+                        "column": 9
+                      },
+                      "to": {
+                        "line": 54,
+                        "column": 31
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "FUN_APP",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 54,
+                            "column": 9
+                          },
+                          "to": {
+                            "line": 54,
+                            "column": 13
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "banks"
+                      },
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 54,
+                            "column": 9
+                          },
+                          "to": {
+                            "line": 54,
+                            "column": 31
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "TUPLE",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 54,
+                                "column": 15
+                              },
+                              "to": {
+                                "line": 54,
+                                "column": 19
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "chain"
+                          },
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 54,
+                                "column": 22
+                              },
+                              "to": {
+                                "line": 54,
+                                "column": 30
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "ValEx",
+                            "value": {
+                              "kind": "TlaStr",
+                              "value": "reserve"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 54,
+                        "column": 35
+                      },
+                      "to": {
+                        "line": 54,
+                        "column": 35
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "ValEx",
+                    "value": {
+                      "kind": "TlaInt",
+                      "value": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "source": {
+            "filename": "TokenTransfer2",
+            "from": {
+              "line": 57,
+              "column": 1
+            },
+            "to": {
+              "line": 59,
+              "column": 27
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaOperDecl",
+          "name": "NoNegativeAccounts",
+          "formalParams": [
+            
+          ],
+          "isRecursive": false,
+          "body": {
+            "source": {
+              "filename": "TokenTransfer2",
+              "from": {
+                "line": 58,
+                "column": 5
+              },
+              "to": {
+                "line": 59,
+                "column": 27
+              }
+            },
+            "type": "Untyped",
+            "kind": "OperEx",
+            "oper": "FORALL3",
+            "args": [
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 58,
+                    "column": 5
+                  },
+                  "to": {
+                    "line": 59,
+                    "column": 27
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "address"
+              },
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 58,
+                    "column": 20
+                  },
+                  "to": {
+                    "line": 58,
+                    "column": 31
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "DOMAIN",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 58,
+                        "column": 27
+                      },
+                      "to": {
+                        "line": 58,
+                        "column": 31
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "NameEx",
+                    "name": "banks"
+                  }
+                ]
+              },
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 59,
+                    "column": 9
+                  },
+                  "to": {
+                    "line": 59,
+                    "column": 27
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "GE",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 59,
+                        "column": 9
+                      },
+                      "to": {
+                        "line": 59,
+                        "column": 22
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "FUN_APP",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 59,
+                            "column": 9
+                          },
+                          "to": {
+                            "line": 59,
+                            "column": 13
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "banks"
+                      },
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 59,
+                            "column": 15
+                          },
+                          "to": {
+                            "line": 59,
+                            "column": 21
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "address"
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 59,
+                        "column": 27
+                      },
+                      "to": {
+                        "line": 59,
+                        "column": 27
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "ValEx",
+                    "value": {
+                      "kind": "TlaInt",
+                      "value": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "source": {
+            "filename": "TokenTransfer2",
+            "from": {
+              "line": 45,
+              "column": 1
+            },
+            "to": {
+              "line": 47,
+              "column": 46
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaOperDecl",
+          "name": "Next",
+          "formalParams": [
+            
+          ],
+          "isRecursive": false,
+          "body": {
+            "source": {
+              "filename": "TokenTransfer2",
+              "from": {
+                "line": 46,
+                "column": 5
+              },
+              "to": {
+                "line": 47,
+                "column": 46
+              }
+            },
+            "type": "Untyped",
+            "kind": "OperEx",
+            "oper": "EXISTS3",
+            "args": [
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 46,
+                    "column": 5
+                  },
+                  "to": {
+                    "line": 47,
+                    "column": 46
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "chain"
+              },
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 46,
+                    "column": 18
+                  },
+                  "to": {
+                    "line": 46,
+                    "column": 23
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "CHAINS"
+              },
+              {
+                "source": {
+                  "filename": "TokenTransfer2",
+                  "from": {
+                    "line": 46,
+                    "column": 5
+                  },
+                  "to": {
+                    "line": 47,
+                    "column": 46
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "EXISTS3",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 46,
+                        "column": 5
+                      },
+                      "to": {
+                        "line": 47,
+                        "column": 46
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "NameEx",
+                    "name": "from"
+                  },
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 46,
+                        "column": 39
+                      },
+                      "to": {
+                        "line": 46,
+                        "column": 46
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "NameEx",
+                    "name": "ACCOUNTS"
+                  },
+                  {
+                    "source": {
+                      "filename": "TokenTransfer2",
+                      "from": {
+                        "line": 46,
+                        "column": 5
+                      },
+                      "to": {
+                        "line": 47,
+                        "column": 46
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "EXISTS3",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 46,
+                            "column": 5
+                          },
+                          "to": {
+                            "line": 47,
+                            "column": 46
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "to"
+                      },
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 46,
+                            "column": 39
+                          },
+                          "to": {
+                            "line": 46,
+                            "column": 46
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "ACCOUNTS"
+                      },
+                      {
+                        "source": {
+                          "filename": "TokenTransfer2",
+                          "from": {
+                            "line": 46,
+                            "column": 5
+                          },
+                          "to": {
+                            "line": 47,
+                            "column": 46
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "EXISTS3",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 46,
+                                "column": 5
+                              },
+                              "to": {
+                                "line": 47,
+                                "column": 46
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "amount"
+                          },
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 46,
+                                "column": 60
+                              },
+                              "to": {
+                                "line": 46,
+                                "column": 62
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "ValEx",
+                            "value": {
+                              "kind": "TlaNatSet"
+                            }
+                          },
+                          {
+                            "source": {
+                              "filename": "TokenTransfer2",
+                              "from": {
+                                "line": 47,
+                                "column": 9
+                              },
+                              "to": {
+                                "line": 47,
+                                "column": 46
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "OperEx",
+                            "oper": "OPER_APP",
+                            "args": [
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 47,
+                                    "column": 9
+                                  },
+                                  "to": {
+                                    "line": 47,
+                                    "column": 46
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "LocalTransfer"
+                              },
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 47,
+                                    "column": 23
+                                  },
+                                  "to": {
+                                    "line": 47,
+                                    "column": 27
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "chain"
+                              },
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 47,
+                                    "column": 30
+                                  },
+                                  "to": {
+                                    "line": 47,
+                                    "column": 33
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "from"
+                              },
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 47,
+                                    "column": 36
+                                  },
+                                  "to": {
+                                    "line": 47,
+                                    "column": 37
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "to"
+                              },
+                              {
+                                "source": {
+                                  "filename": "TokenTransfer2",
+                                  "from": {
+                                    "line": 47,
+                                    "column": 40
+                                  },
+                                  "to": {
+                                    "line": 47,
+                                    "column": 45
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "amount"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
