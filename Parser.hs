@@ -1,16 +1,9 @@
 module Parser where
 
 import Text.Parsec
-import Text.Parsec.Expr
-import Math as Math -- cabal install ParserFunction
-import qualified Text.Parsec.Token as Token
-import Text.Parsec.Language
-import Data.Char
+import Math -- cabal install ParserFunction
+import Control.Arrow
 import Head
-
-import Control.Monad.Identity (Identity)
-
-import Debug.Trace
 
 ignore = many $ thingsToIgnore
 
@@ -39,10 +32,10 @@ comma = do {ws; char ','; ws; return ()}
 infOr = do {ws; string "\\/"; ws; return ()}
 infAnd = do {ws; string "/\\"; ws; return ()}
 
-parseFile a = do f <- readFile a
-                 let e = parse specification "Error:" (f)
-                 -- let e = parse arithmeticExpression "Error:" (f)
-                 return e
+parseTla :: FilePath -> IO (Either String (Module, [Definition]))
+parseTla a = do f <- readFile a
+                let e = parse specification "Error:" f
+                return (left show e)
 
 specification = do (n, d) <- moduleHeader
                    ws
