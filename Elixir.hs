@@ -151,6 +151,11 @@ predicate g (And ps) =  intercalate " and " (map (predicate g) ps)
 -- [new] (PRED-OR)
 predicate g (Or ps) =  intercalate " or " (map (predicate g) ps)
 
+-- [new] (PRED-ALL)
+predicate g (PForAll i v p) = "Enum.all?(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ predicate ((i, "param"):g) p ++ " end)"
+
+predicate _ p = error("Missing predicate case: " ++ show p)
+
 {-- \vdash_init --}
 initialState :: Context -> Action -> ElixirCode
 
@@ -158,7 +163,7 @@ initialState :: Context -> Action -> ElixirCode
 initialState g (ActionAnd as) = aFold (map (initialState g) as)
 
 -- (INIT-EQ)
-initialState g (Condition (Equality (Arith (Ref i)) v)) = "%{ " ++ snake i ++ ": " ++ value g v ++ " }"
+initialState g (Condition (Equality (Ref i) v)) = "%{ " ++ snake i ++ ": " ++ value g v ++ " }"
 
 -- Restriction
 initialState _ p = error("Init condition ambiguous: " ++ show p)
@@ -218,16 +223,31 @@ value g (Record rs) = let (literals, generations) = partition isLiteral rs
                       in if m == [] then l else m ++ " |> Enum.into(" ++ l ++ ")"
 
 -- (REC-EXCEPT)
-value g (Except i [(k, v)]) = "Map.put(" ++ reference g i ++ ", " ++ value g k ++ ", " ++ value g v ++ ")"
+value g (Except i es) = unlines (map (\(k,v) -> "Map.put(" ++ reference g i ++ ", " ++ value g k ++ ", " ++ value g v ++ ")") es)
 
 -- [new] (CASE)
 value g (Case ms) = "cond do\n" ++ intercalate "\n" (map (caseMatch g) ms) ++ "\nend\n"
 
 -- Others, not specified
-value g (Arith e) = expression g e
 value _ (Str s) = show s
-value g (Range n1 n2) = expression g n1 ++ ".." ++ expression g n2
+value g (Range n1 n2) = value g n1 ++ ".." ++ value g n2
 value _ (Boolean b) = if b then "true" else "false"
+value g (Ref i) = reference g i
+value g (Tuple as) = "{" ++ intercalate ", " (map (value g) as) ++ "}"
+value _ (Num d) = show d
+value g (Neg a) = "-" ++ value' g a
+value g (Add a b) = value' g a ++ " + " ++ value' g b
+value g (Sub a b) = value' g a ++ " - " ++ value' g b
+value g (Mul a b) = value' g a ++ " * " ++ value' g b
+value g (Div a b) = value' g a ++ " / " ++ value' g b
+value g (Mod a b) = "rem(" ++ value' g a ++ ", " ++ value' g b ++ ")"
+value g (Domain v) = "Map.keys(" ++ value g v ++ ")"
+value _ v = error("Missing value case: " ++ show v)
+
+value' _ (Num d) = show d
+value' g (Ref i) = reference g i
+value' g e = "(" ++ value g e ++ ")"
+
 
 caseMatch g (Match p v) = predicate g p ++ " -> " ++ value g v
 caseMatch g (DefaultMatch v) = "true -> " ++ value g v
@@ -244,19 +264,3 @@ reference g i = if elem (i, "param") g then i else
 cnst g i = case dropWhile (\d ->snd d /= "module") g of
               [] -> "@" ++ snake i
               ms -> fst (head ms) ++ "." ++ snake i
-
--- Arithmetic expressions, from EXTEND INTEGERS
-expression :: Context -> Value -> ElixirCode
-expression _ (Num d) = show d
-expression g (Ref i) = reference g i
-expression g (Neg a) = "-" ++ expression' g a
-expression g (Add a b) = expression' g a ++ " + " ++ expression' g b
-expression g (Sub a b) = expression' g a ++ " - " ++ expression' g b
-expression g (Mul a b) = expression' g a ++ " * " ++ expression' g b
-expression g (Div a b) = expression' g a ++ " / " ++ expression' g b
-expression g (Mod a b) = "rem(" ++ expression' g a ++ ", " ++ expression' g b ++ ")"
-
-expression' _ (Num d) = show d
-expression' g (Ref i) = reference g i
-expression' g e = "(" ++ expression g e ++ ")"
-

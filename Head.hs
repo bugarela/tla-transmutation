@@ -44,7 +44,7 @@ data Action = Condition Predicate | Value Value | Primed Identifier Value | Unch
 
 data Value = Set [Value] | Tuple [Value] | FunSet Value Value | SetTimes Value Value | Union Value Value | Filtered Identifier Value Predicate | Cardinality Value
            | Record [(Key, Value)] | Except Identifier [(Value, Value)] | Case [CaseMatch] | Domain Value
-           | Str String | Boolean Bool | FullSet String | Arith Value | Index Value Value | Range Value Value
+           | Str String | Boolean Bool | FullSet String | Index Value Value | Range Value Value
            | Num Integer
            | Ref String
            | Neg Value

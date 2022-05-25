@@ -302,15 +302,15 @@ value = do try $ do string "Cardinality("
         <|>
         do {r <- record; return (r)}
         <|>
-        do try $ do {i <- identifier; char '['; k <- identifier; char ']'; ws; return (Index (Arith (Ref i)) (Arith (Ref k)))}
+        do try $ do {i <- identifier; char '['; k <- identifier; char ']'; ws; return (Index (Ref i) (Ref k))}
         <|>
-        do try $ do {i <- identifier; char '['; k <- literal; char ']'; ws; return (Index (Arith (Ref i)) k)}
+        do try $ do {i <- identifier; char '['; k <- literal; char ']'; ws; return (Index (Ref i) k)}
         <|>
         do {s <- set; return (s)}
         <|>
         do try $ do {n1 <- Math.number; string ".."; n2 <- Math.number; ws; return (Range n1 n2)}
         <|>
-        do try $ do {e <- arithmeticExpression; ws; return (Arith e)}
+        do try $ do {e <- arithmeticExpression; ws; return (e)}
         <|>
         do {l <- literal; return (l)}
 
@@ -330,7 +330,7 @@ atomSet = do try $ do char '{'
                       ws
                       return (Filtered i v p)
           <|>
-          do {e <- arithmeticExpression; ws; return (Arith e)}
+          do {e <- arithmeticExpression; ws; return (e)}
 
 caseMatch = do try $ do string "OTHER"
                         ws
