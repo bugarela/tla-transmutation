@@ -179,6 +179,18 @@ action =  do string "IF"
                      ws
                      as <- action `sepBy` infOr
                      return (Exists i v (ActionOr as))
+         <|>
+         do try $ do string "\\A"
+                     ws
+                     i <- identifier
+                     ws
+                     string "\\in"
+                     ws
+                     v <- value
+                     char ':'
+                     ws
+                     a <- action
+                     return (ForAll i v a)
 
 
 predicate = do try $ do char '('
@@ -243,11 +255,6 @@ atomPredicate = do try $ do v1 <- value
                             ws
                             v2 <- value
                             return (RecordNotBelonging v1 v2)
-                <|>
-                do try $ do string "\\A"
-                            ws
-                            (i, v, p) <- inFilter
-                            return (ForAll i v p)
 
 predicateConditionCall = do try $ do i <- identifier
                                      return (ConditionCall i [])
@@ -374,7 +381,7 @@ record = do try $ do char '['
             v <- value
             char ']'
             ws
-            return (Except i k v)
+            return (Except i [(Ref k, v)])
 
 literal = do try $ do {char '\"'; cs <- many1 (noneOf reserved); char '\"'; ws; return (Str cs)}
 

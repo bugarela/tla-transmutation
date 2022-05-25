@@ -13,25 +13,15 @@ module Math where
 import Control.Applicative ((<|>))
 -- import Control.Monad       (liftM, liftM2)
 import Data.Char
+import Head
 -- import qualified Data.Map                           as M
 import qualified Text.ParserCombinators.Parsec.Expr as P
 import qualified Text.ParserCombinators.Parsec      as P
 
--- | Mathematical expressions.
-data Expr = Num Integer
-            | Ref String
-            | Neg Expr
-            | Add Expr Expr
-            | Sub Expr Expr
-            | Mul Expr Expr
-            | Div Expr Expr
-            | Mod Expr Expr
-           deriving (Show, Eq)
-
-build :: P.Parser Expr
+build :: P.Parser Value
 build = do P.try $ P.buildExpressionParser table (P.try $ factor) <|> factor
 
-table :: [[P.Operator Char st Expr]]
+table :: [[P.Operator Char st Value]]
 table =
   [ [ prefix "-" Neg ]
   , [ binary "*" Mul P.AssocLeft, binary "/ " Div P.AssocLeft ]
@@ -42,7 +32,7 @@ table =
 
 ws = P.many $ do {P.many1 (P.oneOf " \n"); return()}
 
-factor ::P.Parser Expr
+factor ::P.Parser Value
 factor = do
   _    <- P.char '('
   expr <- build
@@ -52,14 +42,14 @@ factor = do
   return (expr)
   <|> atom
 
-atom :: P.Parser Expr
+atom :: P.Parser Value
 atom =  do P.try $ do {n <- number; ws; return(n)}
         <|>
         do var <- P.many1 (P.oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
            ws
            return $! Ref var
 
-number :: P.Parser Expr
+number :: P.Parser Value
 number = do
   digits <- P.many1 P.digit
   let n = foldl (\x d -> 10*x + toInteger (digitToInt d)) 0 digits

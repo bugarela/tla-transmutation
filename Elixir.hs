@@ -88,6 +88,11 @@ actionsAndConditions g (Exists i v (ActionOr as)) = let ig = (i, "param"):g
                                                         (ics, _) = unzipAndFold (map (actionsAndConditions ig) as)
                                                         c = "Enum.any?(" ++ value ig v ++ ", fn (" ++ i ++ ") ->" ++ orFold ics ++ "end\n)"
                                                     in ([c], [decide g [Exists i v (ActionOr as)]])
+-- [new]: must test
+actionsAndConditions g (ForAll i v (ActionAnd as)) = let ig = (i, "param"):g
+                                                         (ics, ias) = unzipAndFold (map (actionsAndConditions ig) as)
+                                                         c = "Enum.all?(" ++ value ig v ++ ", fn (" ++ i ++ ") ->" ++ cFold ics ++ "end\n)"
+                                                     in ([c], ias)
 
 -- (TRA)
 actionsAndConditions g a = ([], [action g a])
@@ -141,9 +146,6 @@ predicate g (And ps) =  intercalate " and " (map (predicate g) ps)
 
 -- [new] (PRED-OR)
 predicate g (Or ps) =  intercalate " or " (map (predicate g) ps)
-
--- [new] (PRED-ALL)
-predicate g (ForAll i v p) = "Enum.all?(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ predicate ((i, "param"):g) p ++ " end)"
 
 {-- \vdash_init --}
 initialState :: Context -> Action -> ElixirCode
@@ -212,7 +214,7 @@ value g (Record rs) = let (literals, generations) = partition isLiteral rs
                       in if m == [] then l else m ++ " |> Enum.into(" ++ l ++ ")"
 
 -- (REC-EXCEPT)
-value g (Except i k v) = "Map.put(" ++ reference g i ++ ", " ++ k ++ ", " ++ value g v ++ ")"
+value g (Except i [(k, v)]) = "Map.put(" ++ reference g i ++ ", " ++ value g k ++ ", " ++ value g v ++ ")"
 
 -- [new] (CASE)
 value g (Case ms) = "cond do\n" ++ intercalate "\n" (map (caseMatch g) ms) ++ "\nend\n"
@@ -239,7 +241,7 @@ cnst g i = case dropWhile (\d ->snd d /= "module") g of
               ms -> fst (head ms) ++ "." ++ snake i
 
 -- Arithmetic expressions, from EXTEND INTEGERS
-expression :: Context -> Expr -> ElixirCode
+expression :: Context -> Value -> ElixirCode
 expression _ (Num d) = show d
 expression g (Ref i) = reference g i
 expression g (Neg a) = "-" ++ expression' g a
