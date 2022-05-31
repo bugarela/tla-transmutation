@@ -42,7 +42,8 @@ data Action = Condition Predicate | Value Value | Primed Identifier Value | Unch
             | ActionAnd [Action] | ActionOr [Action] | ActionCall Identifier [Value]
             | If Predicate Action Action | Exists Identifier Value Action | ForAll Identifier Value Action deriving(Show, Eq)
 
-data Value = Set [Value] | Tuple [Value] | FunSet Value Value | SetTimes Value Value | Union Value Value | Filtered Identifier Value Predicate | Cardinality Value
+data Value = Set [Value] | Tuple [Value] | FunSet Value Value | FunGen Identifier Value Value | SetTimes Value Value
+           | Union Value Value | Filtered Identifier Value Predicate | Cardinality Value
            | Record [(Key, Value)] | Except Identifier [(Value, Value)] | Case [CaseMatch] | Domain Value
            | Str String | Boolean Bool | FullSet String | Index Value Value | Range Value Value
            | Num Integer

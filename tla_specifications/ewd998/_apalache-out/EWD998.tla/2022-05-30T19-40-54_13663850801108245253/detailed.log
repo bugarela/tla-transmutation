@@ -1,0 +1,12 @@
+19:40:54.691 [main] INFO  a.f.a.t.Tool$ - Parse EWD998.tla
+19:40:54.694 [main] INFO  a.f.a.i.p.PassChainExecutor - PASS #0: SanyParser
+19:40:54.814 [main] ERROR a.f.a.t.Tool$ - Error by TLA+ parser: *** Abort messages: 1
+
+Unknown location
+
+Cannot find source file for module Folds imported in module Functions.
+
+
+
+19:40:54.815 [main] INFO  a.f.a.t.Tool$ - It took me 0 days  0 hours  0 min  0 sec
+19:40:54.815 [main] INFO  a.f.a.t.Tool$ - Total time: 0.342 sec
