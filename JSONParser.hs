@@ -70,6 +70,7 @@ instance FromJSON Expression where
         "NameEx" -> fmap NameEx (obj .: "name")
         "OperEx" -> liftA2 OperEx (obj .: "oper") (obj .: "args")
         "LetInEx" -> liftA2 LetInEx (obj .: "decls") (obj .: "body")
+        _ -> fail ("Unknown expression kind: " ++ exprKind)
 
 notIgnored Ignored = False
 notIgnored _ = True
@@ -89,7 +90,7 @@ convertDefinitions (Declaration k n body) = case body of
 convertBody :: Kind -> String -> Expression -> Either String H.Definition
 convertBody k i e = case k of
                       "OperEx" -> Right (H.Comment "A")
-                      "TlaOperDecl" -> convertExpression e >>= \x -> Right (H.ActionDefinition i [] [] x)
+                      "TlaOperDecl" -> if isTemporal e then Right (H.Comment (show e)) else convertExpression e >>= \x -> Right (H.ActionDefinition i [] [] x)
                       "TlaAssumeDecl" -> Right (H.Comment (show e))
                       _ -> Left ("Unknown body kind " ++ show k)
 
@@ -108,9 +109,6 @@ manyIdentifiers (NameEx i) = Right [i]
 manyIdentifiers (OperEx o as) = case o of
                                   "TUPLE" -> mapM identifier as
                                   _ -> Left ("Not tuple operator: " ++ o)
-
--- identifierFromString :: Expression -> Either String H.Identifier
--- identifierFromString (ValEx (TlaStr s)) = Right s
 
 val :: TlaValue -> H.Lit
 val (TlaStr s) = H.Str s
@@ -164,6 +162,8 @@ convertValue (OperEx o as) = let r = case o of
                                         [x1, x2] -> liftA2 H.Equality (convertValue x1) (convertValue x2)
                                       "GT" -> case as of
                                         [x1, x2] -> liftA2 H.Gt (convertValue x1) (convertValue x2)
+                                      "LT" -> case as of
+                                        [x1, x2] -> liftA2 H.Lt (convertValue x1) (convertValue x2)
                                       "GE" -> case as of
                                         [x1, x2] -> liftA2 H.Gte (convertValue x1) (convertValue x2)
                                       "LE" -> case as of
@@ -185,7 +185,6 @@ convertValue (OperEx o as) = let r = case o of
                                       op -> Left ("Unknown value operator " ++ op)
                              in left (\s -> s ++ "\nwhen converting " ++ show (OperEx o as)) r
 convertValue (LetInEx ds b) = liftA2 H.Let (mapM convertDefinitions ds) (convertValue b)
--- convertValue e = Left ("Unexpected expression while converting value: " ++ show e)
 
 convertAction :: Expression -> Either String H.Action
 convertAction (OperEx o as) = let r = case o of
@@ -203,15 +202,22 @@ convertAction (OperEx o as) = let r = case o of
                              in left (\s -> s ++ "\nwhen converting " ++ show (OperEx o as)) r
 
 convertExpression :: Expression -> Either String H.Action
-convertExpression (OperEx o as) = if isPredicate (OperEx o as) then  (convertValue (OperEx o as) >>= \x -> Right(H.Condition x)) else convertAction (OperEx o as)
+convertExpression (OperEx o as) = if isPredicate (OperEx o as) then convertValue (OperEx o as) >>= \x -> Right(H.Condition x) else convertAction (OperEx o as)
 convertExpression (ValEx v) =  convertValue (ValEx v) >>= \cv -> Right(H.Condition cv)
 
 actionOperators :: [String]
 actionOperators = ["PRIME", "UNCHANGED"]
 
+temporalOperators :: [String]
+temporalOperators = ["GLOBALLY", "STUTTER", "IMPLIES", "LEADS_TO"]
+
 isPredicate :: Expression -> Bool
 isPredicate (OperEx o as) = o `notElem` actionOperators && all isPredicate as
 isPredicate _ = True
+
+isTemporal :: Expression -> Bool
+isTemporal (OperEx o as) = o `elem` temporalOperators || any isTemporal as
+isTemporal _ = False
 
 convertRecordValues :: [Expression] -> Either String [(H.Key, H.Value)]
 convertRecordValues [] = Right []

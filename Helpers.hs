@@ -113,5 +113,4 @@ findVariables ds = concat (map (\d -> case d of {Variables cs -> cs; _ -> [] }) 
 
 findIdentifier i ds = case find (isNamed i) ds of
                         Just a -> a
-                        Nothing -> error("Definition not found: " ++ (show i))
-
+                        Nothing -> error("Definition not found: " ++ show i ++ " in " ++ show ds)

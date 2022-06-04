@@ -73,7 +73,7 @@ actionsAndConditions g (ActionOr as) = let (ics, ias) = unzipAndFold (map (actio
                                        in (if allUnchanged as then ["false"] else [orFold ics], if ias == [] then [] else [decide g as])
 
 -- (IF)
-actionsAndConditions g (ActionIf p t e) = let cp = predicate g p
+actionsAndConditions g (ActionIf p t e) = let cp = value g p
                                               (ct, at) = actionsAndConditions g t
                                               (ce, ae) = actionsAndConditions g e
                                               c = ifExpr cp (if isUnchanged t then "false" else cFold ct) (if isUnchanged e then "false" else cFold ce)
@@ -81,18 +81,19 @@ actionsAndConditions g (ActionIf p t e) = let cp = predicate g p
                                           in ([c], [a])
 
 -- (COND)
-actionsAndConditions g (Condition p) = ([predicate g p], [])
+actionsAndConditions g (Condition p) = ([value g p], [])
 
 -- [new] (EXT)
-actionsAndConditions g (Exists i v (ActionOr as)) = let ig = (i, "param"):g
-                                                        (ics, _) = unzipAndFold (map (actionsAndConditions ig) as)
-                                                        c = "Enum.any?(" ++ value ig v ++ ", fn (" ++ i ++ ") ->" ++ orFold ics ++ "end\n)"
-                                                    in ([c], [decide g [Exists i v (ActionOr as)]])
+actionsAndConditions g (Exists i v a) = let ig = (i, "param"):g
+                                            (ics, _) = actionsAndConditions ig a
+                                            c = "Enum.any?(" ++ value ig v ++ ", fn (" ++ i ++ ") ->" ++ cFold ics ++ "end\n)"
+                                        in ([c], [decide g [a]])
+
 -- [new]: must test
-actionsAndConditions g (ForAll i v (ActionAnd as)) = let ig = (i, "param"):g
-                                                         (ics, ias) = unzipAndFold (map (actionsAndConditions ig) as)
-                                                         c = "Enum.all?(" ++ value ig v ++ ", fn (" ++ i ++ ") ->" ++ cFold ics ++ "end\n)"
-                                                     in ([c], ias)
+actionsAndConditions g (ForAll i v a) = let ig = (i, "param"):g
+                                            (ics, ias) = actionsAndConditions ig a
+                                            c = "Enum.all?(" ++ value ig v ++ ", fn (" ++ i ++ ") ->" ++ cFold ics ++ "end\n)"
+                                        in ([c], ias)
 
 -- (TRA)
 actionsAndConditions g a = ([], [action g a])
@@ -117,87 +118,47 @@ action _ (Unchanged is) =  let u = \i -> snake i ++ ": variables[:" ++ snake i +
 -- [new] needs testing
 -- action g (Value v) = value g v
 
-action _ a = error(show a)
+action _ a = error("Missing action case: " ++ show a)
+
 {-- \vdash_p --}
-predicate :: Context -> Value -> ElixirCode
+value :: Context -> Value -> ElixirCode
 
 -- (PRED-EQ)
-predicate g (Equality v1 v2) = value g v1 ++ " == " ++ value g v2
+value g (Equality v1 v2) = value g v1 ++ " == " ++ value g v2
 
 -- (PRED-INEQ)
-predicate g (Inequality v1 v2) = value g v1 ++ " != " ++ value g v2
+value g (Inequality v1 v2) = value g v1 ++ " != " ++ value g v2
 
 -- Similar rules
-predicate g (Gt v1 v2) = value g v1 ++ " > " ++ value g v2
-predicate g (Lt v1 v2) = value g v1 ++ " < " ++ value g v2
-predicate g (Gte v1 v2) = value g v1 ++ " >= " ++ value g v2
-predicate g (Lte v1 v2) = value g v1 ++ " <= " ++ value g v2
+value g (Gt v1 v2) = value g v1 ++ " > " ++ value g v2
+value g (Lt v1 v2) = value g v1 ++ " < " ++ value g v2
+value g (Gte v1 v2) = value g v1 ++ " >= " ++ value g v2
+value g (Lte v1 v2) = value g v1 ++ " <= " ++ value g v2
 
 -- [new] (PRED-CALL)
-predicate g (ConditionCall i ps) = call (i ++ "Condition") ("variables":map (value g) ps)
+value g (ConditionCall i ps) = call (i ++ "Condition") ("variables":map (value g) ps)
 
 -- (PRED-IN)
-predicate g (RecordBelonging v1 v2) = "Enum.member?(" ++ value g v2 ++ ", " ++ value g v1 ++ ")"
+value g (RecordBelonging v1 v2) = "Enum.member?(" ++ value g v2 ++ ", " ++ value g v1 ++ ")"
 
 -- [new] (PRED-NOTIN)
-predicate g (RecordNotBelonging v1 v2) = "not " ++ predicate g (RecordBelonging v1 v2)
+value g (RecordNotBelonging v1 v2) = "not " ++ value g (RecordBelonging v1 v2)
 
 -- (PRED-NOT)
-predicate g (Not p) = "not " ++ predicate g p
+value g (Not p) = "not " ++ value g p
 
 -- [new] (PRED-AND)
-predicate g (And ps) =  intercalate " and " (map (predicate g) ps)
+value g (And ps) =  intercalate " and " (map (value g) ps)
 
 -- [new] (PRED-OR)
-predicate g (Or ps) =  intercalate " or " (map (predicate g) ps)
+value g (Or ps) =  intercalate " or " (map (value g) ps)
+
+value g (If c t e) = "if " ++ value g c ++ ", do: " ++ value g t ++ ", else: " ++ value g e
 
 -- [new] (PRED-ALL)
-predicate g (PForAll i v p) = "Enum.all?(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ predicate ((i, "param"):g) p ++ " end)"
+value g (PForAll i v p) = "Enum.all?(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ value ((i, "param"):g) p ++ " end)"
 
-predicate _ p = error("Missing predicate case: " ++ show p)
-
-{-- \vdash_init --}
-initialState :: Context -> Action -> ElixirCode
-
--- (INIT-AND)
-initialState g (ActionAnd as) = aFold (map (initialState g) as)
-
--- (INIT-EQ)
-initialState g (Condition (Equality (Ref i) v)) = "%{ " ++ snake i ++ ": " ++ value g v ++ " }"
-
--- Restriction
-initialState _ p = error("Init condition ambiguous: " ++ show p)
-
--- Comment extraction
-ini g (ActionDefinition _ _ doc a) = comment doc ++ initialState g a
-
-
-{-- \vdash_next --}
-next :: Context -> Definition -> ElixirCode
-
--- (NEXT)
-next g (ActionDefinition _ _ doc a) = let (_, actions) = actionsAndConditions g a
-                                in funDoc doc ++ "def main(variables) do\n" ++ ident (logState ++ "main(" ++ (aFold actions)) ++ ")\nend\n"
-
-
-{-- \vdash_i -}
-actionInfo :: Context -> Action -> ElixirCode
--- (INFO-EX)
-actionInfo g (Exists i v (ActionOr as)) = let ig = (i, "param"):g
-                                              l = map (actionInfo ig) as
-                                              s = intercalate ",\n" l
-                                          in "Enum.map(" ++ value ig v ++ ", fn (" ++ i ++ ") -> [\n" ++ ident s ++ "\n] end\n)"
-
--- (INFO-DEF)
-actionInfo g a = let (cs, as) = actionsAndConditions g a
-                     n = "action: \"" ++ actionName a ++ "\""
-                     c = "condition: " ++ cFold cs
-                     s = "state: " ++ aFold as
-                 in "%{ " ++ intercalate ", " [n,c,s] ++  " }"
-
-
-{-- \vdash_v --}
-value :: Context -> Value -> ElixirCode
+value g (PExists i v p) = "Enum.any?(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ value ((i, "param"):g) p ++ " end)"
 
 -- (REC-INDEX)
 value g (Index v k) = value g v ++ "[" ++ value g k ++ "]"
@@ -211,10 +172,14 @@ value g (Union s (Set [v])) = "MapSet.put(" ++ value g s ++ ", " ++ value g v ++
 value g (Union s1 s2) = "MapSet.union(" ++ value g s1 ++ ", " ++ value g s2 ++ ")"
 
 -- [new] (SET-FILT)
-value g (Filtered i v p) = "Enum.filter(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ predicate ((i, "param"):g) p ++ " end)"
+value g (Filtered i v p) = "Enum.filter(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ value ((i, "param"):g) p ++ " end)"
 
 -- [new] (SET-CAR)
 value g (Cardinality s) = "Enum.count(" ++ value g s ++ ")"
+
+value g (SetIn v s) = "MapSet.member?(" ++ value g s ++ ", " ++ value g v ++ ")"
+
+value g (SetMinus s1 s2) = "MapSet.difference?(" ++ value g s1 ++ ", " ++ value g s2 ++ ")"
 
 -- (REC-LIT) and (REC-EX), aggregated to ensure ordering
 value g (Record rs) = let (literals, generations) = partition isLiteral rs
@@ -224,6 +189,8 @@ value g (Record rs) = let (literals, generations) = partition isLiteral rs
 
 -- (REC-EXCEPT)
 value g (Except i es) = unlines (map (\(k,v) -> "Map.put(" ++ reference g i ++ ", " ++ value g k ++ ", " ++ value g v ++ ")") es)
+
+value g (FunGen i s v) = "MapSet.new(" ++ value g s ++ ", fn(" ++ i ++ ") -> " ++ value ((i, "param"):g) v ++ " end)"
 
 -- [new] (CASE)
 value g (Case ms) = "cond do\n" ++ intercalate "\n" (map (caseMatch g) ms) ++ "\nend\n"
@@ -250,8 +217,46 @@ lit (Str s) = show s
 lit (Num d) = show d
 lit (Boolean b) = if b then "true" else "false"
 
+{-- \vdash_init --}
+initialState :: Context -> Value -> ElixirCode
 
-caseMatch g (Match p v) = predicate g p ++ " -> " ++ value g v
+-- (INIT-AND)
+initialState g (And as) = aFold (map (initialState g) as)
+
+-- (INIT-EQ)
+initialState g (Equality (Ref i) v) = "%{ " ++ snake i ++ ": " ++ value g v ++ " }"
+
+-- Restriction
+initialState _ p = error("Init condition ambiguous: " ++ show p)
+
+-- Comment extraction
+ini g (ActionDefinition _ _ doc (Condition a)) = comment doc ++ initialState g a
+
+
+{-- \vdash_next --}
+next :: Context -> Definition -> ElixirCode
+
+-- (NEXT)
+next g (ActionDefinition _ _ doc a) = let (_, actions) = actionsAndConditions g a
+                                in funDoc doc ++ "def main(variables) do\n" ++ ident (logState ++ "main(" ++ (aFold actions)) ++ ")\nend\n"
+
+
+{-- \vdash_i -}
+actionInfo :: Context -> Action -> ElixirCode
+-- (INFO-EX)
+actionInfo g (Exists i v (ActionOr as)) = let ig = (i, "param"):g
+                                              l = map (actionInfo ig) as
+                                              s = intercalate ",\n" l
+                                          in "Enum.map(" ++ value ig v ++ ", fn (" ++ i ++ ") -> [\n" ++ ident s ++ "\n] end\n)"
+
+-- (INFO-DEF)
+actionInfo g a = let (cs, as) = actionsAndConditions g a
+                     n = "action: \"" ++ actionName a ++ "\""
+                     c = "condition: " ++ cFold cs
+                     s = "state: " ++ aFold as
+                 in "%{ " ++ intercalate ", " [n,c,s] ++  " }"
+
+caseMatch g (Match p v) = value g p ++ " -> " ++ value g v
 caseMatch g (DefaultMatch v) = "true -> " ++ value g v
 
 mapping g ((Key i), v) = show i ++ ": " ++ value g v
