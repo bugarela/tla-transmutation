@@ -141,7 +141,7 @@ action =  do string "IF"
              string "ELSE"
              ws
              af <- action
-             return (If p at af)
+             return (ActionIf p at af)
          <|>
          do {p <- predicate; return (Condition p)}
          <|>

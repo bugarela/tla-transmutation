@@ -73,12 +73,12 @@ actionsAndConditions g (ActionOr as) = let (ics, ias) = unzipAndFold (map (actio
                                        in (if allUnchanged as then ["false"] else [orFold ics], if ias == [] then [] else [decide g as])
 
 -- (IF)
-actionsAndConditions g (If p t e) = let cp = predicate g p
-                                        (ct, at) = actionsAndConditions g t
-                                        (ce, ae) = actionsAndConditions g e
-                                        c = ifExpr cp (if isUnchanged t then "false" else cFold ct) (if isUnchanged e then "false" else cFold ce)
-                                        a = ifExpr cp (aFold at) (aFold ae)
-                                    in ([c], [a])
+actionsAndConditions g (ActionIf p t e) = let cp = predicate g p
+                                              (ct, at) = actionsAndConditions g t
+                                              (ce, ae) = actionsAndConditions g e
+                                              c = ifExpr cp (if isUnchanged t then "false" else cFold ct) (if isUnchanged e then "false" else cFold ce)
+                                              a = ifExpr cp (aFold at) (aFold ae)
+                                          in ([c], [a])
 
 -- (COND)
 actionsAndConditions g (Condition p) = ([predicate g p], [])
@@ -115,11 +115,11 @@ action _ (Unchanged is) =  let u = \i -> snake i ++ ": variables[:" ++ snake i +
                            in "%{ " ++ intercalate ",\n" (map u is) ++ " }"
 
 -- [new] needs testing
-action g (Value v) = value g v
+-- action g (Value v) = value g v
 
 action _ a = error(show a)
 {-- \vdash_p --}
-predicate :: Context -> Predicate -> ElixirCode
+predicate :: Context -> Value -> ElixirCode
 
 -- (PRED-EQ)
 predicate g (Equality v1 v2) = value g v1 ++ " == " ++ value g v2
