@@ -229,12 +229,9 @@ value g (Except i es) = unlines (map (\(k,v) -> "Map.put(" ++ reference g i ++ "
 value g (Case ms) = "cond do\n" ++ intercalate "\n" (map (caseMatch g) ms) ++ "\nend\n"
 
 -- Others, not specified
-value _ (Str s) = show s
 value g (Range n1 n2) = value g n1 ++ ".." ++ value g n2
-value _ (Boolean b) = if b then "true" else "false"
 value g (Ref i) = reference g i
 value g (Tuple as) = "{" ++ intercalate ", " (map (value g) as) ++ "}"
-value _ (Num d) = show d
 value g (Neg a) = "-" ++ value' g a
 value g (Add a b) = value' g a ++ " + " ++ value' g b
 value g (Sub a b) = value' g a ++ " - " ++ value' g b
@@ -242,17 +239,22 @@ value g (Mul a b) = value' g a ++ " * " ++ value' g b
 value g (Div a b) = value' g a ++ " / " ++ value' g b
 value g (Mod a b) = "rem(" ++ value' g a ++ ", " ++ value' g b ++ ")"
 value g (Domain v) = "Map.keys(" ++ value g v ++ ")"
+value _ (Lit l) = lit l
 value _ v = error("Missing value case: " ++ show v)
 
-value' _ (Num d) = show d
+value' _ (Lit (Num d)) = show d
 value' g (Ref i) = reference g i
 value' g e = "(" ++ value g e ++ ")"
+
+lit (Str s) = show s
+lit (Num d) = show d
+lit (Boolean b) = if b then "true" else "false"
 
 
 caseMatch g (Match p v) = predicate g p ++ " -> " ++ value g v
 caseMatch g (DefaultMatch v) = "true -> " ++ value g v
 
-mapping g ((Key i), v) = snake i ++ ": " ++ value g v
+mapping g ((Key i), v) = show i ++ ": " ++ value g v
 mapping g ((All i a), v) = let ig = (i, "param"):g
                            in value g a ++ " |> Enum.map(fn (" ++ i ++ ") -> {" ++ i ++ ", " ++ value ig v ++ "} end)"
 -- (VAL-*)
