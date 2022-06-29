@@ -10,6 +10,7 @@ import Data.List
 import GHC.Generics
 import qualified Data.ByteString.Lazy as B
 import Control.Applicative
+import Control.Arrow
 
 type Kind = String
 
@@ -21,7 +22,7 @@ data Spec = Spec [Module] deriving (Show,Generic)
 data Module = Module String [Declaration] deriving (Show, Generic)
 
 data Declaration = Declaration Kind String (Maybe Expression) | Ignored deriving (Show, Generic)
-data Expression = Expression Kind (Maybe String) (Maybe [Expression]) (Maybe String) (Maybe TlaValue) deriving (Show, Generic)
+data Expression = ValEx TlaValue | NameEx String | OperEx String [Expression] | LetInEx [Declaration] Expression deriving (Show, Generic)
 data TlaValue = TlaStr String | TlaBool Bool | TlaInt Integer | FullSet String deriving (Show, Generic)
 
 instance FromJSON Spec where
@@ -37,8 +38,11 @@ instance FromJSON Module where
 
 instance FromJSON Declaration where
   parseJSON = withObject "Declaration" $ \obj -> do
-      src <- obj .: "source" >>= (.: "filename")
-      case src :: String of
+      src <- obj .: "source"
+      filename <- case src of
+        Object a -> a .: "filename"
+        _ -> return "UNKNOWN"
+      case filename :: String of
         "Functions"  -> return Ignored
         "SequencesExt"  -> return Ignored
         _            -> do k <- obj .: "kind"
@@ -59,11 +63,14 @@ instance FromJSON TlaValue where
         _                   -> fail ("Unknown value kind: " ++ valueKind)
 
 instance FromJSON Expression where
-  parseJSON = withObject "Expression" $ \obj -> Expression <$> obj .:  "kind"
-                                                           <*> obj .:? "oper"
-                                                           <*> obj .:? "args"
-                                                           <*> obj .:? "name"
-                                                           <*> obj .:? "value"
+    parseJSON = withObject "Expression" $ \obj -> do
+      exprKind <- obj .: "kind"
+      case exprKind :: String of
+        "ValEx" -> fmap ValEx (obj .: "value")
+        "NameEx" -> fmap NameEx (obj .: "name")
+        "OperEx" -> liftA2 OperEx (obj .: "oper") (obj .: "args")
+        "LetInEx" -> liftA2 LetInEx (obj .: "decls") (obj .: "body")
+        _ -> fail ("Unknown expression kind: " ++ exprKind)
 
 notIgnored Ignored = False
 notIgnored _ = True
@@ -83,170 +90,140 @@ convertDefinitions (Declaration k n body) = case body of
 convertBody :: Kind -> String -> Expression -> Either String H.Definition
 convertBody k i e = case k of
                       "OperEx" -> Right (H.Comment "A")
-                      "TlaOperDecl" -> convertExpression e >>= \x -> Right (H.ActionDefinition i [] [] x)
+                      "TlaOperDecl" -> if isTemporal e then Right (H.Comment (show e)) else convertExpression e >>= \x -> Right (H.ActionDefinition i [] [] x)
+                      "TlaAssumeDecl" -> Right (H.Comment (show e))
                       _ -> Left ("Unknown body kind " ++ show k)
 
 
 primed :: Expression -> Either String H.Identifier
-primed (Expression k o as i v) = case o of
-                                   Just "PRIME" -> case as of
-                                                     Just [a] -> identifier a
-                                   Nothing -> Left "Missing name in NameEx"
+primed (OperEx o [a]) = case o of
+                         "PRIME" -> identifier a
+                         _ -> Left ("Not prime operator: " ++ o)
 
 identifier :: Expression -> Either String H.Identifier
-identifier (Expression k o as i v) = if k == "NameEx" then case i of
-                                                        Just s -> Right s
-                                                        Nothing -> Left "Missing name in NameEx"
-                                                      else Left ("Missing identifier in " ++ show (Expression k o as i v))
+identifier (NameEx i) = Right i
+identifier e = Left ("Expected name expression when looking for identifier, got: " ++ show e)
 
 manyIdentifiers :: Expression -> Either String [H.Identifier]
-manyIdentifiers (Expression k o as i v) = case k of
-                                            "NameEx" -> fmap (:[]) (identifier (Expression k o as i v))
-                                            "OperEx" -> if o == Just "TUPLE" then case as of
-                                              Just es -> mapM identifier es
-                                              Nothing -> Left ("Missing args in " ++ show (Expression k o as i v))
-                                              else Left ("Missing identifier in " ++ show (Expression k o as i v))
+manyIdentifiers (NameEx i) = Right [i]
+manyIdentifiers (OperEx o as) = case o of
+                                  "TUPLE" -> mapM identifier as
+                                  _ -> Left ("Not tuple operator: " ++ o)
 
-identifierFromString :: Expression -> Either String H.Identifier
-identifierFromString (Expression k o as i v) = if k == "ValEx" then case v of
-                                                                 Just (TlaStr s) -> Right s
-                                                                 _ -> Left ("Expected string for identifier " ++ show v)
-                                                               else Left ("Missing identifier in " ++ show (Expression k o as i v))
-
-ref :: Maybe String -> Either String H.Value
-ref (Just v) = Right (H.Ref v)
-ref x = Left ("Not a reference: " ++ show x)
-
-val :: Maybe TlaValue -> Either String H.Value
-val (Just(TlaStr s)) = Right (H.Str s)
-val (Just(TlaBool b)) = Right (H.Boolean b)
-val (Just(TlaInt n)) = Right (H.Num n)
-val (Just (FullSet s)) = Right (H.FullSet s)
-val Nothing = Left "Value not found"
+val :: TlaValue -> H.Lit
+val (TlaStr s) = H.Str s
+val (TlaBool b) = H.Boolean b
+val (TlaInt n) = H.Num n
+val (FullSet s) = H.FullSet s
 
 splits :: [a] -> [(a, a)]
 splits [a, b] = [(a, b)]
 splits (a:b:ts) = (a,b):splits ts
 
-valueOperators :: [String]
-valueOperators = ["TUPLE", "MINUS", "PLUS", "EXCEPT", "DOMAIN", "RECORD"]
-
-valuePrefixes :: [String]
-valuePrefixes = ["FUN_", "SET_", "INT_"]
-
 convertValue :: Expression -> Either String H.Value
-convertValue (Expression k o as i v) = case k of
-                                         "NameEx" -> ref i
-                                         "ValEx" -> val v
-                                         "OperEx" -> case o of
-                                           Just "FUN_SET" -> case as of
-                                             Just [a1, a2] -> liftA2 H.FunSet (convertValue a1) (convertValue a2)
-                                           Just "FUN_APP" -> case as of
-                                             Just [a1, a2] -> liftA2 H.Index (convertValue a1) (convertValue a2)
-                                           Just "FUN_CTOR" -> case as of
-                                             Just [a1, a2, a3] -> liftA3 H.FunGen (identifier a1) (convertValue a2) (convertValue a3)
-                                           Just "SET_TIMES" -> case as of
-                                             Just [a1, a2] -> liftA2 H.SetTimes (convertValue a1) (convertValue a2)
-                                           Just "SET_ENUM" -> case as of
-                                             Just vs -> fmap H.Set (mapM convertValue vs)
-                                           Just "INT_RANGE" -> case as of
-                                             Just [a1, a2] -> liftA2 H.Range (convertValue a1) (convertValue a2)
-                                           Just "TUPLE" -> case as of
-                                             Just vs -> fmap H.Tuple (mapM convertValue vs)
-                                           Just "RECORD" -> case as of
-                                             Just vs -> fmap H.Record (convertRecordValues vs)
-                                           Just "MINUS" -> case as of
-                                             Just [a1, a2] -> liftA2 H.Sub (convertValue a1) (convertValue a2)
-                                           Just "PLUS" -> case as of
-                                             Just [a1, a2] -> liftA2 H.Add (convertValue a1) (convertValue a2)
-                                           Just "EXCEPT" -> case as of
-                                             Just (e:es) -> liftA2 H.Except (identifier e) (fmap splits (mapM convertValue es))
-                                           Just "DOMAIN" -> case as of
-                                             Just [a1] -> fmap H.Domain (convertValue a1)
-                                           Just op -> Left ("Unknown value operator " ++ op)
-                                         _ -> Left ("Unknown value kind " ++ k)
-
-convertPredicate :: Expression -> Either String H.Predicate
-convertPredicate (Expression k o as i v) = case k of
-                                             "OperEx" -> case o of
-                                               Just "NE" -> case as of
-                                                 Just [x1, x2] -> liftA2 H.Inequality (convertValue x1) (convertValue x2)
-                                               Just "EQ" -> case as of
-                                                 Just [x1, x2] -> liftA2 H.Equality (convertValue x1) (convertValue x2)
-                                               Just "GT" -> case as of
-                                                 Just [x1, x2] -> liftA2 H.Gt (convertValue x1) (convertValue x2)
-                                               Just "GE" -> case as of
-                                                 Just [x1, x2] -> liftA2 H.Gte (convertValue x1) (convertValue x2)
-                                               Just "EXISTS3" -> case as of
-                                                 Just [a1, a2, a3] -> liftA3 H.PExists (identifier a1) (convertValue a2) (convertPredicate a3)
-                                               Just "FORALL3" -> case as of
-                                                 Just [a1, a2, a3] -> liftA3 H.PForAll (identifier a1) (convertValue a2) (convertPredicate a3)
-                                               Just "AND" -> case as of
-                                                 Just es -> fmap H.And (mapM convertPredicate es)
-                                               Just "OR" -> case as of
-                                                 Just es -> fmap H.Or (mapM convertPredicate es)
-                                               Just "NOT" -> case as of
-                                                 Just [a] -> fmap H.Not (convertPredicate a)
-                                               Just "OPER_APP" -> case as of
-                                                 Just (e:es) -> liftA2 H.ConditionCall (identifier e) (mapM convertValue es)
-                                               _ -> Left ("Unknown predicate operator " ++ show o ++ " in " ++ show (Expression k o as i v))
-                                             _ -> Left("Unknown predicate kind " ++ k)
+convertValue (NameEx i) = Right(H.Ref i)
+convertValue (ValEx v) = Right(H.Lit (val v))
+convertValue (OperEx o as) = let r = case o of
+                                      "FUN_SET" -> case as of
+                                        [a1, a2] -> liftA2 H.FunSet (convertValue a1) (convertValue a2)
+                                      "FUN_APP" -> case as of
+                                        [a1, a2] -> liftA2 H.Index (convertValue a1) (convertValue a2)
+                                      "FUN_CTOR" -> case as of
+                                        [a1, a2, a3] -> liftA3 H.FunGen (identifier a2) (convertValue a3) (convertValue a1)
+                                      "SET_TIMES" -> case as of
+                                        [a1, a2] -> liftA2 H.SetTimes (convertValue a1) (convertValue a2)
+                                      "SET_ENUM" -> case as of
+                                        vs -> fmap H.Set (mapM convertValue vs)
+                                      "SET_IN" -> case as of
+                                        [a1, a2] -> liftA2 H.SetIn (convertValue a1) (convertValue a2)
+                                      "SET_MINUS" -> case as of
+                                        [a1, a2] -> liftA2 H.SetMinus (convertValue a1) (convertValue a2)
+                                      "SET_FILTER" -> case as of
+                                        [a1, a2, a3] -> liftA3 H.Filtered (identifier a1) (convertValue a2) (convertValue a3)
+                                      "INT_RANGE" -> case as of
+                                        [a1, a2] -> liftA2 H.Range (convertValue a1) (convertValue a2)
+                                      "TUPLE" -> case as of
+                                        vs -> fmap H.Tuple (mapM convertValue vs)
+                                      "RECORD" -> case as of
+                                        vs -> fmap H.Record (convertRecordValues vs)
+                                      "RECORD_SET" -> case as of
+                                        vs -> fmap H.RecordSet (convertRecordValues vs)
+                                      "MINUS" -> case as of
+                                        [a1, a2] -> liftA2 H.Sub (convertValue a1) (convertValue a2)
+                                      "PLUS" -> case as of
+                                        [a1, a2] -> liftA2 H.Add (convertValue a1) (convertValue a2)
+                                      "EXCEPT" -> case as of
+                                        (e:es) -> liftA2 H.Except (identifier e) (fmap splits (mapM convertValue es))
+                                      "DOMAIN" -> case as of
+                                        [a1] -> fmap H.Domain (convertValue a1)
+                                      "NE" -> case as of
+                                        [x1, x2] -> liftA2 H.Inequality (convertValue x1) (convertValue x2)
+                                      "EQ" -> case as of
+                                        [x1, x2] -> liftA2 H.Equality (convertValue x1) (convertValue x2)
+                                      "GT" -> case as of
+                                        [x1, x2] -> liftA2 H.Gt (convertValue x1) (convertValue x2)
+                                      "LT" -> case as of
+                                        [x1, x2] -> liftA2 H.Lt (convertValue x1) (convertValue x2)
+                                      "GE" -> case as of
+                                        [x1, x2] -> liftA2 H.Gte (convertValue x1) (convertValue x2)
+                                      "LE" -> case as of
+                                        [x1, x2] -> liftA2 H.Lte (convertValue x1) (convertValue x2)
+                                      "EXISTS3" -> case as of
+                                        [a1, a2, a3] -> liftA3 H.PExists (identifier a1) (convertValue a2) (convertValue a3)
+                                      "FORALL3" -> case as of
+                                        [a1, a2, a3] -> liftA3 H.PForAll (identifier a1) (convertValue a2) (convertValue a3)
+                                      "AND" -> case as of
+                                        es -> fmap H.And (mapM convertValue es)
+                                      "OR" -> case as of
+                                        es -> fmap H.Or (mapM convertValue es)
+                                      "NOT" -> case as of
+                                        [a] -> fmap H.Not (convertValue a)
+                                      "IF_THEN_ELSE" -> case as of
+                                        [a1, a2, a3] -> liftA3 H.If (convertValue a1) (convertValue a2) (convertValue a3)
+                                      "OPER_APP" -> case as of
+                                        (e:es) -> liftA2 H.ConditionCall (identifier e) (mapM convertValue es)
+                                      op -> Left ("Unknown value operator " ++ op)
+                             in left (\s -> s ++ "\nwhen converting " ++ show (OperEx o as)) r
+convertValue (LetInEx ds b) = liftA2 H.Let (mapM convertDefinitions ds) (convertValue b)
 
 convertAction :: Expression -> Either String H.Action
-convertAction (Expression k o as i v) = case k of
-                                          "OperEx" -> case o of
-                                            Just "EXISTS3" -> case as of
-                                              Just [a1, a2, a3] -> liftA3 H.Exists (identifier a1) (convertValue a2) (convertExpression a3)
-                                            Just "FORALL3" -> case as of
-                                              Just [a1, a2, a3] -> liftA3 H.ForAll (identifier a1) (convertValue a2) (convertExpression a3)
-                                            Just "UNCHANGED" -> case as of
-                                              Just [a] -> liftA H.Unchanged (manyIdentifiers a)
-                                            Just "AND" -> case as of
-                                              Just es -> fmap H.ActionAnd (mapM convertExpression es)
-                                            Just "EQ" -> case as of
-                                              Just [a1, a2] -> liftA2 H.Primed (primed a1) (convertValue a2)
-                                            Just op -> Left("Unknown action operator " ++ op)
-                                          _ -> Left("Unknown action kind " ++ k)
+convertAction (OperEx o as) = let r = case o of
+                                       "EXISTS3" -> case as of
+                                         [a1, a2, a3] -> liftA3 H.Exists (identifier a1) (convertValue a2) (convertExpression a3)
+                                       "FORALL3" -> case as of
+                                         [a1, a2, a3] -> liftA3 H.ForAll (identifier a1) (convertValue a2) (convertExpression a3)
+                                       "UNCHANGED" -> case as of
+                                         [a] -> liftA H.Unchanged (manyIdentifiers a)
+                                       "AND" -> case as of
+                                         es -> fmap H.ActionAnd (mapM convertExpression es)
+                                       "EQ" -> case as of
+                                         [a1, a2] -> liftA2 H.Primed (primed a1) (convertValue a2)
+                                       op -> Left("Unknown action operator " ++ op ++ " with args " ++ show as)
+                             in left (\s -> s ++ "\nwhen converting " ++ show (OperEx o as)) r
 
 convertExpression :: Expression -> Either String H.Action
-convertExpression (Expression k o as i v) = case k of
-                                              "OperEx" -> case o of
-                                                    Just x -> if isValue (Expression k o as i v) then
-                                                      convertValue (Expression k o as i v) >>= \x -> Right(H.Value x)
-                                                      else if isPredicate (Expression k o as i v) then
-                                                      convertPredicate (Expression k o as i v) >>= \x -> Right(H.Condition x)
-                                                      else convertAction (Expression k o as i v)
-                                                    Nothing -> Left "Operator required"
-                                              "ValEx" -> convertValue (Expression k o as i v) >>= \cv -> Right(H.Value cv)
-                                              _ -> Left ("Unknown expresion type: " ++ k)
+convertExpression (OperEx o as) = if isPredicate (OperEx o as) then convertValue (OperEx o as) >>= \x -> Right(H.Condition x) else convertAction (OperEx o as)
+convertExpression (ValEx v) =  convertValue (ValEx v) >>= \cv -> Right(H.Condition cv)
 
 actionOperators :: [String]
 actionOperators = ["PRIME", "UNCHANGED"]
 
-isValue :: Expression -> Bool
-isValue (Expression k o as i v) = case o of
-                                        Just x -> if x `elem` valueOperators || any (flip isPrefixOf x) valuePrefixes
-                                                  then case as of
-                                                         Just es -> all isValue es
-                                                         Nothing -> True
-                                                  else False
-                                        Nothing -> True
+temporalOperators :: [String]
+temporalOperators = ["GLOBALLY", "STUTTER", "IMPLIES", "LEADS_TO"]
 
 isPredicate :: Expression -> Bool
-isPredicate (Expression k o as i v) = case o of
-                                        Just x -> if x `elem` actionOperators
-                                                  then False
-                                                  else case as of
-                                                         Just es -> all isPredicate es
-                                                         Nothing -> True
-                                        Nothing -> True
+isPredicate (OperEx o as) = o `notElem` actionOperators && all isPredicate as
+isPredicate _ = True
+
+isTemporal :: Expression -> Bool
+isTemporal (OperEx o as) = o `elem` temporalOperators || any isTemporal as
+isTemporal _ = False
 
 convertRecordValues :: [Expression] -> Either String [(H.Key, H.Value)]
 convertRecordValues [] = Right []
-convertRecordValues (k:v:vs) = do k <- identifierFromString k
-                                  e <- convertValue v
-                                  rs <- convertRecordValues vs
-                                  return ((H.Key k, e):rs)
+convertRecordValues (ValEx l:v:vs) = do e <- convertValue v
+                                        rs <- convertRecordValues vs
+                                        return ((H.Key (val l), e):rs)
 
 parseJson :: FilePath -> IO (Either String (H.Module, [H.Definition]))
 parseJson file = do content <- B.readFile file

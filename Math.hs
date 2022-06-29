@@ -54,4 +54,4 @@ number = do
   digits <- P.many1 P.digit
   let n = foldl (\x d -> 10*x + toInteger (digitToInt d)) 0 digits
   ws
-  return (Num n)
+  return (Lit (Num n))

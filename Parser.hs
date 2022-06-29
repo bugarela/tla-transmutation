@@ -141,7 +141,7 @@ action =  do string "IF"
              string "ELSE"
              ws
              af <- action
-             return (If p at af)
+             return (ActionIf p at af)
          <|>
          do {p <- predicate; return (Condition p)}
          <|>
@@ -282,7 +282,7 @@ mapping = do try $ do ws
              ws
              v <- value
              ws
-             return (Key i, v)
+             return (Key (Str i), v)
 
 primed = do try $ do i <- identifier
                      char '\''
@@ -376,6 +376,6 @@ record = do try $ do char '['
             ws
             return (Except i [(Ref k, v)])
 
-literal = do try $ do {char '\"'; cs <- many1 (noneOf reserved); char '\"'; ws; return (Str cs)}
+literal = do try $ do {char '\"'; cs <- many1 (noneOf reserved); char '\"'; ws; return (Lit (Str cs))}
 
 arithmeticExpression = Math.build

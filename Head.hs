@@ -21,32 +21,55 @@ data Definition = ActionDefinition Identifier [Parameter] Documentation Action
                 | Comment String
                 deriving(Show, Eq)
 
-data Key = Key Identifier | All Identifier Value deriving(Show, Eq)
+data Lit = Str String | Boolean Bool | Num Integer | FullSet String deriving(Show, Eq)
 
-data CaseMatch = Match Predicate Value | DefaultMatch Value deriving(Show, Eq)
+data Key = Key Lit | All Identifier Value deriving(Show, Eq)
 
-data Predicate = Equality Value Value | Inequality Value Value
-               | Gt Value Value | Lt Value Value
-               | Gte Value Value | Lte Value Value
-               | RecordBelonging Value Value
-               | RecordNotBelonging Value Value
-               | And [Predicate]
-               | Or [Predicate]
-               | Not Predicate
-               | ConditionCall Identifier [Value]
-               | PExists Identifier Value Predicate
-               | PForAll Identifier Value Predicate
-               deriving(Show, Eq)
+data CaseMatch = Match Value Value | DefaultMatch Value deriving(Show, Eq)
 
-data Action = Condition Predicate | Value Value | Primed Identifier Value | Unchanged [Identifier] | ActionNot Action
-            | ActionAnd [Action] | ActionOr [Action] | ActionCall Identifier [Value]
-            | If Predicate Action Action | Exists Identifier Value Action | ForAll Identifier Value Action deriving(Show, Eq)
+data Action = Condition Value
+            | Primed Identifier Value
+            | Unchanged [Identifier]
+            | ActionNot Action
+            | ActionAnd [Action]
+            | ActionOr [Action]
+            | ActionCall Identifier [Value]
+            | ActionIf Value Action Action
+            | Exists Identifier Value Action
+            | ForAll Identifier Value Action
+            deriving(Show, Eq)
 
-data Value = Set [Value] | Tuple [Value] | FunSet Value Value | FunGen Identifier Value Value | SetTimes Value Value
-           | Union Value Value | Filtered Identifier Value Predicate | Cardinality Value
-           | Record [(Key, Value)] | Except Identifier [(Value, Value)] | Case [CaseMatch] | Domain Value
-           | Str String | Boolean Bool | FullSet String | Index Value Value | Range Value Value
-           | Num Integer
+data Value = Equality Value Value
+           | Inequality Value Value
+           | Gt Value Value | Lt Value Value
+           | Gte Value Value | Lte Value Value
+           | RecordBelonging Value Value
+           | RecordNotBelonging Value Value
+           | And [Value]
+           | Or [Value]
+           | Not Value
+           | If Value Value Value
+           | ConditionCall Identifier [Value]
+           | PExists Identifier Value Value
+           | PForAll Identifier Value Value
+           | Let [Definition] Value
+           | Set [Value]
+           | Tuple [Value]
+           | FunSet Value Value
+           | FunGen Identifier Value Value
+           | SetTimes Value Value
+           | SetIn Value Value
+           | SetMinus Value Value
+           | Union Value Value
+           | Filtered Identifier Value Value
+           | Cardinality Value
+           | Record [(Key, Value)]
+           | RecordSet [(Key, Value)]
+           | Except Identifier [(Value, Value)]
+           | Case [CaseMatch]
+           | Domain Value
+           | Index Value Value
+           | Range Value Value
            | Ref String
            | Neg Value
            | Add Value Value
@@ -54,4 +77,5 @@ data Value = Set [Value] | Tuple [Value] | FunSet Value Value | FunGen Identifie
            | Mul Value Value
            | Div Value Value
            | Mod Value Value
+           | Lit Lit
            deriving (Show, Eq)

@@ -71,7 +71,7 @@ mapMerge (m:ms) = "Map.merge(\n  " ++ m ++ ",\n" ++ ident (mapMerge ms) ++ ")\n"
 
 preassignment as = (head as) == '(' || take 2 as == "if" || dropWhile (/= ':') as == [] || take 4 as == "Enum" || take 3 as == "Map" || take 4 as == "List"
 
-interpolate (Str i) = "#{inspect " ++ i ++ "}"
+interpolate (Lit (Str i)) = "#{inspect " ++ i ++ "}"
 interpolate (Ref i) = "#{inspect " ++ i ++ "}"
 interpolate i = show i
 
@@ -113,5 +113,4 @@ findVariables ds = concat (map (\d -> case d of {Variables cs -> cs; _ -> [] }) 
 
 findIdentifier i ds = case find (isNamed i) ds of
                         Just a -> a
-                        Nothing -> error("Definition not found: " ++ (show i))
-
+                        Nothing -> error("Definition not found: " ++ show i ++ " in " ++ show ds)
