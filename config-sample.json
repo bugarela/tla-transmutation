@@ -1,0 +1,29 @@
+{
+  "processes": [
+    {
+      "process_id": "node0",
+      "actions": [
+        "InitiateProbe",
+        "SendMsg(0)",
+        "Deactivate(0)"
+      ]
+    },
+    {
+      "process_id": "node1",
+      "actions": [
+        "PassToken(1)",
+        "SendMsg(1)",
+        "Deactivate(1)"
+      ]
+    },
+    {
+      "process_id": "node2",
+      "actions": [
+        "PassToken(2)",
+        "SendMsg(2)",
+        "Deactivate(2)"
+      ]
+    }
+  ],
+  "shared_variables": ["tcolor", "tpos", "active"]
+}
