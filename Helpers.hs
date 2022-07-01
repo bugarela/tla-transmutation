@@ -10,11 +10,9 @@ import DocHandler
 import Snippets
 
 -- (MOD) helpers
-moduleHeader (Module i doc) = "defmodule " ++ pascal i ++ " do\n" ++ ident (moduleDoc doc ++ oracleDelaration)
+moduleHeader name (Module _ doc) = "defmodule " ++ pascal name ++ " do\n" ++ ident (moduleDoc doc ++ oracleDelaration)
 
 moduleContext (Module m _) = [(m,"module")]
-
-mainCall (Module i _) s = pascal i ++ ".main(\n" ++ ident s ++ "\n)\n"
 
 -- (CALL) helpers
 call i [] = snake i

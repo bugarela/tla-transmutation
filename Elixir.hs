@@ -12,9 +12,22 @@ generate :: Spec -> DistributionConfig -> [(String, ElixirCode)]
 generate (Spec m i n ds) (Config ps shared) = let defs = filter (not . (specialDef i n)) ds
                                                   cs = findConstants ds
                                                   vs = findVariables ds
-                                                  defInit = findIdentifier i ds
                                                   -- defNext = findIdentifier n ds
-                                              in map (\(PConfig p as) -> ((moduleName m) ++ "_" ++ p, spec m cs vs (filterDefs as defs) defInit (ActionDefinition n [] [] (ActionOr (map (\(i, ps) -> ActionCall i ps) as))))) ps
+                                              in map (generateForProcess m n cs vs defs) ps
+
+generateStarter :: Spec -> (String, ElixirCode)
+generateStarter (Spec m i _ ds) = let cs = findConstants ds
+                                      vs = findVariables ds
+                                      g = map (\c -> (c, "const")) cs ++ map (\v -> (v, "variable")) vs
+                                      state = ini (g ++ moduleContext m) (findIdentifier i ds)
+                                  in (moduleName m, starterTask ((pascal . moduleName) m) state)
+
+generateForProcess :: Module -> String -> [Constant] -> [Variable] -> [Definition] -> ProcessConfig -> (String, ElixirCode)
+generateForProcess m n cs vs defs (PConfig p as) = let name = (moduleName m) ++ "_" ++ p
+                                                       header = moduleHeader name m
+                                                       ds = filterDefs as defs
+                                                       defNext = (ActionDefinition n [] [] (ActionOr (map (\(i, ps) -> ActionCall i ps) as)))
+                                                   in (name, spec header cs vs ds defNext)
 
 filterDefs :: [Call] -> [Definition] -> [Definition]
 filterDefs is ds = let actionNames = map fst is
@@ -22,20 +35,19 @@ filterDefs is ds = let actionNames = map fst is
 
 {-- \vdash --}
 -- (MOD)
-spec :: Module -> [Constant] -> [Variable] -> [Definition] -> Init -> Next -> ElixirCode
-spec m cs vs ds di dn = let g = map (\c -> (c, "const")) cs ++ map (\v -> (v, "variable")) vs
-                            state = ini (g ++ moduleContext m) di
-                        in concat [moduleHeader m,
-                                   ident (concat [
-                                             constants cs,
-                                             mapAndJoin (definition g) ds,
-                                             "\n",
-                                             next g dn,
-                                             decideAction
-                                             ]
-                                         ),
-                                   "\nend\n\n",
-                                   mainCall m state]
+spec :: String -> [Constant] -> [Variable] -> [Definition] -> Next -> ElixirCode
+spec h cs vs ds dn = let g = map (\c -> (c, "const")) cs ++ map (\v -> (v, "variable")) vs
+                     in concat [h,
+                                ident (concat [
+                                          constants cs,
+                                          mapAndJoin (definition g) ds,
+                                          "\n",
+                                          next g dn,
+                                          mainFunction,
+                                          decideAction
+                                          ]
+                                      ),
+                                   "\nend\n\n"]
 
 {-- \vdash_const --}
 -- (CONST)
@@ -87,13 +99,13 @@ actionsAndConditions g (Condition p) = ([value g p], [])
 -- [new] (EXT)
 actionsAndConditions g (Exists i v a) = let ig = (i, "param"):g
                                             (ics, _) = actionsAndConditions ig a
-                                            c = "Enum.any?(" ++ value ig v ++ ", fn (" ++ i ++ ") ->" ++ cFold ics ++ "end\n)"
+                                            c = "Enum.any?(" ++ value ig v ++ ", fn (" ++ i ++ ") ->" ++ cFold ics ++ " end\n)"
                                         in ([c], [decide g [a]])
 
 -- [new]: must test
 actionsAndConditions g (ForAll i v a) = let ig = (i, "param"):g
                                             (ics, ias) = actionsAndConditions ig a
-                                            c = "Enum.all?(" ++ value ig v ++ ", fn (" ++ i ++ ") ->" ++ cFold ics ++ "end\n)"
+                                            c = "Enum.all?(" ++ value ig v ++ ", fn (" ++ i ++ ") ->" ++ cFold ics ++ " end\n)"
                                         in ([c], ias)
 
 -- (TRA)
@@ -154,7 +166,7 @@ value g (And ps) =  intercalate " and " (map (value g) ps)
 -- [new] (PRED-OR)
 value g (Or ps) =  intercalate " or " (map (value g) ps)
 
-value g (If c t e) = "if " ++ value g c ++ ", do: " ++ value g t ++ ", else: " ++ value g e
+value g (If c t e) = "(if " ++ value g c ++ ", do: " ++ value g t ++ ", else: " ++ value g e ++ ")"
 
 -- [new] (PRED-ALL)
 value g (PForAll i v p) = "Enum.all?(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ value ((i, "param"):g) p ++ " end)"
@@ -189,7 +201,7 @@ value g (Record rs) = let (literals, generations) = partition isLiteral rs
                       in if m == [] then l else m ++ " |> Enum.into(" ++ l ++ ")"
 
 -- (REC-EXCEPT)
-value g (Except i es) = unlines (map (\(k,v) -> "Map.put(" ++ reference g i ++ ", " ++ value g k ++ ", " ++ value g v ++ ")") es)
+value g (Except i es) = intercalate "\n" (map (\(k,v) -> "Map.put(" ++ reference g i ++ ", " ++ value g k ++ ", " ++ value g v ++ ")") es)
 
 value g (FunGen i s v) = "MapSet.new(" ++ value g s ++ ", fn(" ++ i ++ ") -> " ++ value ((i, "param"):g) v ++ " end)"
 
@@ -239,7 +251,7 @@ next :: Context -> Definition -> ElixirCode
 
 -- (NEXT)
 next g (ActionDefinition _ _ doc a) = let (_, actions) = actionsAndConditions g a
-                                in funDoc doc ++ "def main(variables) do\n" ++ ident (logState ++ "main(" ++ (aFold actions)) ++ ")\nend\n"
+                                in funDoc doc ++ "def next(variables) do\n" ++ ident (logState ++ "next(" ++ (aFold actions)) ++ ")\nend\n"
 
 
 {-- \vdash_i -}
