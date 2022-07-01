@@ -100,6 +100,8 @@ name (ActionDefinition i _ _ _) = i
 name (ValueDefinition i _) = i
 name _ = ""
 
+moduleName (Module i _) = i
+
 partitionCondition (Condition c) = [c]
 partitionCondition (ActionCall c ps) = [ConditionCall c ps]
 partitionCondition (ActionOr cs) = let ics = foldr (++) [] (map partitionCondition cs) in if ics /= [] then [Or ics] else []

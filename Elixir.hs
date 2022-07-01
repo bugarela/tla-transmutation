@@ -14,9 +14,7 @@ generate (Spec m i n ds) (Config ps shared) = let defs = filter (not . (specialD
                                                   vs = findVariables ds
                                                   defInit = findIdentifier i ds
                                                   defNext = findIdentifier n ds
-                                              in map (\(PConfig p as) -> (p, spec m cs vs (filterDefs as defs) defInit defNext)) ps
-
-filename (Module m _) = snake m ++ ".ex"
+                                              in map (\(PConfig p as) -> ((moduleName m) ++ "_" ++ p, spec m cs vs (filterDefs as defs) defInit defNext)) ps
 
 filterDefs :: [String] -> [Definition] -> [Definition]
 filterDefs is ds = let actionNames = map stripParameters is

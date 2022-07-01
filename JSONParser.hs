@@ -21,8 +21,9 @@ data Spec = Spec [Module] deriving (Show,Generic)
 
 data Module = Module String [Declaration] deriving (Show, Generic)
 
-data Declaration = Declaration Kind String (Maybe Expression) | Ignored deriving (Show, Generic)
+data Declaration = Declaration Kind String (Maybe [FormalParam]) (Maybe Expression) | Ignored deriving (Show, Generic)
 data Expression = ValEx TlaValue | NameEx String | OperEx String [Expression] | LetInEx [Declaration] Expression deriving (Show, Generic)
+data FormalParam = Param String deriving (Show, Generic)
 data TlaValue = TlaStr String | TlaBool Bool | TlaInt Integer | FullSet String deriving (Show, Generic)
 
 instance FromJSON Spec where
@@ -47,8 +48,14 @@ instance FromJSON Declaration where
         "SequencesExt"  -> return Ignored
         _            -> do k <- obj .: "kind"
                            n <- obj .: "name"
+                           ps <- obj .:? "formalParams"
                            b <- obj .:? "body"
-                           return (Declaration k n b)
+                           return (Declaration k n ps b)
+
+instance FromJSON FormalParam where
+  parseJSON = withObject "FormalParam" $ \obj -> do
+      name <- obj .: "name"
+      return (Param name)
 
 instance FromJSON TlaValue where
     parseJSON = withObject "TlaValue" $ \obj -> do
@@ -79,21 +86,24 @@ convertSpec :: Spec -> Either String (H.Module, [H.Definition])
 convertSpec (Spec [Module i ds]) = fmap (H.Module i [],) (mapM convertDefinitions (filter notIgnored ds))
 
 convertDefinitions :: Declaration -> Either String H.Definition
-convertDefinitions (Declaration k n body) = case body of
-                                              Just b -> convertBody k n b
-                                              Nothing -> case k of
-                                                "TlaConstDecl" -> Right (H.Constants [n])
-                                                "TlaVarDecl" -> Right (H.Variables [n])
-                                                "OperEx" -> Left "OperEx needs body"
-                                                _ -> Left ("Unknown kind" ++ show k ++ " body " ++ show body)
+convertDefinitions (Declaration k n ps body) = case body of
+                                                 Just b -> convertBody k n ps b
+                                                 Nothing -> case k of
+                                                   "TlaConstDecl" -> Right (H.Constants [n])
+                                                   "TlaVarDecl" -> Right (H.Variables [n])
+                                                   "OperEx" -> Left "OperEx needs body"
+                                                   _ -> Left ("Unknown kind" ++ show k ++ " body " ++ show body)
 
-convertBody :: Kind -> String -> Expression -> Either String H.Definition
-convertBody k i e = case k of
-                      "OperEx" -> Right (H.Comment "A")
-                      "TlaOperDecl" -> if isTemporal e then Right (H.Comment (show e)) else convertExpression e >>= \x -> Right (H.ActionDefinition i [] [] x)
-                      "TlaAssumeDecl" -> Right (H.Comment (show e))
-                      _ -> Left ("Unknown body kind " ++ show k)
+convertBody :: Kind -> String -> Maybe [FormalParam] -> Expression -> Either String H.Definition
+convertBody k i ps e = case k of
+                         -- "OperEx" -> Right (H.Comment "A")
+                         "TlaOperDecl" -> if isTemporal e then Right (H.Comment (show e)) else convertExpression e >>= \x -> Right (H.ActionDefinition i (convertParams ps) [] x)
+                         "TlaAssumeDecl" -> Right (H.Comment (show e))
+                         _ -> Left ("Unknown body kind " ++ show k)
 
+convertParams :: Maybe [FormalParam] -> [String]
+convertParams (Just ps) = map (\(Param s) -> s) ps
+convertParams Nothing = []
 
 primed :: Expression -> Either String H.Identifier
 primed (OperEx o [a]) = case o of
