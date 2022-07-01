@@ -1,23 +1,31 @@
 module Elixir where
 
 import Data.List
-import Data.List.Extra
 
 import Head
-import Math
 import Snippets
 import DocHandler
 import Helpers
+import ConfigParser
 
-generate :: Spec -> ElixirCode
-generate (Spec m i n ds) = let defs = filter (not . (specialDef i n)) ds
-                               cs = findConstants ds
-                               vs = findVariables ds
-                               defInit = findIdentifier i ds
-                               defNext = findIdentifier n ds
-                           in spec m cs vs defs defInit defNext
+generate :: Spec -> DistributionConfig -> [(String, ElixirCode)]
+generate (Spec m i n ds) (Config ps shared) = let defs = filter (not . (specialDef i n)) ds
+                                                  cs = findConstants ds
+                                                  vs = findVariables ds
+                                                  defInit = findIdentifier i ds
+                                                  defNext = findIdentifier n ds
+                                              in map (\(PConfig p as) -> (p, spec m cs vs (filterDefs as defs) defInit defNext)) ps
 
 filename (Module m _) = snake m ++ ".ex"
+
+filterDefs :: [String] -> [Definition] -> [Definition]
+filterDefs is ds = let actionNames = map stripParameters is
+                   in filter (\d -> name d `elem` actionNames) ds
+
+stripParameters :: String -> String
+stripParameters [] = ""
+stripParameters ('(':_) = ""
+stripParameters (s:ss) = s:stripParameters ss
 
 {-- \vdash --}
 -- (MOD)

@@ -93,7 +93,12 @@ tabIfline [] = []
 tabIfline xs = "  " ++ xs
 
 isNamed i (ActionDefinition id _ _ _) = i == id
+isNamed i (ValueDefinition id _) = i == id
 isNamed _ _ = False
+
+name (ActionDefinition i _ _ _) = i
+name (ValueDefinition i _) = i
+name _ = ""
 
 partitionCondition (Condition c) = [c]
 partitionCondition (ActionCall c ps) = [ConditionCall c ps]
