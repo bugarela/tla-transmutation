@@ -13,17 +13,12 @@ generate (Spec m i n ds) (Config ps shared) = let defs = filter (not . (specialD
                                                   cs = findConstants ds
                                                   vs = findVariables ds
                                                   defInit = findIdentifier i ds
-                                                  defNext = findIdentifier n ds
-                                              in map (\(PConfig p as) -> ((moduleName m) ++ "_" ++ p, spec m cs vs (filterDefs as defs) defInit defNext)) ps
+                                                  -- defNext = findIdentifier n ds
+                                              in map (\(PConfig p as) -> ((moduleName m) ++ "_" ++ p, spec m cs vs (filterDefs as defs) defInit (ActionDefinition n [] [] (ActionOr (map (\(i, ps) -> ActionCall i ps) as))))) ps
 
-filterDefs :: [String] -> [Definition] -> [Definition]
-filterDefs is ds = let actionNames = map stripParameters is
+filterDefs :: [Call] -> [Definition] -> [Definition]
+filterDefs is ds = let actionNames = map fst is
                    in filter (\d -> name d `elem` actionNames) ds
-
-stripParameters :: String -> String
-stripParameters [] = ""
-stripParameters ('(':_) = ""
-stripParameters (s:ss) = s:stripParameters ss
 
 {-- \vdash --}
 -- (MOD)

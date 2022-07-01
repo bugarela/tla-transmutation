@@ -37,6 +37,8 @@ parseTla a = do f <- readFile a
                 let e = parse specification "Error:" f
                 return (left show e)
 
+parseCall c = parse call ("Error parsing " ++ c ++ ":") c
+
 specification = do (n, d) <- moduleHeader
                    ws
                    ds <- many definition

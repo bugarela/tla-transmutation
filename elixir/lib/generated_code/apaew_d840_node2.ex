@@ -63,7 +63,15 @@ defmodule ApaewD840 do
   def main(variables) do
     IO.puts (inspect variables)
 
-    main(%{})
+    main((
+      decide_action(
+        List.flatten([
+          %{ action: "PassToken(Lit (Num 2))", condition: pass_token_condition(variables, 2), state: pass_token(variables, 2) },
+          %{ action: "SendMsg(Lit (Num 2))", condition: send_msg_condition(variables, 2), state: send_msg(variables, 2) },
+          %{ action: "Deactivate(Lit (Num 2))", condition: deactivate_condition(variables, 2), state: deactivate(variables, 2) }
+        ])
+      )
+    ))
   end
 
   def decide_action(actions) do
