@@ -1,26 +1,26 @@
 module Parser where
 
 import Text.Parsec
-import Math -- cabal install ParserFunction
+import Math
 import Control.Arrow
 import Head
 
-ignore = many $ thingsToIgnore
+ignore = many thingsToIgnore
 
-thingsToIgnore = theorem <|> moduleInstance <|> extends <|> divisionLine <|> do{(oneOf " \n"); return()}
+thingsToIgnore = theorem <|> moduleInstance <|> extends <|> divisionLine <|> do{oneOf " \n"; return()}
 
 divisionLine = do try $ do {string "--"; many (char '-'); char '\n'; ignore; return()}
 
 variablesDeclaration = do try $ do string "VARIABLE"
                                    optional (char 'S')
                                    ws
-                                   vs <- identifier `sepBy` (try $ comma)
+                                   vs <- identifier `sepBy` try comma
                                    ignore
-                                   return (vs)
+                                   return vs
 
 theorem = do try $ do {string "THEOREM"; ws; manyTill anyChar (char '\n'); ignore; return()}
 moduleInstance = do try $ do {string "INSTANCE"; ws; identifier; ignore; return()}
-extends = do try $ do {string "EXTENDS"; ws; identifier `sepBy` (try $ comma); ignore; return()}
+extends = do try $ do {string "EXTENDS"; ws; identifier `sepBy` try comma; ignore; return()}
 
 identifier = many1 (oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
 constant = do try $ do c <- oneOf ['A'..'Z']
@@ -38,6 +38,20 @@ parseTla a = do f <- readFile a
                 return (left show e)
 
 parseCall c = parse call ("Error parsing " ++ c ++ ":") c
+
+parseState s = parse action ("Error parsing " ++ s ++ ":") s
+
+parseTrace t = parse trace ("Error parsing " ++ t ++ ":") t
+
+trace = many1 $ do string "State "
+                   _ <- many digit
+                   string ": <"
+                   _ <- manyTill anyChar (try (char '>'))
+                   ignore
+                   a <- action
+                   ignore
+                   return a
+
 
 specification = do (n, d) <- moduleHeader
                    ws
@@ -61,19 +75,19 @@ moduleHeader = do many (char '-')
 comment = do try $ do string "(*"
              c <- anyChar `manyTill` (do try $ string "*)")
              ignore
-             return (c)
+             return c
           <|>
           do try $ do string "\\* "
-             c <- anyChar `manyTill` (char '\n')
+             c <- anyChar `manyTill` char '\n'
              ignore
-             return (c)
+             return c
 
 declaration = do try $ do string "CONSTANT"
                           optional (char 'S')
                           ws
-                          cs <- constant `sepBy` (try $ comma)
+                          cs <- constant `sepBy` try comma
                           ignore
-                          return (cs)
+                          return cs
 
 parameters = identifier `sepBy` comma
 
@@ -101,18 +115,17 @@ defSignature = do try $ do i <- identifier
                    ws
                    return (i, [])
 
-definition = do {c <- comment; return (Comment c)}
+definition = do {Comment <$> comment;}
              <|>
-             do try $ do {cs <- declaration; return (Constants cs)}
+             do try $ do {Constants <$> declaration;}
              <|>
-             do try $ do {cs <- variablesDeclaration; return (Variables cs)}
+             do try $ do {Variables <$> variablesDeclaration;}
              <|>
              do try $ do i <- identifier
                          ws
                          string "=="
                          ws
-                         v <- value
-                         return (ValueDefinition i v)
+                         ValueDefinition i <$> value
              <|>
              do try $ do (i, ps) <- defSignature
                          string "=="
@@ -145,14 +158,14 @@ action =  do string "IF"
              af <- action
              return (ActionIf p at af)
          <|>
-         do {p <- predicate; return (Condition p)}
+         do {Condition <$> predicate;}
          <|>
-         do {p <- primed; char '='; ws; v <- value; return (Primed p v)}
+         do {p <- primed; char '='; ws; Primed p <$> value;}
          <|>
          do string "UNCHANGED"
             ws
             string "<<"
-            vs <- identifier `sepBy` (comma)
+            vs <- identifier `sepBy` comma
             string ">>"
             ws
             return (Unchanged vs)
@@ -206,50 +219,48 @@ predicate = do try $ do char '('
 atomPredicate = do try $ do v1 <- value
                             char '='
                             ws
-                            v2 <- value
-                            return (Equality v1 v2)
+                            Equality v1 <$> value
                 <|>
                 do try $ do v1 <- value
                             char '#'
                             ws
-                            v2 <- value
-                            return (Inequality v1 v2)
+                            Inequality v1 <$> value
                 <|>
                 do try $ do v1 <- value
                             char '>'
                             ws
-                            v2 <- value
-                            return (Gt v1 v2)
+                            Gt v1 <$> value
                 <|>
                 do try $ do v1 <- value
                             char '<'
                             ws
-                            v2 <- value
-                            return (Lt v1 v2)
+                            Lt v1 <$> value
                 <|>
                 do try $ do v1 <- value
                             string ">="
                             ws
-                            v2 <- value
-                            return (Gte v1 v2)
+                            Gte v1 <$> value
                 <|>
                 do try $ do v1 <- value
                             string "<="
                             ws
-                            v2 <- value
-                            return (Lte v1 v2)
+                            Lte v1 <$> value
                 <|>
                 do try $ do v1 <- value
                             string "\\in"
                             ws
-                            v2 <- value
-                            return (RecordBelonging v1 v2)
+                            RecordBelonging v1 <$> value
                 <|>
                 do try $ do v1 <- value
                             string "\\notin"
                             ws
                             v2 <- value
-                            return (RecordNotBelonging v1 v2)
+                            RecordNotBelonging v1 <$> value
+                <|>
+                do try $ do string "\\A"
+                            ws
+                            (i, v, p) <- inFilter
+                            return (PForAll i v p)
 
 predicateConditionCall = do try $ do i <- identifier
                                      return (ConditionCall i [])
@@ -289,7 +300,7 @@ mapping = do try $ do ws
 primed = do try $ do i <- identifier
                      char '\''
                      ws
-                     return (i)
+                     return i
 
 value = do try $ do string "Cardinality("
                     ws
@@ -298,30 +309,31 @@ value = do try $ do string "Cardinality("
                     ws
                     return (Cardinality s)
         <|>
-        do {c <- caseStatement; return (c)}
+        do {caseStatement;}
         <|>
         do try $ do {n1 <- Math.number; string ".."; n2 <- Math.number; ws; return (Range n1 n2)}
         <|>
-        do {r <- record; return (r)}
+        do {record;}
         <|>
         do try $ do {i <- identifier; char '['; k <- identifier; char ']'; ws; return (Index (Ref i) (Ref k))}
         <|>
         do try $ do {i <- identifier; char '['; k <- literal; char ']'; ws; return (Index (Ref i) k)}
         <|>
-        do {s <- set; return (s)}
+        do {set;}
         <|>
         do try $ do {n1 <- Math.number; string ".."; n2 <- Math.number; ws; return (Range n1 n2)}
         <|>
         do try $ do {e <- arithmeticExpression; ws; return (e)}
         <|>
-        do {l <- literal; return (l)}
+        do {literal;}
 
 set = do try $ do {s1 <- atomSet; string "\\cup"; ws; s2 <- set; ws; return (Union s1 s2)}
       <|>
       atomSet
 
 atomSet = do try $ do char '{'
-                      vs <- value `sepBy` (try $ comma)
+                      ws
+                      vs <- value `sepBy` try comma
                       char '}'
                       ws
                       return (Set vs)
@@ -342,7 +354,7 @@ caseMatch = do try $ do string "OTHER"
                         ws
                         return (DefaultMatch v)
            <|>
-           do p <- (try $ predicate <|> predicateConditionCall)
+           do p <- try $ predicate <|> predicateConditionCall
               ws
               string "->"
               ws
@@ -352,12 +364,12 @@ caseMatch = do try $ do string "OTHER"
 
 caseStatement = do try $ do string "CASE"
                             ws
-                            cs <- caseMatch `sepBy` (try $ do {ws; string "[]"; ws})
+                            cs <- caseMatch `sepBy` try (do {ws; string "[]"; ws})
                             ws
                             return (Case cs)
 
 record = do try $ do char '['
-                     ms <- mapping `sepBy` (try $ comma)
+                     ms <- mapping `sepBy` try comma
                      char ']'
                      ws
                      return (Record ms)

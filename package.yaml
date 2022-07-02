@@ -15,6 +15,7 @@ dependencies:
   - casing
   - extra
   - mtl
+  - aeson
 
 executable:
   main: Main.hs

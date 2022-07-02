@@ -1,17 +1,20 @@
----- MODULE TransactionCommit -----------------------------------------------
+\* This code originally comes from Leslie Lamport's video series
+\* http://lamport.azurewebsites.net/video/videos.html
+------------------------------ MODULE TCommit ------------------------------
 (***************************************************************************)
 (* This specification is explained in "Transaction Commit", Lecture 5 of   *)
 (* the TLA+ Video Course.                                                  *)
 (***************************************************************************)
-CONSTANT RM
-VARIABLE rmState
------------------------------------------------------------------------------
-(* TCTypeOK == *)
-(*   (\*************************************************************************\) *)
-(*   (\* The type-correctness invariant                                        *\) *)
-(*   (\*************************************************************************\) *)
-(*   rmState \in [RM -> {"working", "prepared", "committed", "aborted"}] *)
+CONSTANT RM       \* The set of participating resource managers
 
+VARIABLE rmState  \* rmState[rm] is the state of resource manager r.
+-----------------------------------------------------------------------------
+TCTypeOK == 
+  (*************************************************************************)
+  (* The type-correctness invariant                                        *)
+  (*************************************************************************)
+  rmState \in [RM -> {"working", "prepared", "committed", "aborted"}]
+        
 TCInit ==   rmState = [r \in RM |-> "working"]
   (*************************************************************************)
   (* The initial predicate.                                                *)
@@ -22,7 +25,7 @@ canCommit == \A r \in RM : rmState[r] \in {"prepared", "committed"}
   (* True iff all RMs are in the "prepared" or "committed" state.          *)
   (*************************************************************************)
 
-notCommitted == \A r \in RM : rmState[r] # "committed"
+notCommitted == \A r \in RM : rmState[r] # "committed" 
   (*************************************************************************)
   (* True iff no resource manager has decided to commit.                   *)
   (*************************************************************************)
@@ -47,7 +50,7 @@ TCNext == \E r \in RM : Prepare(r) \/ Decide(r)
   (* The next-state action.                                                *)
   (*************************************************************************)
 -----------------------------------------------------------------------------
-TCConsistent ==
+TCConsistent ==  
   (*************************************************************************)
   (* A state predicate asserting that two RMs have not arrived at          *)
   (* conflicting decisions.  It is an invariant of the specification.      *)
@@ -73,4 +76,8 @@ THEOREM TCSpec => [](TCTypeOK /\ TCConsistent)
   (* equivalent to invariance of both of the formulas TCTypeOK and         *)
   (* TCConsistent.                                                         *)
   (*************************************************************************)
-=================================================================================
+
+=============================================================================
+\* Modification History
+\* Last modified Thu Sep 14 22:04:45 EDT 2017 by jay1512
+\* Created Thu Sep 14 22:04:25 EDT 2017 by jay1512

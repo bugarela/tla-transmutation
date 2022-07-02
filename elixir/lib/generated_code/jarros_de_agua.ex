@@ -4,7 +4,7 @@ defmodule JarrosDeAgua do
              /\ jarro_grande  \in 0..5
   """
   require Oracle
-  @oracle spawn(Oracle, :start, [])
+  # @oracle spawn(Oracle, :start, [])
 
   def enche_pequeno_condition(variables) do
     True
@@ -17,7 +17,6 @@ defmodule JarrosDeAgua do
     }
   end
 
-
   def enche_grande_condition(variables) do
     True
   end
@@ -28,7 +27,6 @@ defmodule JarrosDeAgua do
       jarro_pequeno: variables[:jarro_pequeno]
     }
   end
-
 
   def esvazia_pequeno_condition(variables) do
     True
@@ -41,7 +39,6 @@ defmodule JarrosDeAgua do
     }
   end
 
-
   def esvazia_grande_condition(variables) do
     True
   end
@@ -52,7 +49,6 @@ defmodule JarrosDeAgua do
       jarro_pequeno: variables[:jarro_pequeno]
     }
   end
-
 
   def pequeno_para_grande_condition(variables) do
     if variables[:jarro_grande] + variables[:jarro_pequeno] <= 5 do
@@ -76,7 +72,6 @@ defmodule JarrosDeAgua do
     end
   end
 
-
   def grande_para_pequeno_condition(variables) do
     if variables[:jarro_grande] + variables[:jarro_pequeno] <= 3 do
       True
@@ -99,47 +94,73 @@ defmodule JarrosDeAgua do
     end
   end
 
-
-  def main(variables) do
-    IO.puts (inspect variables)
-
-    main(
-      decide_action(
-        List.flatten([
-          %{ action: "EnchePequeno()", condition: enche_pequeno_condition(variables), state: enche_pequeno(variables) },
-          %{ action: "EncheGrande()", condition: enche_grande_condition(variables), state: enche_grande(variables) },
-          %{ action: "EsvaziaPequeno()", condition: esvazia_pequeno_condition(variables), state: esvazia_pequeno(variables) },
-          %{ action: "EsvaziaGrande()", condition: esvazia_grande_condition(variables), state: esvazia_grande(variables) },
-          %{ action: "PequenoParaGrande()", condition: pequeno_para_grande_condition(variables), state: pequeno_para_grande(variables) },
-          %{ action: "GrandeParaPequeno()", condition: grande_para_pequeno_condition(variables), state: grande_para_pequeno(variables) }
-        ])
-      )
-    )
+  def next(variables) do
+    List.flatten([
+      %{
+        action: "EnchePequeno()",
+        condition: enche_pequeno_condition(variables),
+        state: enche_pequeno(variables)
+      },
+      %{
+        action: "EncheGrande()",
+        condition: enche_grande_condition(variables),
+        state: enche_grande(variables)
+      },
+      %{
+        action: "EsvaziaPequeno()",
+        condition: esvazia_pequeno_condition(variables),
+        state: esvazia_pequeno(variables)
+      },
+      %{
+        action: "EsvaziaGrande()",
+        condition: esvazia_grande_condition(variables),
+        state: esvazia_grande(variables)
+      },
+      %{
+        action: "PequenoParaGrande()",
+        condition: pequeno_para_grande_condition(variables),
+        state: pequeno_para_grande(variables)
+      },
+      %{
+        action: "GrandeParaPequeno()",
+        condition: grande_para_pequeno_condition(variables),
+        state: grande_para_pequeno(variables)
+      }
+    ])
   end
 
-  def decide_action(actions) do
-    possible_actions = Enum.filter(actions, fn(action) -> action[:condition] end)
-    different_states = Enum.uniq_by(possible_actions, fn(action) -> action[:state] end)
+  def main(oracle, variables, step) do
+    IO.puts(inspect(variables))
 
-    if Enum.count(different_states) == 1 do
-      Enum.at(possible_actions, 0)[:state]
-    else
-      actions_names = Enum.map(possible_actions, fn(action) -> action[:action] end)
-      send @oracle, {self(), actions_names}
+    actions = next(variables)
 
-      n = receive do
-        {:ok, n} -> n
-      end
+    next_variables = decide_action(oracle, actions, step)
+    send(oracle, {:notify, step, variables, next_variables})
 
-      Enum.at(possible_actions, n)[:state]
+    main(oracle, next_variables, step + 1)
+  end
+
+  def decide_action(oracle, actions, step) do
+    possible_actions = Enum.filter(actions, fn action -> action[:condition] end)
+    different_states = Enum.uniq_by(possible_actions, fn action -> action[:state] end)
+
+    cond do
+      Enum.count(different_states) == 1 -> Enum.at(possible_actions, 0)[:state]
+      Enum.count(different_states) == 0 ->
+        IO.puts("DEADLOCK")
+        exit(0)
+      true ->
+        # actions_names = Enum.map(possible_actions, fn action -> action[:action] end)
+        IO.inspect(different_states)
+        send(oracle, {:choose, self(), step, possible_actions})
+
+        n =
+          receive do
+          {:ok, n} -> n
+          {:stop} -> exit(0)
+        end
+
+        Enum.at(possible_actions, n)[:state]
     end
   end
 end
-
-JarrosDeAgua.main(
-
-  %{
-    jarro_grande: 0,
-    jarro_pequeno: 0
-  }
-)
