@@ -1,9 +1,6 @@
-
-
 ---------------------------------------------------------------
 -- Copyright (c) 2014, Enzo Haussecker. All rights reserved. --
 ---------------------------------------------------------------
-
 {-# LANGUAGE LambdaCase #-}
 {-# OPTIONS -Wall       #-}
 
@@ -11,47 +8,57 @@
 module Math where
 
 import Control.Applicative ((<|>))
--- import Control.Monad       (liftM, liftM2)
+
 import Data.Char
 import Head
--- import qualified Data.Map                           as M
+
+import qualified Text.ParserCombinators.Parsec as P
 import qualified Text.ParserCombinators.Parsec.Expr as P
-import qualified Text.ParserCombinators.Parsec      as P
 
 build :: P.Parser Value
-build = do P.try $ P.buildExpressionParser table (P.try $ factor) <|> factor
+build = do
+  P.try $ P.buildExpressionParser table (P.try $ factor) <|> factor
 
 table :: [[P.Operator Char st Value]]
 table =
-  [ [ prefix "-" Neg ]
-  , [ binary "*" Mul P.AssocLeft, binary "/ " Div P.AssocLeft ]
-  , [ binary "+" Add P.AssocLeft, binary "-" Sub P.AssocLeft ]
-  , [ binary "%" Mod P.AssocLeft ]
-  ] where binary s f a = P.Infix  (P.try (P.string s) >> ws >> return f) a
-          prefix s f   = P.Prefix (P.try (P.string s) >> ws >> return f)
+  [ [prefix "-" Neg]
+  , [binary "*" Mul P.AssocLeft, binary "/ " Div P.AssocLeft]
+  , [binary "+" Add P.AssocLeft, binary "-" Sub P.AssocLeft]
+  , [binary "%" Mod P.AssocLeft]
+  ]
+  where
+    binary s f a = P.Infix (P.try (P.string s) >> ws >> return f) a
+    prefix s f = P.Prefix (P.try (P.string s) >> ws >> return f)
 
-ws = P.many $ do {P.many1 (P.oneOf " \n"); return()}
+ws =
+  P.many $ do
+    P.many1 (P.oneOf " \n")
+    return ()
 
-factor ::P.Parser Value
-factor = do
-  _    <- P.char '('
-  expr <- build
-  ws
-  _    <- P.char ')'
-  ws
-  return (expr)
-  <|> atom
+factor :: P.Parser Value
+factor =
+  do _ <- P.char '('
+     expr <- build
+     ws
+     _ <- P.char ')'
+     ws
+     return (expr)
+     <|> atom
 
 atom :: P.Parser Value
-atom =  do P.try $ do {n <- number; ws; return(n)}
-        <|>
-        do var <- P.many1 (P.oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['_'] ++ ['0'..'9']))
-           ws
-           return $! Ref var
+atom =
+  do P.try $ do
+       n <- number
+       ws
+       return (n)
+     <|> do
+    var <- P.many1 (P.oneOf (['a' .. 'z'] ++ ['A' .. 'Z'] ++ ['_'] ++ ['0' .. '9']))
+    ws
+    return $! Ref var
 
 number :: P.Parser Value
 number = do
   digits <- P.many1 P.digit
-  let n = foldl (\x d -> 10*x + toInteger (digitToInt d)) 0 digits
+  let n = foldl (\x d -> 10 * x + toInteger (digitToInt d)) 0 digits
   ws
   return (Lit (Num n))

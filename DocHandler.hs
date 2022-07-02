@@ -11,5 +11,9 @@ funDoc doc = "@doc \"\"\"\n" ++ (intercalate "\n" (map cleanTrailing doc)) ++ "\
 comment doc = intercalate "\n" (map (((++) "# ") . cleanTrailing) doc) ++ "\n"
 
 allSpaces s = dropWhile (== ' ') s == []
+
 cleanTrailing [] = []
-cleanTrailing (x:xs) = if allSpaces xs then [x] else x:(cleanTrailing xs)
+cleanTrailing (x:xs) =
+  if allSpaces xs
+    then [x]
+    else x : (cleanTrailing xs)
