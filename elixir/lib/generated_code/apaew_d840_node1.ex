@@ -43,32 +43,26 @@ defmodule ApaewD840Node1 do
       tpos: variables[:tpos],
       tcolor: variables[:tcolor]
     },
-      (
-        decide_action(
-          List.flatten([
-            %{ action: "ActionAnd [Primed \"active\" \(Except \"active\" [\(Tuple [Ref \"j\"\],Lit \(Boolean True\)\)\]\),Primed \"color\" \(Except \"color\" [\(Tuple [Ref \"i\"\],If \(Gt \(Ref \"j\"\) \(Ref \"i\"\)\) \(Lit \(Str \"black\"\)\) \(Index \(Ref \"color\"\) \(Ref \"i\"\)\)\)\]\)\]", condition: true, state: %{
-              active: Map.put(variables[:active], {j(variables)}, true),
-              color: Map.put(variables[:color], {i}, (if j(variables) > i, do: "black", else: variables[:color][i]))
-            } }
-          ])
+      List.flatten([
+        Enum.map(MapSet.difference?(nodes_condition(variables), MapSet.new([i])), fn (j) -> [
+          %{ action: "ActionAnd [Primed \"active\" \(Except \"active\" [\(Tuple [Ref \"j\"\],Lit \(Boolean True\)\)\]\),Primed \"color\" \(Except \"color\" [\(Tuple [Ref \"i\"\],If \(Gt \(Ref \"j\"\) \(Ref \"i\"\)\) \(Lit \(Str \"black\"\)\) \(Index \(Ref \"color\"\) \(Ref \"i\"\)\)\)\]\)\]", condition: true, state: %{
+            active: Map.put(variables[:active], {j}, true),
+            color: Map.put(variables[:color], {i}, (if j > i, do: "black", else: variables[:color][i]))
+          } }
+        ] end
         )
-      ))
+      ]))
   end
 
 
   def next(variables) do
-    IO.puts (inspect variables)
-
-    next((
-      decide_action(
-        List.flatten([
-          %{ action: "PassToken(Lit (Num 1))", condition: pass_token_condition(variables, 1), state: pass_token(variables, 1) },
-          %{ action: "SendMsg(Lit (Num 1))", condition: send_msg_condition(variables, 1), state: send_msg(variables, 1) },
-          %{ action: "Deactivate(Lit (Num 1))", condition: deactivate_condition(variables, 1), state: deactivate(variables, 1) }
-        ])
-      )
-    ))
+    List.flatten([
+      %{ action: "PassToken(Lit (Num 1))", condition: pass_token_condition(variables, 1), state: pass_token(variables, 1) },
+      %{ action: "SendMsg(Lit (Num 1))", condition: send_msg_condition(variables, 1), state: send_msg(variables, 1) },
+      %{ action: "Deactivate(Lit (Num 1))", condition: deactivate_condition(variables, 1), state: deactivate(variables, 1) }
+    ])
   end
+
   def main(oracle, variables, step) do
     IO.puts(inspect(variables))
 

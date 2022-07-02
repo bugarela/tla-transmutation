@@ -83,7 +83,7 @@ actionsAndConditions g (ActionAnd as) = let (ics, ias) = unzipAndFold (map (acti
 
 -- (OR)
 actionsAndConditions g (ActionOr as) = let (ics, ias) = unzipAndFold (map (actionsAndConditions g) as)
-                                       in (if allUnchanged as then ["false"] else [orFold ics], if ias == [] then [] else [decide g as])
+                                       in (if allUnchanged as then ["false"] else [orFold ics], if ias == [] then [] else [listActions g as])
 
 -- (IF)
 actionsAndConditions g (ActionIf p t e) = let cp = value g p
@@ -100,7 +100,7 @@ actionsAndConditions g (Condition p) = ([value g p], [])
 actionsAndConditions g (Exists i v a) = let ig = (i, "param"):g
                                             (ics, _) = actionsAndConditions ig a
                                             c = "Enum.any?(" ++ value ig v ++ ", fn (" ++ i ++ ") ->" ++ cFold ics ++ " end\n)"
-                                        in ([c], [decide g [a]])
+                                        in ([c], [listActions ig [Exists i v a]])
 
 -- [new]: must test
 actionsAndConditions g (ForAll i v a) = let ig = (i, "param"):g
@@ -111,8 +111,13 @@ actionsAndConditions g (ForAll i v a) = let ig = (i, "param"):g
 -- (TRA)
 actionsAndConditions g a = ([], [action g a])
 
+listActions :: Context -> [Action] -> ElixirCode
+listActions _ [] = ""
+listActions g as = let infos = map (actionInfo g) as
+                   in "List.flatten([\n" ++ ident (intercalate ",\n" infos) ++ "\n])\n"
+
 decide :: Context -> [Action] -> ElixirCode
-decide g [] = ""
+decide _ [] = ""
 decide g as = let infos = map (actionInfo g) as
                   list = "List.flatten([\n" ++ ident (intercalate ",\n" infos) ++ "\n])\n"
               in "(\n" ++ ident ("decide_action(\n" ++ ident list ++ "\n)\n") ++ "\n)"
@@ -250,8 +255,9 @@ ini g (ActionDefinition _ _ doc (Condition a)) = comment doc ++ initialState g a
 next :: Context -> Definition -> ElixirCode
 
 -- (NEXT)
+-- TODO: Handle nested non-determinism (in a single transaction)
 next g (ActionDefinition _ _ doc a) = let (_, actions) = actionsAndConditions g a
-                                in funDoc doc ++ "def next(variables) do\n" ++ ident (logState ++ "next(" ++ (aFold actions)) ++ ")\nend\n"
+                                      in funDoc doc ++ "def next(variables) do\n" ++ ident (head actions) ++ "\nend\n\n"
 
 
 {-- \vdash_i -}
@@ -261,6 +267,10 @@ actionInfo g (Exists i v (ActionOr as)) = let ig = (i, "param"):g
                                               l = map (actionInfo ig) as
                                               s = intercalate ",\n" l
                                           in "Enum.map(" ++ value ig v ++ ", fn (" ++ i ++ ") -> [\n" ++ ident s ++ "\n] end\n)"
+
+actionInfo g (Exists i v a) = let ig = (i, "param"):g
+                                  s = actionInfo ig a
+                              in "Enum.map(" ++ value ig v ++ ", fn (" ++ i ++ ") -> [\n" ++ ident s ++ "\n] end\n)"
 
 -- (INFO-DEF)
 actionInfo g a = let (cs, as) = actionsAndConditions g a
