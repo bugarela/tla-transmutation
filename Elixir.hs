@@ -9,11 +9,11 @@ import Helpers
 import Snippets
 
 generate :: Spec -> DistributionConfig -> [(String, ElixirCode)]
-generate (Spec m i n ds) (Config ps _shared) =
+generate (Spec m i n ds) (Config ps shared) =
   let defs = filter (not . (specialDef i n)) ds
       cs = findConstants ds
       vs = findVariables ds
-      header = moduleHeader (moduleName m) m False
+      header = moduleHeader (moduleName m) m shared False
       -- defNext = findIdentifier n ds
       base = baseSpec header cs vs defs
    in (moduleName m, base):map (generateForProcess m n cs vs defs) ps
@@ -29,10 +29,11 @@ generateStarter (Spec m i _ ds) =
 generateForProcess ::
      Module -> String -> [Constant] -> [Variable] -> [Definition] -> ProcessConfig -> (String, ElixirCode)
 generateForProcess m n cs vs defs (PConfig p as) =
-  let name = (moduleName m) ++ "_" ++ p
-      header = moduleHeader name m True
-      defNext = (ActionDefinition n [] [] (ActionOr (map (\(i, ps) -> ActionCall i ps) as)))
+  let name = moduleName m ++ "_" ++ p
+      header = moduleHeader name m [] True
+      defNext = ActionDefinition n [] [] (ActionOr (map (\(i, ps) -> ActionCall i ps) as))
    in (name, spec header cs vs [] defNext)
+
 
 filterDefs :: [Call] -> [Definition] -> [Definition]
 filterDefs is ds =
@@ -46,7 +47,7 @@ spec h cs vs ds dn =
   let g = map (\c -> (c, "const")) cs ++ map (\v -> (v, "variable")) vs
    in concat
         [ h
-        , ident (concat [constants cs, mapAndJoin (definition g) ds, "\n", next g dn, mainFunction, decideAction])
+        , ident (concat [constants cs, mapAndJoin (definition g) ds, "\n", next g dn, mainFunction, decideAction, waitLockFunction])
         , "\nend\n\n"
         ]
 

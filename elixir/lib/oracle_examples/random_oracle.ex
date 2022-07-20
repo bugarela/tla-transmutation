@@ -7,12 +7,12 @@ defmodule RandomOracle do
       {:choose, p, _, as} -> send(p, {:ok, random_choice(as)})
       {:lock, p} -> if lock, do: send(p, {:already_locked, %{}}), else: lock = p; send(p, {:ok, current_variables})
       # Receive state and update shared variables
-      {:DOWN, ^ref, _, _, _} -> IO.puts "Process #{inspect(pid)} is down"; lock = nil
+      {:DOWN, ^ref, _, _, _} -> IO.puts "Process #{inspect(ref)} is down"; lock = nil
     end
 
     variables = current_variables
 
-    start(variables, if variables != current_variables, do: step + 1, else: step, lock)
+    start(variables, (if variables != current_variables, do: step + 1, else: step), lock)
   end
 
   def random_choice(as) do

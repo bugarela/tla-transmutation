@@ -15,7 +15,10 @@ defmodule Mix.Tasks.ApaewD840Starter do
 }
 
     oracle = spawn(RandomOracle, :start, [initial_state, 0, nil])
-    :global.register_name("oracle", oracle)
+    a = :global.register_name("oracle", oracle)
+    IO.puts(inspect(a))
+    aoracle = :global.whereis_name("oracle")
+    IO.puts(inspect(aoracle))
 
     ref = Process.monitor(oracle)
 

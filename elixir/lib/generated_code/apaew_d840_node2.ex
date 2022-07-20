@@ -15,9 +15,11 @@ defmodule APAEWD840_node2 do
     ])
   end
 
-  def main(oracle, variables, step) do
-    IO.puts(inspect(variables))
+  def main(oracle, private_variables, step) do
+    shared_state = wait_lock(oracle)
+    variables = Map.merge(private_variables, shared_state)
 
+    IO.puts(inspect(variables))
     actions = next(variables)
 
     next_variables = decide_action(oracle, actions, step)
@@ -45,6 +47,13 @@ defmodule APAEWD840_node2 do
         end
 
         Enum.at(possible_actions, n)[:state]
+    end
+  end
+  def wait_lock(oracle) do
+    send(oracle, {:lock, self()})
+    receive do
+      {:ok, state} -> Map.split(state, shared_variables)
+      {:already_locked, _} -> Process.sleep(1000); wait_lock(oracle)
     end
   end
 end

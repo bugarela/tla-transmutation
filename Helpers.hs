@@ -9,22 +9,28 @@ import Head
 import Snippets
 
 -- (MOD) helpers
-moduleHeader name (Module m doc) imp =
+moduleHeader name (Module m doc) shared imp =
   "defmodule " ++
   name ++
   " do\n" ++
   ident
     (moduleDoc doc ++
+     sharedVariablesDeclaration shared ++
      oracleDelaration ++
      if imp
        then "import " ++ m ++ "\n\n"
        else "")
 
+sharedVariablesDeclaration :: [String] -> String
+sharedVariablesDeclaration [] = ""
+sharedVariablesDeclaration shared =
+  unlines ([ "def shared_variables do", "  [" ] ++ map (\v -> "    :" ++ v ++ ",") shared ++ ["  ]", "end"])
+
 moduleContext (Module m _) = [(m, "module")]
 
 -- (CALL) helpers
 call i [] = snake i
-call i ps = snake i ++ "(" ++ intercalate ", " (ps) ++ ")"
+call i ps = snake i ++ "(" ++ intercalate ", " ps ++ ")"
 
 -- (IF) helpers
 ifExpr c t e = "(if " ++ c ++ ", do: " ++ t ++ ", else: " ++ e ++ ")"
