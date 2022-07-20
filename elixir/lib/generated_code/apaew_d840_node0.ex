@@ -2,7 +2,7 @@ defmodule APAEWD840_node0 do
   require Oracle
 
   import APAEWD840
-  @n "<value for N>"
+  @n 3
   def n, do: @n
 
 
@@ -16,6 +16,7 @@ defmodule APAEWD840_node0 do
   end
 
   def main(oracle, private_variables, step) do
+    IO.puts("Waiting lock")
     shared_state = wait_lock(oracle)
     variables = Map.merge(private_variables, shared_state)
 
@@ -49,11 +50,14 @@ defmodule APAEWD840_node0 do
         Enum.at(possible_actions, n)[:state]
     end
   end
+
   def wait_lock(oracle) do
+    IO.puts("sending lock request to:")
+    IO.inspect(oracle)
     send(oracle, {:lock, self()})
     receive do
-      {:ok, state} -> Map.split(state, shared_variables)
-      {:already_locked, _} -> Process.sleep(1000); wait_lock(oracle)
+      {:ok, state} -> IO.puts("Lock acquired"); {map, _rest} = Map.split(state, shared_variables); map
+      {:already_locked, _} -> IO.puts("Oracle locked"); Process.sleep(1000); wait_lock(oracle)
     end
   end
 end

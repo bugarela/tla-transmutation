@@ -9,20 +9,24 @@ defmodule Mix.Tasks.ApaewD840Node0 do
   def run(args) do
      variables = %{}
       initial_state = %{
-  active: MapSet.new(nodes(variables), fn(n) -> true end),
-  color: MapSet.new(nodes(variables), fn(n) -> "white" end),
+  active: Map.new(nodes(variables), fn(n) -> {n, true} end),
+  color: Map.new(nodes(variables), fn(n) -> {n, "white"} end),
   tpos: 0,
   tcolor: "black"
 }
-
     oracle_host = String.to_atom(Enum.at(args, 0))
-    IO.inspect(oracle_host)
-    result = Node.connect(oracle_host)
-    IO.inspect(result)
-    IO.inspect(Node.ping(oracle_host))
-    oracle = :global.whereis_name("oracle")
-    IO.puts(inspect(oracle))
-    main(oracle, initial_state, 0)
+    Node.connect(oracle_host)
+    oracle_pid = find_oracle()
+    IO.puts(inspect(oracle_pid))
+    main(oracle_pid, initial_state, 0)
+  end
 
+  def find_oracle() do
+    o = :global.whereis_name("oracle")
+    if o == :undefined do
+       find_oracle()
+    else
+      o
+    end
   end
 end

@@ -8,8 +8,8 @@ defmodule Mix.Tasks.ApaewD840Starter do
   def run(_) do
       variables = %{}
       initial_state = %{
-  active: MapSet.new(nodes(variables), fn(n) -> true end),
-  color: MapSet.new(nodes(variables), fn(n) -> "white" end),
+  active: Map.new(nodes(variables), fn(n) -> {n, true} end),
+  color: Map.new(nodes(variables), fn(n) -> {n, "white"} end),
   tpos: 0,
   tcolor: "black"
 }

@@ -7,7 +7,7 @@ defmodule APAEWD840 do
     ]
   end
   require Oracle
-  @n "<value for N>"
+  @n 3
   def n, do: @n
 
 
