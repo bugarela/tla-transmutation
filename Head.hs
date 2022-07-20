@@ -28,7 +28,7 @@ data Module =
 
 data Definition
   = ActionDefinition Identifier [Parameter] Documentation Action
-  | ValueDefinition Identifier Value
+  | ValueDefinition Identifier [Parameter] Value
   | Constants [Identifier]
   | Variables [Identifier]
   | Comment String

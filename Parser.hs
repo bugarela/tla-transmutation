@@ -121,11 +121,11 @@ definition = do {Comment <$> comment;}
              <|>
              do try $ do {Variables <$> variablesDeclaration;}
              <|>
-             do try $ do i <- identifier
+             do try $ do (i, ps) <- defSignature
                          ws
                          string "=="
                          ws
-                         ValueDefinition i <$> value
+                         ValueDefinition i ps <$> value
              <|>
              do try $ do (i, ps) <- defSignature
                          string "=="

@@ -1,12 +1,18 @@
 defmodule RandomOracle do
-  def start do
+  def start(current_variables, step, lock) do
     IO.puts("RandomOracle at [#{inspect(self())}] is listening")
+    ref = Process.monitor(if lock != nil, do: lock, else: self())
 
     receive do
-      {:choose, p, _, as} -> IO.puts("aqui"); send(p, {:ok, random_choice(as)})
+      {:choose, p, _, as} -> send(p, {:ok, random_choice(as)})
+      {:lock, p} -> if lock, do: send(p, {:already_locked, %{}}), else: lock = p; send(p, {:ok, current_variables})
+      # Receive state and update shared variables
+      {:DOWN, ^ref, _, _, _} -> IO.puts "Process #{inspect(pid)} is down"; lock = nil
     end
 
-    start()
+    variables = current_variables
+
+    start(variables, if variables != current_variables, do: step + 1, else: step, lock)
   end
 
   def random_choice(as) do

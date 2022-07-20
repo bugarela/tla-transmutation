@@ -9,12 +9,14 @@ import Helpers
 import Snippets
 
 generate :: Spec -> DistributionConfig -> [(String, ElixirCode)]
-generate (Spec m i n ds) (Config ps shared) =
+generate (Spec m i n ds) (Config ps _shared) =
   let defs = filter (not . (specialDef i n)) ds
       cs = findConstants ds
       vs = findVariables ds
-                                                  -- defNext = findIdentifier n ds
-   in map (generateForProcess m n cs vs defs) ps
+      header = moduleHeader (moduleName m) m False
+      -- defNext = findIdentifier n ds
+      base = baseSpec header cs vs defs
+   in (moduleName m, base):map (generateForProcess m n cs vs defs) ps
 
 generateStarter :: Spec -> (String, ElixirCode)
 generateStarter (Spec m i _ ds) =
@@ -22,16 +24,15 @@ generateStarter (Spec m i _ ds) =
       vs = findVariables ds
       g = map (\c -> (c, "const")) cs ++ map (\v -> (v, "variable")) vs
       state = ini (g ++ moduleContext m) (findIdentifier i ds)
-   in (moduleName m, starterTask ((pascal . moduleName) m) state)
+   in (moduleName m, starterTask (moduleName m) state)
 
 generateForProcess ::
      Module -> String -> [Constant] -> [Variable] -> [Definition] -> ProcessConfig -> (String, ElixirCode)
 generateForProcess m n cs vs defs (PConfig p as) =
   let name = (moduleName m) ++ "_" ++ p
-      header = moduleHeader name m
-      ds = filterDefs as defs
+      header = moduleHeader name m True
       defNext = (ActionDefinition n [] [] (ActionOr (map (\(i, ps) -> ActionCall i ps) as)))
-   in (name, spec header cs vs ds defNext)
+   in (name, spec header cs vs [] defNext)
 
 filterDefs :: [Call] -> [Definition] -> [Definition]
 filterDefs is ds =
@@ -46,6 +47,15 @@ spec h cs vs ds dn =
    in concat
         [ h
         , ident (concat [constants cs, mapAndJoin (definition g) ds, "\n", next g dn, mainFunction, decideAction])
+        , "\nend\n\n"
+        ]
+
+baseSpec :: String -> [Constant] -> [Variable] -> [Definition] -> ElixirCode
+baseSpec h cs vs ds =
+  let g = map (\c -> (c, "const")) cs ++ map (\v -> (v, "variable")) vs
+   in concat
+        [ h
+        , ident (concat [constants cs, mapAndJoin (definition g) ds, "\n"])
         , "\nend\n\n"
         ]
 
@@ -73,7 +83,7 @@ definition g (ActionDefinition i ps doc a) =
         else funDoc doc ++
              declaration (i ++ "Condition") ps ++
              ident (cFold conditions) ++ "\nend\n\n" ++ declaration i ps ++ ident (aFold actions) ++ "\nend\n\n"
-definition g (ValueDefinition i v) = declaration i [] ++ ident (value g v) ++ "\nend\n\n"
+definition g (ValueDefinition i ps v) = declaration i ps ++ ident (value g v) ++ "\nend\n\n"
 -- Comment translation, not specified
 definition _ (Comment s) = "# " ++ cleanTrailing s
 
@@ -168,7 +178,7 @@ value g (Lt v1 v2) = value g v1 ++ " < " ++ value g v2
 value g (Gte v1 v2) = value g v1 ++ " >= " ++ value g v2
 value g (Lte v1 v2) = value g v1 ++ " <= " ++ value g v2
 -- [new] (PRED-CALL)
-value g (ConditionCall i ps) = call (i ++ "Condition") ("variables" : map (value g) ps)
+value g (ConditionCall i ps) = call i ("variables" : map (value g) ps)
 -- (PRED-IN)
 value g (RecordBelonging v1 v2) = "Enum.member?(" ++ value g v2 ++ ", " ++ value g v1 ++ ")"
 -- [new] (PRED-NOTIN)
@@ -197,7 +207,7 @@ value g (Filtered i v p) =
 -- [new] (SET-CAR)
 value g (Cardinality s) = "Enum.count(" ++ value g s ++ ")"
 value g (SetIn v s) = "MapSet.member?(" ++ value g s ++ ", " ++ value g v ++ ")"
-value g (SetMinus s1 s2) = "MapSet.difference?(" ++ value g s1 ++ ", " ++ value g s2 ++ ")"
+value g (SetMinus s1 s2) = "MapSet.difference(" ++ value g s1 ++ ", " ++ value g s2 ++ ")"
 -- (REC-LIT) and (REC-EX), aggregated to ensure ordering
 value g (Record rs) =
   let (literals, generations) = partition isLiteral rs
@@ -247,7 +257,9 @@ initialState g (Equality (Ref i) v) = "%{ " ++ snake i ++ ": " ++ value g v ++ "
 initialState _ p = error ("Init condition ambiguous: " ++ show p)
 
 -- Comment extraction
-ini g (ActionDefinition _ _ doc (Condition a)) = comment doc ++ initialState g a
+ini :: Context -> Definition -> ElixirCode
+ini g (ValueDefinition _ _ a) = initialState g a
+ini _ a = error("Expected init to have no actions, found: " ++ show a)
 
 {-- \vdash_next --}
 next :: Context -> Definition -> ElixirCode
@@ -255,7 +267,8 @@ next :: Context -> Definition -> ElixirCode
 -- TODO: Handle nested non-determinism (in a single transaction)
 next g (ActionDefinition _ _ doc a) =
   let (_, actions) = actionsAndConditions g a
-   in funDoc doc ++ "def next(variables) do\n" ++ ident (head actions) ++ "\nend\n\n"
+   in if actions == [] then error(show (actionsAndConditions g a)) else funDoc doc ++ "def next(variables) do\n" ++ ident (head actions) ++ "\nend\n\n"
+next _ a = error("Next should be an action, found: " ++ show a)
 
 {-- \vdash_i -}
 actionInfo :: Context -> Action -> ElixirCode

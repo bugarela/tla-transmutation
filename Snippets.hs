@@ -3,7 +3,7 @@ module Snippets where
 decideAction =
   unlines
     [ ""
-    , "def decide_action(actions) do"
+    , "def decide_action(oracle, actions, step) do"
     , "  possible_actions = Enum.filter(actions, fn(action) -> action[:condition] end)"
     , "  different_states = Enum.uniq_by(possible_actions, fn(action) -> action[:state] end)"
     , ""
@@ -43,41 +43,3 @@ mainFunction =
 logState = "IO.puts (inspect variables)\n\n"
 
 oracleDelaration = "require Oracle\n\n"
-
-starterTask name init =
-  unlines
-    [ "defmodule Mix.Tasks.Startmodel do"
-    , "  @moduledoc \"Printed when the user requests `mix help echo`\""
-    , "  @shortdoc \"Echoes arguments\""
-    , "  use Mix.Task"
-    , ""
-    , "  @impl Mix.Task"
-    , "  def run(_) do"
-    , "      initial_state = " ++ init
-    , ""
-    , "    oracle = spawn(RandomOracle, :start, [])"
-    , "    " ++ name ++ ".main(oracle, initial_state, 0)"
-    , "  end"
-    , "end"
-    ]
-
-tracerStarterTask name trace =
-  unlines
-    [ "defmodule Mix.Tasks.Startmodel do"
-    , "  @moduledoc \"Printed when the user requests `mix help echo`\""
-    , "  @shortdoc \"Echoes arguments\""
-    , "  use Mix.Task"
-    , ""
-    , "  @impl Mix.Task"
-    , "  def run(_) do"
-    , "    trace =  ["
-    ] ++
-  trace ++
-  unlines
-    [ "    ]"
-    , ""
-    , "    oracle = spawn(TraceCheckerOracle, :start, [trace])"
-    , "     " ++ name ++ ".main(oracle, Enum.at(trace, 0), 0)"
-    , "  end"
-    , "end"
-    ]

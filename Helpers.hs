@@ -6,11 +6,19 @@ import qualified Text.Casing as Casing -- cabal install casing
 
 import DocHandler
 import Head
-import Math
 import Snippets
 
 -- (MOD) helpers
-moduleHeader name (Module _ doc) = "defmodule " ++ pascal name ++ " do\n" ++ ident (moduleDoc doc ++ oracleDelaration)
+moduleHeader name (Module m doc) imp =
+  "defmodule " ++
+  name ++
+  " do\n" ++
+  ident
+    (moduleDoc doc ++
+     oracleDelaration ++
+     if imp
+       then "import " ++ m ++ "\n\n"
+       else "")
 
 moduleContext (Module m _) = [(m, "module")]
 
@@ -99,11 +107,11 @@ tabIfline [] = []
 tabIfline xs = "  " ++ xs
 
 isNamed i (ActionDefinition id _ _ _) = i == id
-isNamed i (ValueDefinition id _) = i == id
+isNamed i (ValueDefinition id _ _) = i == id
 isNamed _ _ = False
 
 name (ActionDefinition i _ _ _) = i
-name (ValueDefinition i _) = i
+name (ValueDefinition i _ _) = i
 name _ = ""
 
 moduleName (Module i _) = i
@@ -154,3 +162,50 @@ findIdentifier i ds =
   case find (isNamed i) ds of
     Just a -> a
     Nothing -> error ("Definition not found: " ++ show i ++ " in " ++ show ds)
+
+starterTask name init =
+  unlines
+    [ "defmodule Mix.Tasks." ++ pascal (name ++ "Starter") ++ " do"
+    , "  @moduledoc \"Printed when the user requests `mix help echo`\""
+    , "  @shortdoc \"Echoes arguments\""
+    , "  use Mix.Task"
+    , "  import " ++ name
+    , ""
+    , "  @impl Mix.Task"
+    , "  def run(_) do"
+    , "      variables = %{}"
+    , "      initial_state = " ++ init
+    , ""
+    , "    oracle = spawn(RandomOracle, :start, [initial_state, 0, nil])"
+    , "    :global.register_name(\"oracle\", oracle)"
+    , ""
+    , "    ref = Process.monitor(oracle)"
+    , ""
+    , "     receive do"
+    , "       {:DOWN, ^ref, _, _, _} ->"
+    , "         IO.puts(\"Oracle is down\")"
+    , "    end"
+    , "  end"
+    , "end"
+    ]
+
+tracerStarterTask name trace =
+  unlines
+    [ "defmodule Mix.Tasks.Startmodel do"
+    , "  @moduledoc \"Printed when the user requests `mix help echo`\""
+    , "  @shortdoc \"Echoes arguments\""
+    , "  use Mix.Task"
+    , ""
+    , "  @impl Mix.Task"
+    , "  def run(_) do"
+    , "    trace =  ["
+    ] ++
+  trace ++
+  unlines
+    [ "    ]"
+    , ""
+    , "    oracle = spawn(TraceCheckerOracle, :start, [trace])"
+    , "     " ++ name ++ ".main(oracle, Enum.at(trace, 0), 0)"
+    , "  end"
+    , "end"
+    ]

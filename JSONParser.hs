@@ -108,6 +108,10 @@ instance FromJSON Expression where
         "LetInEx" -> liftA2 LetInEx (obj .: "decls") (obj .: "body")
         _ -> fail ("Unknown expression kind: " ++ exprKind)
 
+-- TODO: Parse this from config or something
+actionNames :: [String]
+actionNames = ["SendMsg", "Deactivate", "Environment", "System", "PassToken", "InitiateProbe", "Next"]
+
 notIgnored Ignored = False
 notIgnored _ = True
 
@@ -130,8 +134,10 @@ convertBody k i ps e =
   case k of
     "TlaOperDecl" ->
       if isTemporal e
-        then Right (H.Comment (show e))
-        else convertExpression e >>= \x -> Right (H.ActionDefinition i (convertParams ps) [] x)
+        then Right (H.Comment (show i ++ ": " ++ show e))
+        else if isPredicate e
+          then convertValue e >>= \x -> Right (H.ValueDefinition i (convertParams ps) x)
+          else convertExpression e >>= \x -> Right (H.ActionDefinition i (convertParams ps) [] x)
     "TlaAssumeDecl" -> Right (H.Comment (show e))
     _ -> Left ("Unknown body kind " ++ show k)
 
@@ -279,9 +285,15 @@ convertAction (OperEx o as) =
           "AND" ->
             case as of
               es -> fmap H.ActionAnd (mapM convertExpression es)
+          "OR" ->
+            case as of
+              es -> fmap H.ActionOr (mapM convertExpression es)
           "EQ" ->
             case as of
               [a1, a2] -> liftA2 H.Primed (primed a1) (convertValue a2)
+          "OPER_APP" ->
+            case as of
+              (e:es) -> liftA2 H.ActionCall (identifier e) (mapM convertValue es)
           op -> Left ("Unknown action operator " ++ op ++ " with args " ++ show as)
    in left (\s -> s ++ "\nwhen converting " ++ show (OperEx o as)) r
 
@@ -299,7 +311,10 @@ temporalOperators :: [String]
 temporalOperators = ["GLOBALLY", "STUTTER", "IMPLIES", "LEADS_TO"]
 
 isPredicate :: Expression -> Bool
-isPredicate (OperEx o as) = o `notElem` actionOperators && all isPredicate as
+isPredicate (OperEx o as) =
+  all isPredicate as && if o == "OPER_APP"
+                          then case identifier (head as) of {Right i -> i `notElem` actionNames}
+                          else o `notElem` actionOperators
 isPredicate _ = True
 
 isTemporal :: Expression -> Bool
