@@ -37,8 +37,6 @@ parseTla a = do f <- readFile a
                 let e = parse specification "Error:" f
                 return (left show e)
 
-parseCall c = parse call ("Error parsing " ++ c ++ ":") c
-
 parseState s = parse action ("Error parsing " ++ s ++ ":") s
 
 parseTrace t = parse trace ("Error parsing " ++ t ++ ":") t
@@ -147,16 +145,16 @@ andAction = do string "/\\"
                ws
                return a
 
-action =  do string "IF"
-             ws
-             p <- predicate
-             string "THEN"
-             ws
-             at <- action
-             string "ELSE"
-             ws
-             af <- action
-             return (ActionIf p at af)
+action =  do try $ do string "IF"
+                      ws
+                      p <- predicate
+                      string "THEN"
+                      ws
+                      at <- action
+                      string "ELSE"
+                      ws
+                      af <- action
+                      return (ActionIf p at af)
          <|>
          do {Condition <$> predicate;}
          <|>

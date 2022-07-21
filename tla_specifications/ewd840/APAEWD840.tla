@@ -79,20 +79,14 @@ PassToken(i) ==
   /\ color' = [color EXCEPT ![i] = "white"]
 
 (***************************************************************************)
-(* token passing actions controlled by the termination detection algorithm *)
-(***************************************************************************)
-System == InitiateProbe \/ \E i \in Nodes \ {0} : PassToken(i)
-
-(***************************************************************************)
 (* An active node i may activate another node j by sending it a message.   *)
 (* If j>i (hence activation goes against the direction of the token being  *)
 (* passed), then node i becomes black.                                     *)
 (***************************************************************************)
-SendMsg(i) ==
+SendMsg(i, j) ==
   /\ active[i]
-  /\ \E j \in Nodes \ {i} :
-        /\ active' = [active EXCEPT ![j] = TRUE]
-        /\ color' = [color EXCEPT ![i] = IF j>i THEN "black" ELSE @]
+  /\ active' = [active EXCEPT ![j] = TRUE]
+  /\ color' = [color EXCEPT ![i] = IF j>i THEN "black" ELSE @]
   /\ UNCHANGED <<tpos, tcolor>>
 
 (***************************************************************************)
@@ -103,19 +97,16 @@ Deactivate(i) ==
   /\ active' = [active EXCEPT ![i] = FALSE]
   /\ UNCHANGED <<color, tpos, tcolor>>
 
-(***************************************************************************)
-(* actions performed by the underlying algorithm                           *)
-(***************************************************************************)
-Environment == \E i \in Nodes : SendMsg(i) \/ Deactivate(i)
 
 (***************************************************************************)
 (* next-state relation: disjunction of above actions                       *)
 (***************************************************************************)
-Next == System \/ Environment
+Next == \/ InitiateProbe
+        \/ \E i \in Nodes \ {0} : PassToken(i)
+        \/ \E i \in Nodes : \/ \E j \in Nodes \ {i} : SendMsg(i, j)
+                            \/ Deactivate(i)
 
 vars == <<active, color, tpos, tcolor>>
-
-Spec == Init /\ [][Next]_vars /\ WF_vars(System)
 
 -----------------------------------------------------------------------------
 
@@ -161,8 +152,6 @@ FalseLiveness ==
 (***************************************************************************)
 
 SpecWFNext == Init /\ [][Next]_vars /\ WF_vars(Next)
-AllNodesTerminateIfNoMessages ==
-  <>[][\A i \in Nodes : ~ SendMsg(i)]_vars => <>(\A i \in Nodes : ~ active[i])
 
 (***************************************************************************)
 (* Dijkstra's inductive invariant                                          *)

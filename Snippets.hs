@@ -37,6 +37,7 @@ mainFunction =
     , ""
     , "  next_variables = decide_action(oracle, actions, step)"
     , "  send(oracle, {:notify, step, variables, next_variables})"
+    , "  Process.sleep(2000)"
     , ""
     , "  main(oracle, next_variables, step + 1)"
     , "end"
@@ -47,8 +48,8 @@ waitLockFunction =
     [ "def wait_lock(oracle) do"
     , "  send(oracle, {:lock, self()})"
     , "  receive do"
-    , "    {:ok, state} -> Map.split(state, shared_variables)"
-    , "    {:already_locked, _} -> Process.sleep(1000); wait_lock(oracle)"
+    , "    {:lock_acquired, state} -> IO.puts(\"Lock acquired\"); {map, _} = Map.split(state, shared_variables); map"
+    , "    {:already_locked, _} -> IO.puts(\"Lock refused\"); Process.sleep(1000); wait_lock(oracle)"
     , "  end"
     , "end"
     ]

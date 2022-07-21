@@ -16,7 +16,7 @@ generate (Spec m i n ds) (Config ps shared) =
       header = moduleHeader (moduleName m) m shared False
       -- defNext = findIdentifier n ds
       base = baseSpec header cs vs defs
-   in (moduleName m, base):map (generateForProcess m n cs vs defs) ps
+   in (moduleName m, base):map (generateForProcess m n vs defs) ps
 
 generateStarter :: Spec -> (String, ElixirCode)
 generateStarter (Spec m i _ ds) =
@@ -27,18 +27,18 @@ generateStarter (Spec m i _ ds) =
    in (moduleName m, starterTask (moduleName m) state)
 
 generateForProcess ::
-     Module -> String -> [Constant] -> [Variable] -> [Definition] -> ProcessConfig -> (String, ElixirCode)
-generateForProcess m n cs vs defs (PConfig p as) =
+     Module -> String -> [Variable] -> [Definition] -> ProcessConfig -> (String, ElixirCode)
+generateForProcess m n vs defs (PConfig p as) =
   let name = moduleName m ++ "_" ++ p
       header = moduleHeader name m [] True
-      defNext = ActionDefinition n [] [] (ActionOr (map (\(i, ps) -> ActionCall i ps) as))
-   in (name, spec header cs vs [] defNext)
+      defNext = ActionDefinition n [] [] (ActionOr as)
+   in (name, spec header [] vs [] defNext)
 
 
-filterDefs :: [Call] -> [Definition] -> [Definition]
-filterDefs is ds =
-  let actionNames = map fst is
-   in filter (\d -> name d `elem` actionNames) ds
+-- filterDefs :: [Call] -> [Definition] -> [Definition]
+-- filterDefs is ds =
+--   let actionNames = map fst is
+   -- in filter (\d -> name d `elem` actionNames) ds
 
 {-- \vdash --}
 -- (MOD)
@@ -148,12 +148,12 @@ listActions g as =
   let infos = map (actionInfo g) as
    in "List.flatten([\n" ++ ident (intercalate ",\n" infos) ++ "\n])\n"
 
-decide :: Context -> [Action] -> ElixirCode
-decide _ [] = ""
-decide g as =
-  let infos = map (actionInfo g) as
-      list = "List.flatten([\n" ++ ident (intercalate ",\n" infos) ++ "\n])\n"
-   in "(\n" ++ ident ("decide_action(\n" ++ ident list ++ "\n)\n") ++ "\n)"
+-- decide :: Context -> [Action] -> ElixirCode
+-- decide _ [] = ""
+-- decide g as =
+--   let infos = map (actionInfo g) as
+--       list = "List.flatten([\n" ++ ident (intercalate ",\n" infos) ++ "\n])\n"
+--    in "(\n" ++ ident ("decide_action(\n" ++ ident list ++ "\n)\n") ++ "\n)"
 
 {-- \vdash_a --}
 action :: Context -> Action -> ElixirCode
@@ -204,7 +204,7 @@ value g (Union s (Set [v])) = "MapSet.put(" ++ value g s ++ ", " ++ value g v ++
 value g (Union s1 s2) = "MapSet.union(" ++ value g s1 ++ ", " ++ value g s2 ++ ")"
 -- [new] (SET-FILT)
 value g (Filtered i v p) =
-  "Enum.filter(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ value ((i, "param") : g) p ++ " end)"
+  "MapSet.new(Enum.filter(" ++ value g v ++ ", fn(" ++ i ++ ") -> " ++ value ((i, "param") : g) p ++ " end))"
 -- [new] (SET-CAR)
 value g (Cardinality s) = "Enum.count(" ++ value g s ++ ")"
 value g (SetIn v s) = "MapSet.member?(" ++ value g s ++ ", " ++ value g v ++ ")"
@@ -220,12 +220,13 @@ value g (Record rs) =
 -- (REC-EXCEPT)
 value g (Except i es) =
   intercalate "\n" (map (\(k, v) -> "Map.put(" ++ reference g i ++ ", " ++ value g k ++ ", " ++ value g v ++ ")") es)
-value g (FunGen i s v) = "MapSet.new(" ++ value g s ++ ", fn(" ++ i ++ ") -> " ++ value ((i, "param") : g) v ++ " end)"
+value g (FunGen i s v) = "Map.new(" ++ value g s ++ ", fn(" ++ i ++ ") -> {" ++ i ++ ", " ++ value ((i, "param") : g) v ++ "} end)"
 -- [new] (CASE)
 value g (Case ms) = "cond do\n" ++ intercalate "\n" (map (caseMatch g) ms) ++ "\nend\n"
 -- Others, not specified
 value g (Range n1 n2) = value g n1 ++ ".." ++ value g n2
 value g (Ref i) = reference g i
+value g (Tuple [a]) = value g a
 value g (Tuple as) = "{" ++ intercalate ", " (map (value g) as) ++ "}"
 value g (Neg a) = "-" ++ value' g a
 value g (Add a b) = value' g a ++ " + " ++ value' g b

@@ -10,8 +10,6 @@ import Data.Aeson
 import qualified Data.ByteString.Lazy as B
 import GHC.Generics
 
-type Call = (String, [H.Value])
-
 jsonFile :: FilePath
 jsonFile = "config-sample.json"
 
@@ -20,7 +18,7 @@ data DistributionConfig =
   deriving (Show, Generic)
 
 data ProcessConfig =
-  PConfig String [Call]
+  PConfig String [H.Action]
   deriving (Show, Generic)
 
 instance FromJSON DistributionConfig where
@@ -35,8 +33,8 @@ instance FromJSON ProcessConfig where
     withObject "ProcessConfig" $ \obj -> do
       i <- obj .: "process_id"
       as <- obj .: "actions"
-      case mapM parseCall as of
-        Left e -> fail ("Invalid action calls in:" ++ show as ++ ". Error: " ++ show e)
+      case mapM parseState as of
+        Left e -> fail ("Invalid action in:" ++ show as ++ ". Error: " ++ show e)
         Right cs -> return (PConfig i cs)
 
 parseConfig :: FilePath -> IO (Either String DistributionConfig)

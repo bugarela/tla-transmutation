@@ -2,21 +2,19 @@ defmodule APAEWD840_node0 do
   require Oracle
 
   import APAEWD840
-  @n 3
-  def n, do: @n
-
-
 
   def next(variables) do
     List.flatten([
       %{ action: "InitiateProbe()", condition: initiate_probe_condition(variables), state: initiate_probe(variables) },
-      %{ action: "SendMsg(Lit (Num 0))", condition: send_msg_condition(variables, 0), state: send_msg(variables, 0) },
+      Enum.map(MapSet.new([1, 2]), fn (i) -> [
+        %{ action: "SendMsg(Lit (Num 0), #{inspect i})", condition: send_msg_condition(variables, 0, i), state: send_msg(variables, 0, i) }
+      ] end
+      ),
       %{ action: "Deactivate(Lit (Num 0))", condition: deactivate_condition(variables, 0), state: deactivate(variables, 0) }
     ])
   end
 
   def main(oracle, private_variables, step) do
-    IO.puts("Waiting lock")
     shared_state = wait_lock(oracle)
     variables = Map.merge(private_variables, shared_state)
 
@@ -25,6 +23,7 @@ defmodule APAEWD840_node0 do
 
     next_variables = decide_action(oracle, actions, step)
     send(oracle, {:notify, step, variables, next_variables})
+    Process.sleep(2000)
 
     main(oracle, next_variables, step + 1)
   end
@@ -50,14 +49,11 @@ defmodule APAEWD840_node0 do
         Enum.at(possible_actions, n)[:state]
     end
   end
-
   def wait_lock(oracle) do
-    IO.puts("sending lock request to:")
-    IO.inspect(oracle)
     send(oracle, {:lock, self()})
     receive do
-      {:ok, state} -> IO.puts("Lock acquired"); {map, _rest} = Map.split(state, shared_variables); map
-      {:already_locked, _} -> IO.puts("Oracle locked"); Process.sleep(1000); wait_lock(oracle)
+      {:lock_acquired, state} -> IO.puts("Lock acquired"); {map, _} = Map.split(state, shared_variables); map
+      {:already_locked, _} -> IO.puts("Lock refused"); Process.sleep(1000); wait_lock(oracle)
     end
   end
 end

@@ -3,8 +3,8 @@
     {
       "process_id": "node0",
       "actions": [
-        "InitiateProbe",
-        "SendMsg(0)",
+        "InitiateProbe()",
+        "\\E i \\in {1, 2} : SendMsg(0, i)",
         "Deactivate(0)"
       ]
     },
@@ -12,7 +12,7 @@
       "process_id": "node1",
       "actions": [
         "PassToken(1)",
-        "SendMsg(1)",
+        "\\E i \\in {0, 2} : SendMsg(1, i)",
         "Deactivate(1)"
       ]
     },
@@ -20,7 +20,7 @@
       "process_id": "node2",
       "actions": [
         "PassToken(2)",
-        "SendMsg(2)",
+        "\\E i \\in {0, 1} : SendMsg(2, i)",
         "Deactivate(2)"
       ]
     }
