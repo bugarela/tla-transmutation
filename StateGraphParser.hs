@@ -7,6 +7,7 @@ import Data.List
 import GHC.Generics
 import System.Environment
 
+import Head as H
 import Elixir
 import Helpers
 import Parser
@@ -83,8 +84,14 @@ findNode ns n =
 toMap :: Node -> Either String String
 toMap Node {nodeId = _, label = l} =
   case parseState (unescape l) of
-    Right a -> Right (initialState [] a)
+    Right a -> Right (initialState [] (toValue a))
     Left e -> Left (show e)
+
+toValue :: H.Action -> H.Value
+toValue (H.ActionAnd as) = H.And (map toValue as)
+toValue (H.Condition v) = v
+toValue (H.ActionCall i ps) = H.ConditionCall i ps
+toValue a = error("Not a value: " ++ show a)
 
 unescape :: String -> String
 unescape [] = []

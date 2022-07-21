@@ -38,6 +38,7 @@ parseTla a = do f <- readFile a
                 return (left show e)
 
 parseState s = parse action ("Error parsing " ++ s ++ ":") s
+parseValue s = parse value ("Error parsing " ++ s ++ ":") s
 
 parseTrace t = parse trace ("Error parsing " ++ t ++ ":") t
 
@@ -323,7 +324,7 @@ value = do try $ do string "Cardinality("
         <|>
         do try $ do {e <- arithmeticExpression; ws; return (e)}
         <|>
-        do {literal;}
+        do {l <- lit; return (Lit l)}
 
 set = do try $ do {s1 <- atomSet; string "\\cup"; ws; s2 <- set; ws; return (Union s1 s2)}
       <|>
@@ -371,6 +372,12 @@ record = do try $ do char '['
                      char ']'
                      ws
                      return (Record ms)
+        <|>
+        do try $ do char '('
+                    ms <- recEntry `sepBy` try (string "@@ ")
+                    char ')'
+                    ws
+                    return (Record ms)
          <|>
          do char '['
             i <- identifier
@@ -388,6 +395,23 @@ record = do try $ do char '['
             ws
             return (Except i [(Ref k, v)])
 
-literal = do try $ do {char '\"'; cs <- many1 (noneOf reserved); char '\"'; ws; return (Lit (Str cs))}
+recEntry = do try $ do l <- lit
+                       ws
+                       string ":>"
+                       ws
+                       a <- lit
+                       ws
+                       return (Key l, (Lit a))
+
+lit = do try $ do stringLiteral
+      <|>
+      do try $ do numberLiteral
+      <|>
+      do try $ do {string "TRUE"; return (Boolean True)}
+      <|>
+      do try $ do {string "FALSE"; return (Boolean False)}
+
+stringLiteral =  do try $ do {char '\"'; cs <- many1 (noneOf reserved); char '\"'; ws; return (Str cs)}
+literal = do try $ do {s <- stringLiteral; return (Lit s)}
 
 arithmeticExpression = Math.build

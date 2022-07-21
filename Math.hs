@@ -58,7 +58,12 @@ atom =
 
 number :: P.Parser Value
 number = do
+  n <- numberLiteral
+  return (Lit n)
+
+numberLiteral :: P.Parser Lit
+numberLiteral = do
   digits <- P.many1 P.digit
   let n = foldl (\x d -> 10 * x + toInteger (digitToInt d)) 0 digits
   ws
-  return (Lit (Num n))
+  return (Num n)
