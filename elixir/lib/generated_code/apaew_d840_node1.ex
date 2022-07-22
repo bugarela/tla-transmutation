@@ -4,14 +4,17 @@ defmodule APAEWD840_node1 do
   import APAEWD840
 
   def next(variables) do
-    List.flatten([
+    Enum.filter(
+      List.flatten([
       %{ action: "PassToken(Lit (Num 1))", condition: pass_token_condition(variables, 1), state: pass_token(variables, 1) },
       Enum.map(MapSet.new([0, 2]), fn (i) -> [
         %{ action: "SendMsg(Lit (Num 1), #{inspect i})", condition: send_msg_condition(variables, 1, i), state: send_msg(variables, 1, i) }
       ] end
       ),
       %{ action: "Deactivate(Lit (Num 1))", condition: deactivate_condition(variables, 1), state: deactivate(variables, 1) }
-    ])
+    ]),
+      fn(action) -> action[:condition] end
+    )
   end
 
   def main(oracle, private_variables, step) do
@@ -29,24 +32,23 @@ defmodule APAEWD840_node1 do
   end
 
   def decide_action(oracle, actions, step) do
-    possible_actions = Enum.filter(actions, fn(action) -> action[:condition] end)
-    different_states = Enum.uniq_by(possible_actions, fn(action) -> action[:state] end)
+    different_states = Enum.uniq_by(actions, fn(action) -> action[:state] end)
 
     cond do
       Enum.count(different_states) == 1 ->
-        Enum.at(possible_actions, 0)[:state]
+        Enum.at(actions, 0)[:state]
       Enum.empty?(different_states) ->
         IO.puts("DEADLOCK")
         exit(0)
       true ->
-        send oracle, {:choose, self(), possible_actions}
+        send oracle, {:choose, self(), actions}
 
         n = receive do
           {:ok, n} -> n
           {:stop} -> exit(0)
         end
 
-        Enum.at(possible_actions, n)[:state]
+        Enum.at(actions, n)[:state]
     end
   end
   def wait_lock(oracle) do

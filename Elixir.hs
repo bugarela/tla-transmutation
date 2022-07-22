@@ -146,7 +146,7 @@ listActions :: Context -> [Action] -> ElixirCode
 listActions _ [] = ""
 listActions g as =
   let infos = map (actionInfo g) as
-   in "List.flatten([\n" ++ ident (intercalate ",\n" infos) ++ "\n])\n"
+   in "Enum.filter(\n  List.flatten([\n" ++ ident (intercalate ",\n" infos) ++ "\n]),\n  fn(action) -> action[:condition] end\n)"
 
 -- decide :: Context -> [Action] -> ElixirCode
 -- decide _ [] = ""
@@ -295,7 +295,7 @@ actionInfo g a =
 caseMatch g (Match p v) = value g p ++ " -> " ++ value g v
 caseMatch g (DefaultMatch v) = "true -> " ++ value g v
 
-mapping g ((Key i), v) = show i ++ ": " ++ value g v
+mapping g ((Key i), v) = lit i ++ " => " ++ value g v
 mapping g ((All i a), v) =
   let ig = (i, "param") : g
    in value g a ++ " |> Enum.map(fn (" ++ i ++ ") -> {" ++ i ++ ", " ++ value ig v ++ "} end)"

@@ -43,3 +43,6 @@ parseConfig file = do
   return (eitherDecode content)
 -- main :: IO ()
 -- main = parseJson jsonFile >>= print
+
+processNames :: DistributionConfig -> [String]
+processNames (Config ps _) = map (\(PConfig n _) -> n) ps

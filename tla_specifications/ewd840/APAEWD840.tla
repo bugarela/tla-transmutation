@@ -115,6 +115,8 @@ vars == <<active, color, tpos, tcolor>>
 (***************************************************************************)
 TokenAlwaysBlack == tcolor = "black"
 
+Test == TRUE
+
 NeverChangeColor == [][ UNCHANGED color ]_vars
 
 (***************************************************************************)

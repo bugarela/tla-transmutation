@@ -11,6 +11,7 @@ import Head as H
 import Elixir
 import Helpers
 import Parser
+import ConfigParser
 
 getJSON :: FilePath -> IO B.ByteString
 getJSON = B.readFile
@@ -45,14 +46,14 @@ instance FromJSON Node where
 instance FromJSON Edge where
   parseJSON (Object v) = Edge <$> v .: "tail" <*> v .: "head"
 
-genTests :: String -> Graph -> Either String String
-genTests m Graph {nodes = ns, edges = es} =
-  case traverse (testForNode m (Graph ns es)) ns of
+genTests :: String -> [String] -> Graph -> Either String String
+genTests m ms Graph {nodes = ns, edges = es} =
+  case traverse (testForNode (map ((m ++ "_") ++) ms) (Graph ns es)) ns of
     Right ts -> Right (header m ++ intercalate "\n" ts ++ "\nend")
     Left e -> Left e
 
-testForNode :: String -> Graph -> Node -> Either String String
-testForNode m g Node {nodeId = i, label = l} = do
+testForNode :: [String] -> Graph -> Node -> Either String String
+testForNode ms g Node {nodeId = i, label = l} = do
   vs <- toMap Node {nodeId = i, label = l}
   ss <- statesFromId g i >>= traverse toMap
   return
@@ -62,7 +63,7 @@ testForNode m g Node {nodeId = i, label = l} = do
        , ""
        , "  expectedStates = [" ++ intercalate ",\n" ss ++ "]"
        , ""
-       , "  actions = " ++ m ++ ".next(variables)"
+       , "  actions = List.flatten([" ++ intercalate ", " (map (++ ".next(variables)") ms) ++ "])"
        , "  states = Enum.map(actions, fn action -> action[:state] end)"
        , ""
        , "  assert Enum.sort(Enum.uniq(states)) == Enum.sort(Enum.uniq(expectedStates))"
@@ -71,7 +72,7 @@ testForNode m g Node {nodeId = i, label = l} = do
 
 statesFromId :: Graph -> Integer -> Either String [Node]
 statesFromId Graph {nodes = ns, edges = es} i =
-  let edgesFromId = filter (\Edge {nodeFrom = f, nodeTo = t} -> f == i) es
+  let edgesFromId = filter (\Edge {nodeFrom = f, nodeTo = _} -> f == i) es
       nodesIdsFromId = map (\Edge {nodeFrom = _, nodeTo = t} -> t) edgesFromId
    in traverse (findNode ns) nodesIdsFromId
 
@@ -108,13 +109,16 @@ header m = unlines ["defmodule " ++ m ++ "Test do", "  use ExUnit.Case", "  doct
 
 main :: IO ()
 main = do
-  (moduleName:file:_) <- getArgs
+  (moduleName:file:configFile:_) <- getArgs
+  config <- parseConfig configFile
   d <- (eitherDecode <$> getJSON file) :: IO (Either String Graph)
   case d of
     Left err -> putStrLn err
     Right ps ->
-      case genTests moduleName ps of
+      case fmap processNames config of
         Left err -> putStrLn err
-        Right s ->
-          let f = "elixir/test/generated_code/" ++ snake moduleName ++ "_test.exs"
-           in writeFile f s
+        Right ms -> case genTests moduleName ms ps of
+                      Left err -> putStrLn err
+                      Right s ->
+                        let f = "elixir/test/generated_code/" ++ snake moduleName ++ "_test.exs"
+                         in writeFile f s
