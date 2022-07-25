@@ -24,31 +24,27 @@ defmodule APAEWD840_node2 do
     IO.puts(inspect(variables))
     actions = next(variables)
 
-    next_variables = decide_action(oracle, actions, step)
+    next_variables = decide_action(oracle, variables, actions, step)
     send(oracle, {:notify, step, variables, next_variables})
     Process.sleep(2000)
 
     main(oracle, next_variables, step + 1)
   end
 
-  def decide_action(oracle, actions, step) do
+  def decide_action(oracle, variables, actions, step) do
     different_states = Enum.uniq_by(actions, fn(action) -> action[:state] end)
 
     cond do
       Enum.count(different_states) == 1 ->
         Enum.at(actions, 0)[:state]
-      Enum.empty?(different_states) ->
-        IO.puts("DEADLOCK")
-        exit(0)
       true ->
         send oracle, {:choose, self(), actions}
 
-        n = receive do
-          {:ok, n} -> n
-          {:stop} -> exit(0)
-        end
-
-        Enum.at(actions, n)[:state]
+       receive do
+         {:ok, n} -> Enum.at(actions, n)[:state]
+         {:cancel} -> variables
+         {:stop} -> exit(0)
+       end
     end
   end
   def wait_lock(oracle) do

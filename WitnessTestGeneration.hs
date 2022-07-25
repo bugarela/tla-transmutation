@@ -3,8 +3,9 @@ import Elixir
 import Helpers
 import Parser
 import System.Environment
+import ConfigParser
 
-testFile moduleName testTrace testName =
+testFile testTrace modules testName =
   unlines
     [ "defmodule Mix.Tasks." ++ testName ++ " do"
     , "  @moduledoc \"Runs blackblox testing using the oracle\""
@@ -17,19 +18,25 @@ testFile moduleName testTrace testName =
     , intercalate ",\n" testTrace
     , "    ]"
     , ""
-    , "    oracle = spawn(TraceCheckerOracle, :start, [trace])"
-    , "    " ++ moduleName ++ ".main(oracle, Enum.at(trace, 0), 0)"
+    , "    modules =  ["
+    , "        " ++ intercalate ",\n      " modules
+    , "    ]"
+    , "    pids = Enum.map(modules, fn m -> spawn(m, :main, [self(), Enum.at(trace, 0), 0]) end)"
+    , "    TraceCheckerOracle.start(trace, 0, nil, pids)"
     , "  end"
     , "end"
     ]
 
 main :: IO ()
 main = do
-  (file:moduleName:testName:_) <- getArgs
+  (moduleName:file:testName:configFile:_) <- getArgs
   f <- readFile file
-  case parseTrace f of
-    Right ss ->
-      let content = testFile moduleName (map (initialState []) ss) testName
-          outFile = "elixir/lib/mix/tasks/" ++ snake testName ++ ".ex"
-       in writeFile outFile content
-    Left e -> print e
+  config <- parseConfig configFile
+  case fmap processNames config of
+        Left err -> putStrLn err
+        Right ms -> case parseTrace f of
+                      Right ss ->
+                        let content = testFile (map (initialState [] . toValue) ss) (map ((moduleName ++ "_") ++) ms) testName
+                            outFile = "elixir/lib/mix/tasks/" ++ snake testName ++ ".ex"
+                         in writeFile outFile content
+                      Left e -> print e

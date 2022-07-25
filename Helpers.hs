@@ -215,3 +215,9 @@ tracerStarterTask name trace =
     , "  end"
     , "end"
     ]
+
+toValue :: Action -> Value
+toValue (ActionAnd as) = And (map toValue as)
+toValue (Condition v) = v
+toValue (ActionCall i ps) = ConditionCall i ps
+toValue a = error("Not a value: " ++ show a)

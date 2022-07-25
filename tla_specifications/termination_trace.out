@@ -1,0 +1,41 @@
+State 1: <Initial predicate>
+/\ tpos = 0
+/\ active = (0 :> TRUE @@ 1 :> TRUE @@ 2 :> TRUE)
+/\ tcolor = "black"
+/\ color = (0 :> "white" @@ 1 :> "white" @@ 2 :> "white")
+
+State 2: <InitiateProbe line 56, col 3 to line 61, col 43 of module APAEWD840>
+/\ tpos = 2
+/\ active = (0 :> TRUE @@ 1 :> TRUE @@ 2 :> TRUE)
+/\ tcolor = "white"
+/\ color = (0 :> "white" @@ 1 :> "white" @@ 2 :> "white")
+
+State 3: <Deactivate line 96, col 3 to line 98, col 38 of module APAEWD840>
+/\ tpos = 2
+/\ active = (0 :> FALSE @@ 1 :> TRUE @@ 2 :> TRUE)
+/\ tcolor = "white"
+/\ color = (0 :> "white" @@ 1 :> "white" @@ 2 :> "white")
+
+State 4: <Deactivate line 96, col 3 to line 98, col 38 of module APAEWD840>
+/\ tpos = 2
+/\ active = (0 :> FALSE @@ 1 :> FALSE @@ 2 :> TRUE)
+/\ tcolor = "white"
+/\ color = (0 :> "white" @@ 1 :> "white" @@ 2 :> "white")
+
+State 5: <Deactivate line 96, col 3 to line 98, col 38 of module APAEWD840>
+/\ tpos = 2
+/\ active = (0 :> FALSE @@ 1 :> FALSE @@ 2 :> FALSE)
+/\ tcolor = "white"
+/\ color = (0 :> "white" @@ 1 :> "white" @@ 2 :> "white")
+
+State 6: <PassToken line 74, col 3 to line 79, col 43 of module APAEWD840>
+/\ tpos = 1
+/\ active = (0 :> FALSE @@ 1 :> FALSE @@ 2 :> FALSE)
+/\ tcolor = "white"
+/\ color = (0 :> "white" @@ 1 :> "white" @@ 2 :> "white")
+
+State 7: <PassToken line 74, col 3 to line 79, col 43 of module APAEWD840>
+/\ tpos = 0
+/\ active = (0 :> FALSE @@ 1 :> FALSE @@ 2 :> FALSE)
+/\ tcolor = "white"
+/\ color = (0 :> "white" @@ 1 :> "white" @@ 2 :> "white")

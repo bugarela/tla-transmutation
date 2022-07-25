@@ -88,11 +88,6 @@ toMap Node {nodeId = _, label = l} =
     Right a -> Right (initialState [] (toValue a))
     Left e -> Left (show e)
 
-toValue :: H.Action -> H.Value
-toValue (H.ActionAnd as) = H.And (map toValue as)
-toValue (H.Condition v) = v
-toValue (H.ActionCall i ps) = H.ConditionCall i ps
-toValue a = error("Not a value: " ++ show a)
 
 unescape :: String -> String
 unescape [] = []

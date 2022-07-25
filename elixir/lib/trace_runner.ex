@@ -1,5 +1,4 @@
 defmodule TraceRunner do
-
   def check(trace, index, current_state, next_state) do
     IO.inspect(index)
     IO.inspect(current_state)
