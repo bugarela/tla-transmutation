@@ -1,0 +1,126 @@
+strict digraph DiskGraph {
+nodesep=0.35;
+subgraph cluster_graph {
+color="white";
+-5484804798014709476 [label="/\\ jarro_pequeno = 0\n/\\ jarro_grande = 0",style = filled]
+-5484804798014709476 -> -6903141547663845486 [label="",color="black",fontcolor="black"];
+-6903141547663845486 [label="/\\ jarro_pequeno = 3\n/\\ jarro_grande = 0"];
+-5484804798014709476 -> -3139966685307173636 [label="",color="black",fontcolor="black"];
+-3139966685307173636 [label="/\\ jarro_pequeno = 0\n/\\ jarro_grande = 5"];
+-5484804798014709476 -> -5484804798014709476 [label="",color="black",fontcolor="black"];
+-5484804798014709476 -> -5484804798014709476 [label="",color="black",fontcolor="black"];
+-5484804798014709476 -> -5484804798014709476 [label="",color="black",fontcolor="black"];
+-5484804798014709476 -> -5484804798014709476 [label="",color="black",fontcolor="black"];
+-6903141547663845486 -> -6903141547663845486 [label="",color="black",fontcolor="black"];
+-6903141547663845486 -> -4053931664713403790 [label="",color="black",fontcolor="black"];
+-4053931664713403790 [label="/\\ jarro_pequeno = 3\n/\\ jarro_grande = 5"];
+-6903141547663845486 -> -5484804798014709476 [label="",color="black",fontcolor="black"];
+-6903141547663845486 -> -6903141547663845486 [label="",color="black",fontcolor="black"];
+-6903141547663845486 -> 5458270148537692363 [label="",color="black",fontcolor="black"];
+5458270148537692363 [label="/\\ jarro_pequeno = 0\n/\\ jarro_grande = 3"];
+-6903141547663845486 -> -6903141547663845486 [label="",color="black",fontcolor="black"];
+-3139966685307173636 -> -4053931664713403790 [label="",color="black",fontcolor="black"];
+-3139966685307173636 -> -3139966685307173636 [label="",color="black",fontcolor="black"];
+-3139966685307173636 -> -3139966685307173636 [label="",color="black",fontcolor="black"];
+-3139966685307173636 -> -5484804798014709476 [label="",color="black",fontcolor="black"];
+-3139966685307173636 -> -3139966685307173636 [label="",color="black",fontcolor="black"];
+-3139966685307173636 -> -3063024226093955969 [label="",color="black",fontcolor="black"];
+-3063024226093955969 [label="/\\ jarro_pequeno = 3\n/\\ jarro_grande = 2"];
+-4053931664713403790 -> -4053931664713403790 [label="",color="black",fontcolor="black"];
+-4053931664713403790 -> -4053931664713403790 [label="",color="black",fontcolor="black"];
+-4053931664713403790 -> -3139966685307173636 [label="",color="black",fontcolor="black"];
+-4053931664713403790 -> -6903141547663845486 [label="",color="black",fontcolor="black"];
+-4053931664713403790 -> -4053931664713403790 [label="",color="black",fontcolor="black"];
+-4053931664713403790 -> -4053931664713403790 [label="",color="black",fontcolor="black"];
+5458270148537692363 -> 6372234522398623301 [label="",color="black",fontcolor="black"];
+6372234522398623301 [label="/\\ jarro_pequeno = 3\n/\\ jarro_grande = 3"];
+5458270148537692363 -> -3139966685307173636 [label="",color="black",fontcolor="black"];
+5458270148537692363 -> 5458270148537692363 [label="",color="black",fontcolor="black"];
+5458270148537692363 -> -5484804798014709476 [label="",color="black",fontcolor="black"];
+5458270148537692363 -> 5458270148537692363 [label="",color="black",fontcolor="black"];
+5458270148537692363 -> -6903141547663845486 [label="",color="black",fontcolor="black"];
+-3063024226093955969 -> -3063024226093955969 [label="",color="black",fontcolor="black"];
+-3063024226093955969 -> -4053931664713403790 [label="",color="black",fontcolor="black"];
+-3063024226093955969 -> -4130678271262510351 [label="",color="black",fontcolor="black"];
+-4130678271262510351 [label="/\\ jarro_pequeno = 0\n/\\ jarro_grande = 2"];
+-3063024226093955969 -> -6903141547663845486 [label="",color="black",fontcolor="black"];
+-3063024226093955969 -> -3139966685307173636 [label="",color="black",fontcolor="black"];
+-3063024226093955969 -> -3063024226093955969 [label="",color="black",fontcolor="black"];
+6372234522398623301 -> 6372234522398623301 [label="",color="black",fontcolor="black"];
+6372234522398623301 -> -4053931664713403790 [label="",color="black",fontcolor="black"];
+6372234522398623301 -> 5458270148537692363 [label="",color="black",fontcolor="black"];
+6372234522398623301 -> -6903141547663845486 [label="",color="black",fontcolor="black"];
+6372234522398623301 -> -2676148449289922938 [label="",color="black",fontcolor="black"];
+-2676148449289922938 [label="/\\ jarro_pequeno = 1\n/\\ jarro_grande = 5"];
+6372234522398623301 -> 6372234522398623301 [label="",color="black",fontcolor="black"];
+-4130678271262510351 -> -3063024226093955969 [label="",color="black",fontcolor="black"];
+-4130678271262510351 -> -3139966685307173636 [label="",color="black",fontcolor="black"];
+-4130678271262510351 -> -4130678271262510351 [label="",color="black",fontcolor="black"];
+-4130678271262510351 -> -5484804798014709476 [label="",color="black",fontcolor="black"];
+-4130678271262510351 -> -4130678271262510351 [label="",color="black",fontcolor="black"];
+-4130678271262510351 -> -5871589370185021976 [label="",color="black",fontcolor="black"];
+-5871589370185021976 [label="/\\ jarro_pequeno = 2\n/\\ jarro_grande = 0"];
+-2676148449289922938 -> -4053931664713403790 [label="",color="black",fontcolor="black"];
+-2676148449289922938 -> -2676148449289922938 [label="",color="black",fontcolor="black"];
+-2676148449289922938 -> -3139966685307173636 [label="",color="black",fontcolor="black"];
+-2676148449289922938 -> -4804497626813582490 [label="",color="black",fontcolor="black"];
+-4804497626813582490 [label="/\\ jarro_pequeno = 1\n/\\ jarro_grande = 0"];
+-2676148449289922938 -> -2676148449289922938 [label="",color="black",fontcolor="black"];
+-2676148449289922938 -> 6372234522398623301 [label="",color="black",fontcolor="black"];
+-5871589370185021976 -> -6903141547663845486 [label="",color="black",fontcolor="black"];
+-5871589370185021976 -> -3959372824750809080 [label="",color="black",fontcolor="black"];
+-3959372824750809080 [label="/\\ jarro_pequeno = 2\n/\\ jarro_grande = 5"];
+-5871589370185021976 -> -5484804798014709476 [label="",color="black",fontcolor="black"];
+-5871589370185021976 -> -5871589370185021976 [label="",color="black",fontcolor="black"];
+-5871589370185021976 -> -4130678271262510351 [label="",color="black",fontcolor="black"];
+-5871589370185021976 -> -5871589370185021976 [label="",color="black",fontcolor="black"];
+-4804497626813582490 -> -6903141547663845486 [label="",color="black",fontcolor="black"];
+-4804497626813582490 -> -2676148449289922938 [label="",color="black",fontcolor="black"];
+-4804497626813582490 -> -5484804798014709476 [label="",color="black",fontcolor="black"];
+-4804497626813582490 -> -4804497626813582490 [label="",color="black",fontcolor="black"];
+-4804497626813582490 -> 4535482304481829670 [label="",color="black",fontcolor="black"];
+4535482304481829670 [label="/\\ jarro_pequeno = 0\n/\\ jarro_grande = 1"];
+-4804497626813582490 -> -4804497626813582490 [label="",color="black",fontcolor="black"];
+-3959372824750809080 -> -4053931664713403790 [label="",color="black",fontcolor="black"];
+-3959372824750809080 -> -3959372824750809080 [label="",color="black",fontcolor="black"];
+-3959372824750809080 -> -3139966685307173636 [label="",color="black",fontcolor="black"];
+-3959372824750809080 -> -5871589370185021976 [label="",color="black",fontcolor="black"];
+-3959372824750809080 -> -3959372824750809080 [label="",color="black",fontcolor="black"];
+-3959372824750809080 -> 5381450370688004168 [label="",color="black",fontcolor="black"];
+5381450370688004168 [label="/\\ jarro_pequeno = 3\n/\\ jarro_grande = 4"];
+4535482304481829670 -> 3251695063285994920 [label="",color="black",fontcolor="black"];
+3251695063285994920 [label="/\\ jarro_pequeno = 3\n/\\ jarro_grande = 1"];
+4535482304481829670 -> -3139966685307173636 [label="",color="black",fontcolor="black"];
+4535482304481829670 -> 4535482304481829670 [label="",color="black",fontcolor="black"];
+4535482304481829670 -> -5484804798014709476 [label="",color="black",fontcolor="black"];
+4535482304481829670 -> 4535482304481829670 [label="",color="black",fontcolor="black"];
+4535482304481829670 -> -4804497626813582490 [label="",color="black",fontcolor="black"];
+5381450370688004168 -> 5381450370688004168 [label="",color="black",fontcolor="black"];
+5381450370688004168 -> -4053931664713403790 [label="",color="black",fontcolor="black"];
+5381450370688004168 -> 6449105013082457798 [label="",color="black",fontcolor="black"];
+6449105013082457798 [label="/\\ jarro_pequeno = 0\n/\\ jarro_grande = 4"];
+5381450370688004168 -> -6903141547663845486 [label="",color="black",fontcolor="black"];
+5381450370688004168 -> -3959372824750809080 [label="",color="black",fontcolor="black"];
+5381450370688004168 -> 5381450370688004168 [label="",color="black",fontcolor="black"];
+3251695063285994920 -> 3251695063285994920 [label="",color="black",fontcolor="black"];
+3251695063285994920 -> -4053931664713403790 [label="",color="black",fontcolor="black"];
+3251695063285994920 -> 4535482304481829670 [label="",color="black",fontcolor="black"];
+3251695063285994920 -> -6903141547663845486 [label="",color="black",fontcolor="black"];
+3251695063285994920 -> 6449105013082457798 [label="",color="black",fontcolor="black"];
+3251695063285994920 -> 3251695063285994920 [label="",color="black",fontcolor="black"];
+6449105013082457798 -> 5381450370688004168 [label="",color="black",fontcolor="black"];
+6449105013082457798 -> -3139966685307173636 [label="",color="black",fontcolor="black"];
+6449105013082457798 -> 6449105013082457798 [label="",color="black",fontcolor="black"];
+6449105013082457798 -> -5484804798014709476 [label="",color="black",fontcolor="black"];
+6449105013082457798 -> 6449105013082457798 [label="",color="black",fontcolor="black"];
+6449105013082457798 -> 3251695063285994920 [label="",color="black",fontcolor="black"];
+{rank = same; -5484804798014709476;}
+{rank = same; -6903141547663845486;-3139966685307173636;}
+{rank = same; -4053931664713403790;-3063024226093955969;5458270148537692363;}
+{rank = same; -4130678271262510351;6372234522398623301;}
+{rank = same; -5871589370185021976;-2676148449289922938;}
+{rank = same; -3959372824750809080;-4804497626813582490;}
+{rank = same; 4535482304481829670;5381450370688004168;}
+{rank = same; 6449105013082457798;3251695063285994920;}
+}
+}

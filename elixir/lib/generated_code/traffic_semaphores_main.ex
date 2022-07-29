@@ -1,17 +1,17 @@
-defmodule APAEWD840_node0 do
+defmodule TrafficSemaphores_main do
   require Oracle
 
-  import APAEWD840
+  import TrafficSemaphores
 
   def next(variables) do
     Enum.filter(
       List.flatten([
-      %{ action: "InitiateProbe()", condition: initiate_probe_condition(variables), state: initiate_probe(variables) },
-      Enum.map(MapSet.new([1, 2]), fn (i) -> [
-        %{ action: "SendMsg(Lit (Num 0), #{inspect i})", condition: send_msg_condition(variables, 0, i), state: send_msg(variables, 0, i) }
+      Enum.map(MapSet.new([0, 1]), fn (s) -> [
+        %{ action: "TurnGreen(#{inspect s})", condition: turn_green_condition(variables, s), state: turn_green(variables, s) },
+        %{ action: "TurnYellow(#{inspect s})", condition: turn_yellow_condition(variables, s), state: turn_yellow(variables, s) },
+        %{ action: "TurnRed(#{inspect s})", condition: turn_red_condition(variables, s), state: turn_red(variables, s) }
       ] end
-      ),
-      %{ action: "Deactivate(Lit (Num 0))", condition: deactivate_condition(variables, 0), state: deactivate(variables, 0) }
+      )
     ]),
       fn(action) -> action[:condition] end
     )

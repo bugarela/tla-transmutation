@@ -15,27 +15,6 @@ defmodule APAEWD840 do
     20
   end
 
-
-  def color(variables) do
-    MapSet.new(["white", "black"])
-  end
-
-
-  def const_init4(variables) do
-    MapSet.member?(MapSet.new([4]), @n)
-  end
-
-
-  def const_init10(variables) do
-    MapSet.member?(MapSet.new([10]), @n)
-  end
-
-
-  def const_init_all20(variables) do
-    MapSet.member?(2..50, @n)
-  end
-
-
   def nodes(variables) do
     MapSet.new(Enum.filter(0..max_n(variables), fn(i) -> i < @n end))
   end
@@ -119,5 +98,30 @@ defmodule APAEWD840 do
   # "Inv": OperEx "OR" [OperEx "LABEL" [OperEx "FORALL3" [NameEx "i",OperEx "OPER_APP" [NameEx "Nodes"],OperEx "IMPLIES" [OperEx "LT" [NameEx "tpos",NameEx "i"],OperEx "NOT" [OperEx "FUN_APP" [NameEx "active",NameEx "i"]]]],ValEx (TlaStr "P0")],OperEx "LABEL" [OperEx "EXISTS3" [NameEx "j",OperEx "OPER_APP" [NameEx "Nodes"],OperEx "IMPLIES" [OperEx "AND" [OperEx "LE" [ValEx (TlaInt 0),NameEx "j"],OperEx "LE" [NameEx "j",NameEx "tpos"]],OperEx "EQ" [OperEx "FUN_APP" [NameEx "color",NameEx "j"],ValEx (TlaStr "black")]]],ValEx (TlaStr "P1")],OperEx "LABEL" [OperEx "EQ" [NameEx "tcolor",ValEx (TlaStr "black")],ValEx (TlaStr "P2")]]
   # "SpecWFNext": OperEx "AND" [OperEx "AND" [OperEx "OPER_APP" [NameEx "Init"],OperEx "GLOBALLY" [OperEx "STUTTER" [OperEx "OPER_APP" [NameEx "Next"],OperEx "OPER_APP" [NameEx "vars"]]]],OperEx "WEAK_FAIRNESS" [OperEx "OPER_APP" [NameEx "vars"],OperEx "OPER_APP" [NameEx "Next"]]]
   # "CheckInductiveSpec": OperEx "AND" [OperEx "OPER_APP" [NameEx "Inv"],OperEx "GLOBALLY" [OperEx "STUTTER" [OperEx "OPER_APP" [NameEx "Next"],OperEx "OPER_APP" [NameEx "vars"]]]]
+
+  def decide_action(oracle, variables, actions, step) do
+    different_states = Enum.uniq_by(actions, fn(action) -> action[:state] end)
+
+    cond do
+      Enum.count(different_states) == 1 ->
+        Enum.at(actions, 0)[:state]
+      true ->
+        send oracle, {:choose, self(), actions}
+
+       receive do
+         {:ok, n} -> Enum.at(actions, n)[:state]
+         {:cancel} -> variables
+         {:stop} -> exit(0)
+       end
+    end
+  end
+
+  def wait_lock(oracle) do
+    send(oracle, {:lock, self()})
+    receive do
+      {:lock_acquired, state} -> IO.puts("Lock acquired"); {map, _} = Map.split(state, shared_variables); map
+      {:already_locked, _} -> IO.puts("Lock refused"); Process.sleep(1000); wait_lock(oracle)
+    end
+  end
 end
 

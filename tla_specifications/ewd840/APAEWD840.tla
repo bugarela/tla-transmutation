@@ -12,6 +12,7 @@ CONSTANT
     N
 
 MaxN == 20
+CInit3 == N = 3
 ConstInit4 == N \in {4}
 ConstInit10 == N \in {10}
 ConstInitAll20 == N \in 2..50
@@ -130,6 +131,8 @@ terminationDetected ==
 TerminationDetection ==
   terminationDetected => \A i \in Nodes : ~ active[i]
 
+NotTerminationDetection ==
+  terminationDetected => \E i \in Nodes : active[i]
 (***************************************************************************)
 (* Liveness property: termination is eventually detected.                  *)
 (***************************************************************************)

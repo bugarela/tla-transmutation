@@ -220,12 +220,18 @@ convertValue (OperEx o as) =
           "PLUS" ->
             case as of
               [a1, a2] -> liftA2 H.Add (convertValue a1) (convertValue a2)
+          "MOD" ->
+            case as of
+              [a1, a2] -> liftA2 H.Mod (convertValue a1) (convertValue a2)
           "EXCEPT" ->
             case as of
               (e:es) -> liftA2 H.Except (identifier e) (fmap splits (mapM convertValue es))
           "DOMAIN" ->
             case as of
               [a1] -> fmap H.Domain (convertValue a1)
+          "FiniteSets!Cardinality" ->
+            case as of
+              [a1] -> fmap H.Cardinality (convertValue a1)
           "NE" ->
             case as of
               [x1, x2] -> liftA2 H.Inequality (convertValue x1) (convertValue x2)

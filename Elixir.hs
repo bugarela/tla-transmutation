@@ -47,7 +47,7 @@ spec h cs vs ds dn =
   let g = map (\c -> (c, "const")) cs ++ map (\v -> (v, "variable")) vs
    in concat
         [ h
-        , ident (concat [constants cs, mapAndJoin (definition g) ds, "\n", next g dn, mainFunction, decideAction, waitLockFunction])
+        , ident (concat [constants cs, mapAndJoin (definition g) ds, "\n", next g dn, mainFunction])
         , "\nend\n\n"
         ]
 
@@ -56,7 +56,7 @@ baseSpec h cs vs ds =
   let g = map (\c -> (c, "const")) cs ++ map (\v -> (v, "variable")) vs
    in concat
         [ h
-        , ident (concat [constants cs, mapAndJoin (definition g) ds, "\n"])
+        , ident (concat [constants cs, mapAndJoin (definition g) ds, "\n", decideAction, "\n", waitLockFunction])
         , "\nend\n\n"
         ]
 
