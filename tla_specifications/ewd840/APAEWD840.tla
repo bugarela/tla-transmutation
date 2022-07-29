@@ -147,6 +147,8 @@ Liveness ==
 FalseLiveness ==
   (\A i \in Nodes : []<> ~ active[i]) ~> terminationDetected
 
+full == TRUE
+
 (***************************************************************************)
 (* The following property says that eventually all nodes will terminate    *)
 (* assuming that from some point onwards no messages are sent. It is       *)
