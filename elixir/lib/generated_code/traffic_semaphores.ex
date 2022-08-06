@@ -6,18 +6,18 @@ defmodule TrafficSemaphores do
     ]
   end
   require Oracle
-  @semaphores [0,1]
+  @semaphores "<value for SEMAPHORES>"
   def semaphores, do: @semaphores
 
 
   def turn_green_condition(variables, s) do
-    Enum.all?([Enum.all?(@semaphores, fn(s2) -> variables[:colors][s2] == "red" end), variables[:next_to_open] == s])
+    Enum.all?(@semaphores, fn(s2) -> variables[:colors][s2] == "red" end)
   end
 
   def turn_green(variables, s) do
     %{
       colors: Map.put(variables[:colors], s, "green"),
-      next_to_open: rem((s + 1), (Enum.count(@semaphores)))
+      next_to_open: variables[:next_to_open]
     }
   end
 
@@ -46,7 +46,6 @@ defmodule TrafficSemaphores do
   end
 
 
-  # "Spec": OperEx "AND" [OperEx "OPER_APP" [NameEx "Init"],OperEx "GLOBALLY" [OperEx "STUTTER" [OperEx "OPER_APP" [NameEx "Next"],OperEx "TUPLE" [NameEx "colors",NameEx "next_to_open"]]]]
 
   def decide_action(oracle, variables, actions, step) do
     different_states = Enum.uniq_by(actions, fn(action) -> action[:state] end)

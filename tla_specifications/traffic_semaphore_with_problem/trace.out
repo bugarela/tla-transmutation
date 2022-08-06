@@ -1,0 +1,13 @@
+State 1: <Initial predicate>
+/\ colors = (0 :> "red" @@ 1 :> "red")
+/\ next_to_open = 0
+
+State 2: <TurnGreen line 6, col 17 to line 8, col 46 of module TrafficSemaphores>
+/\ colors = (0 :> "red" @@ 1 :> "green")
+/\ next_to_open = 0
+
+State 3: <TurnYellow line 10, col 18 to line 12, col 47 of module TrafficSemaphores>
+/\ colors = (0 :> "red" @@ 1 :> "yellow")
+/\ next_to_open = 0
+
+Back to state 1: <TurnRed line 14, col 15 to line 16, col 44 of module TrafficSemaphores>

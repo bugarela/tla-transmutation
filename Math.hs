@@ -1,7 +1,6 @@
 ---------------------------------------------------------------
 -- Copyright (c) 2014, Enzo Haussecker. All rights reserved. --
 ---------------------------------------------------------------
-{-# LANGUAGE LambdaCase #-}
 {-# OPTIONS -Wall       #-}
 
 -- | Parse and evaluate mathematical expressions.

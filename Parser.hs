@@ -3,6 +3,7 @@ module Parser where
 import Text.Parsec
 import Math
 import Control.Arrow
+import Data.Char
 import Head
 
 ignore = many thingsToIgnore
@@ -40,16 +41,39 @@ parseTla a = do f <- readFile a
 parseState s = parse action ("Error parsing " ++ s ++ ":") s
 parseValue s = parse value ("Error parsing " ++ s ++ ":") s
 
-parseTrace t = parse trace ("Error parsing " ++ t ++ ":") t
+parseTrace t = fmap resolveReferences (parse trace ("Error parsing " ++ t ++ ":") t)
 
-trace = many1 $ do string "State "
-                   _ <- many digit
+resolveReferences :: [TraceState] -> [Action]
+resolveReferences ts = resolveReferences' ts ts
+
+resolveReferences' :: [TraceState] -> [TraceState] -> [Action]
+resolveReferences' _ [] = []
+resolveReferences' ts (Act a:ss) = a : resolveReferences' ts ss
+resolveReferences' ts (StepRef i:ss) = let a = case ts !! i of
+                                             (Act a') -> a'
+                                             _ -> error("Reference to reference")
+                                       in a: resolveReferences' ts ss
+
+data TraceState = Act Action | StepRef Int
+
+-- trace :: Either ParseError TraceState
+trace = do many1 $ traceStep
+
+traceStep = do try $ do string "State "
+                        _ <- many digit
+                        string ": <"
+                        _ <- manyTill anyChar (try (char '>'))
+                        ignore
+                        a <- action
+                        ignore
+                        return (Act a)
+            <|> do string "Back to state "
+                   digits <- many1 digit
+                   let n = foldl (\x d -> 10 * x + (digitToInt d)) 0 digits
                    string ": <"
                    _ <- manyTill anyChar (try (char '>'))
                    ignore
-                   a <- action
-                   ignore
-                   return a
+                   return (StepRef (n-1))
 
 
 specification = do (n, d) <- moduleHeader

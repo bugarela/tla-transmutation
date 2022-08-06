@@ -63,8 +63,8 @@
               "column": 1
             },
             "to": {
-              "line": 9,
-              "column": 67
+              "line": 8,
+              "column": 46
             }
           },
           "type": "Untyped",
@@ -86,8 +86,8 @@
                 "column": 17
               },
               "to": {
-                "line": 9,
-                "column": 67
+                "line": 8,
+                "column": 46
               }
             },
             "type": "Untyped",
@@ -379,199 +379,44 @@
                   },
                   "to": {
                     "line": 8,
-                    "column": 34
+                    "column": 46
                   }
                 },
                 "type": "Untyped",
                 "kind": "OperEx",
-                "oper": "EQ",
+                "oper": "UNCHANGED",
                 "args": [
                   {
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
                         "line": 8,
-                        "column": 19
+                        "column": 29
                       },
                       "to": {
                         "line": 8,
-                        "column": 30
-                      }
-                    },
-                    "type": "Untyped",
-                    "kind": "NameEx",
-                    "name": "next_to_open"
-                  },
-                  {
-                    "source": {
-                      "filename": "TrafficSemaphores",
-                      "from": {
-                        "line": 8,
-                        "column": 34
-                      },
-                      "to": {
-                        "line": 8,
-                        "column": 34
-                      }
-                    },
-                    "type": "Untyped",
-                    "kind": "NameEx",
-                    "name": "s"
-                  }
-                ]
-              },
-              {
-                "source": {
-                  "filename": "TrafficSemaphores",
-                  "from": {
-                    "line": 9,
-                    "column": 19
-                  },
-                  "to": {
-                    "line": 9,
-                    "column": 67
-                  }
-                },
-                "type": "Untyped",
-                "kind": "OperEx",
-                "oper": "EQ",
-                "args": [
-                  {
-                    "source": {
-                      "filename": "TrafficSemaphores",
-                      "from": {
-                        "line": 9,
-                        "column": 19
-                      },
-                      "to": {
-                        "line": 9,
-                        "column": 31
+                        "column": 46
                       }
                     },
                     "type": "Untyped",
                     "kind": "OperEx",
-                    "oper": "PRIME",
+                    "oper": "TUPLE",
                     "args": [
                       {
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 9,
-                            "column": 19
+                            "line": 8,
+                            "column": 32
                           },
                           "to": {
-                            "line": 9,
-                            "column": 30
+                            "line": 8,
+                            "column": 43
                           }
                         },
                         "type": "Untyped",
                         "kind": "NameEx",
                         "name": "next_to_open"
-                      }
-                    ]
-                  },
-                  {
-                    "source": {
-                      "filename": "TrafficSemaphores",
-                      "from": {
-                        "line": 9,
-                        "column": 35
-                      },
-                      "to": {
-                        "line": 9,
-                        "column": 67
-                      }
-                    },
-                    "type": "Untyped",
-                    "kind": "OperEx",
-                    "oper": "MOD",
-                    "args": [
-                      {
-                        "source": {
-                          "filename": "TrafficSemaphores",
-                          "from": {
-                            "line": 9,
-                            "column": 36
-                          },
-                          "to": {
-                            "line": 9,
-                            "column": 40
-                          }
-                        },
-                        "type": "Untyped",
-                        "kind": "OperEx",
-                        "oper": "PLUS",
-                        "args": [
-                          {
-                            "source": {
-                              "filename": "TrafficSemaphores",
-                              "from": {
-                                "line": 9,
-                                "column": 36
-                              },
-                              "to": {
-                                "line": 9,
-                                "column": 36
-                              }
-                            },
-                            "type": "Untyped",
-                            "kind": "NameEx",
-                            "name": "s"
-                          },
-                          {
-                            "source": {
-                              "filename": "TrafficSemaphores",
-                              "from": {
-                                "line": 9,
-                                "column": 40
-                              },
-                              "to": {
-                                "line": 9,
-                                "column": 40
-                              }
-                            },
-                            "type": "Untyped",
-                            "kind": "ValEx",
-                            "value": {
-                              "kind": "TlaInt",
-                              "value": 1
-                            }
-                          }
-                        ]
-                      },
-                      {
-                        "source": {
-                          "filename": "TrafficSemaphores",
-                          "from": {
-                            "line": 9,
-                            "column": 45
-                          },
-                          "to": {
-                            "line": 9,
-                            "column": 67
-                          }
-                        },
-                        "type": "Untyped",
-                        "kind": "OperEx",
-                        "oper": "FiniteSets!Cardinality",
-                        "args": [
-                          {
-                            "source": {
-                              "filename": "TrafficSemaphores",
-                              "from": {
-                                "line": 9,
-                                "column": 57
-                              },
-                              "to": {
-                                "line": 9,
-                                "column": 66
-                              }
-                            },
-                            "type": "Untyped",
-                            "kind": "NameEx",
-                            "name": "SEMAPHORES"
-                          }
-                        ]
                       }
                     ]
                   }
@@ -584,11 +429,11 @@
           "source": {
             "filename": "TrafficSemaphores",
             "from": {
-              "line": 11,
+              "line": 10,
               "column": 1
             },
             "to": {
-              "line": 13,
+              "line": 12,
               "column": 47
             }
           },
@@ -607,11 +452,11 @@
             "source": {
               "filename": "TrafficSemaphores",
               "from": {
-                "line": 11,
+                "line": 10,
                 "column": 18
               },
               "to": {
-                "line": 13,
+                "line": 12,
                 "column": 47
               }
             },
@@ -623,11 +468,11 @@
                 "source": {
                   "filename": "TrafficSemaphores",
                   "from": {
-                    "line": 11,
+                    "line": 10,
                     "column": 20
                   },
                   "to": {
-                    "line": 11,
+                    "line": 10,
                     "column": 38
                   }
                 },
@@ -639,11 +484,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 11,
+                        "line": 10,
                         "column": 20
                       },
                       "to": {
-                        "line": 11,
+                        "line": 10,
                         "column": 28
                       }
                     },
@@ -655,11 +500,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 11,
+                            "line": 10,
                             "column": 20
                           },
                           "to": {
-                            "line": 11,
+                            "line": 10,
                             "column": 25
                           }
                         },
@@ -671,11 +516,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 11,
+                            "line": 10,
                             "column": 27
                           },
                           "to": {
-                            "line": 11,
+                            "line": 10,
                             "column": 27
                           }
                         },
@@ -689,11 +534,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 11,
+                        "line": 10,
                         "column": 32
                       },
                       "to": {
-                        "line": 11,
+                        "line": 10,
                         "column": 38
                       }
                     },
@@ -710,11 +555,11 @@
                 "source": {
                   "filename": "TrafficSemaphores",
                   "from": {
-                    "line": 12,
+                    "line": 11,
                     "column": 20
                   },
                   "to": {
-                    "line": 12,
+                    "line": 11,
                     "column": 60
                   }
                 },
@@ -726,11 +571,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 12,
+                        "line": 11,
                         "column": 20
                       },
                       "to": {
-                        "line": 12,
+                        "line": 11,
                         "column": 26
                       }
                     },
@@ -742,11 +587,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 12,
+                            "line": 11,
                             "column": 20
                           },
                           "to": {
-                            "line": 12,
+                            "line": 11,
                             "column": 25
                           }
                         },
@@ -760,11 +605,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 12,
+                        "line": 11,
                         "column": 30
                       },
                       "to": {
-                        "line": 12,
+                        "line": 11,
                         "column": 60
                       }
                     },
@@ -776,11 +621,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 12,
+                            "line": 11,
                             "column": 31
                           },
                           "to": {
-                            "line": 12,
+                            "line": 11,
                             "column": 36
                           }
                         },
@@ -792,11 +637,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 12,
+                            "line": 11,
                             "column": 45
                           },
                           "to": {
-                            "line": 12,
+                            "line": 11,
                             "column": 59
                           }
                         },
@@ -808,11 +653,11 @@
                             "source": {
                               "filename": "TrafficSemaphores",
                               "from": {
-                                "line": 12,
+                                "line": 11,
                                 "column": 47
                               },
                               "to": {
-                                "line": 12,
+                                "line": 11,
                                 "column": 47
                               }
                             },
@@ -826,11 +671,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 12,
+                            "line": 11,
                             "column": 52
                           },
                           "to": {
-                            "line": 12,
+                            "line": 11,
                             "column": 59
                           }
                         },
@@ -849,11 +694,11 @@
                 "source": {
                   "filename": "TrafficSemaphores",
                   "from": {
-                    "line": 13,
+                    "line": 12,
                     "column": 20
                   },
                   "to": {
-                    "line": 13,
+                    "line": 12,
                     "column": 47
                   }
                 },
@@ -865,11 +710,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 13,
+                        "line": 12,
                         "column": 30
                       },
                       "to": {
-                        "line": 13,
+                        "line": 12,
                         "column": 47
                       }
                     },
@@ -881,11 +726,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 13,
+                            "line": 12,
                             "column": 33
                           },
                           "to": {
-                            "line": 13,
+                            "line": 12,
                             "column": 44
                           }
                         },
@@ -904,11 +749,11 @@
           "source": {
             "filename": "TrafficSemaphores",
             "from": {
-              "line": 15,
+              "line": 14,
               "column": 1
             },
             "to": {
-              "line": 17,
+              "line": 16,
               "column": 44
             }
           },
@@ -927,11 +772,11 @@
             "source": {
               "filename": "TrafficSemaphores",
               "from": {
-                "line": 15,
+                "line": 14,
                 "column": 15
               },
               "to": {
-                "line": 17,
+                "line": 16,
                 "column": 44
               }
             },
@@ -943,11 +788,11 @@
                 "source": {
                   "filename": "TrafficSemaphores",
                   "from": {
-                    "line": 15,
+                    "line": 14,
                     "column": 17
                   },
                   "to": {
-                    "line": 15,
+                    "line": 14,
                     "column": 36
                   }
                 },
@@ -959,11 +804,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 15,
+                        "line": 14,
                         "column": 17
                       },
                       "to": {
-                        "line": 15,
+                        "line": 14,
                         "column": 25
                       }
                     },
@@ -975,11 +820,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 15,
+                            "line": 14,
                             "column": 17
                           },
                           "to": {
-                            "line": 15,
+                            "line": 14,
                             "column": 22
                           }
                         },
@@ -991,11 +836,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 15,
+                            "line": 14,
                             "column": 24
                           },
                           "to": {
-                            "line": 15,
+                            "line": 14,
                             "column": 24
                           }
                         },
@@ -1009,11 +854,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 15,
+                        "line": 14,
                         "column": 29
                       },
                       "to": {
-                        "line": 15,
+                        "line": 14,
                         "column": 36
                       }
                     },
@@ -1030,11 +875,11 @@
                 "source": {
                   "filename": "TrafficSemaphores",
                   "from": {
-                    "line": 16,
+                    "line": 15,
                     "column": 17
                   },
                   "to": {
-                    "line": 16,
+                    "line": 15,
                     "column": 54
                   }
                 },
@@ -1046,11 +891,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 16,
+                        "line": 15,
                         "column": 17
                       },
                       "to": {
-                        "line": 16,
+                        "line": 15,
                         "column": 23
                       }
                     },
@@ -1062,11 +907,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 16,
+                            "line": 15,
                             "column": 17
                           },
                           "to": {
-                            "line": 16,
+                            "line": 15,
                             "column": 22
                           }
                         },
@@ -1080,11 +925,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 16,
+                        "line": 15,
                         "column": 27
                       },
                       "to": {
-                        "line": 16,
+                        "line": 15,
                         "column": 54
                       }
                     },
@@ -1096,11 +941,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 16,
+                            "line": 15,
                             "column": 28
                           },
                           "to": {
-                            "line": 16,
+                            "line": 15,
                             "column": 33
                           }
                         },
@@ -1112,11 +957,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 16,
+                            "line": 15,
                             "column": 42
                           },
                           "to": {
-                            "line": 16,
+                            "line": 15,
                             "column": 53
                           }
                         },
@@ -1128,11 +973,11 @@
                             "source": {
                               "filename": "TrafficSemaphores",
                               "from": {
-                                "line": 16,
+                                "line": 15,
                                 "column": 44
                               },
                               "to": {
-                                "line": 16,
+                                "line": 15,
                                 "column": 44
                               }
                             },
@@ -1146,11 +991,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 16,
+                            "line": 15,
                             "column": 49
                           },
                           "to": {
-                            "line": 16,
+                            "line": 15,
                             "column": 53
                           }
                         },
@@ -1169,11 +1014,11 @@
                 "source": {
                   "filename": "TrafficSemaphores",
                   "from": {
-                    "line": 17,
+                    "line": 16,
                     "column": 17
                   },
                   "to": {
-                    "line": 17,
+                    "line": 16,
                     "column": 44
                   }
                 },
@@ -1185,11 +1030,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 17,
+                        "line": 16,
                         "column": 27
                       },
                       "to": {
-                        "line": 17,
+                        "line": 16,
                         "column": 44
                       }
                     },
@@ -1201,11 +1046,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 17,
+                            "line": 16,
                             "column": 30
                           },
                           "to": {
-                            "line": 17,
+                            "line": 16,
                             "column": 41
                           }
                         },
@@ -1224,11 +1069,11 @@
           "source": {
             "filename": "TrafficSemaphores",
             "from": {
-              "line": 19,
+              "line": 18,
               "column": 1
             },
             "to": {
-              "line": 19,
+              "line": 18,
               "column": 64
             }
           },
@@ -1243,11 +1088,11 @@
             "source": {
               "filename": "TrafficSemaphores",
               "from": {
-                "line": 19,
+                "line": 18,
                 "column": 9
               },
               "to": {
-                "line": 19,
+                "line": 18,
                 "column": 64
               }
             },
@@ -1259,11 +1104,11 @@
                 "source": {
                   "filename": "TrafficSemaphores",
                   "from": {
-                    "line": 19,
+                    "line": 18,
                     "column": 9
                   },
                   "to": {
-                    "line": 19,
+                    "line": 18,
                     "column": 45
                   }
                 },
@@ -1275,11 +1120,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 19,
+                        "line": 18,
                         "column": 9
                       },
                       "to": {
-                        "line": 19,
+                        "line": 18,
                         "column": 14
                       }
                     },
@@ -1291,11 +1136,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 19,
+                        "line": 18,
                         "column": 18
                       },
                       "to": {
-                        "line": 19,
+                        "line": 18,
                         "column": 45
                       }
                     },
@@ -1307,11 +1152,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 19,
+                            "line": 18,
                             "column": 40
                           },
                           "to": {
-                            "line": 19,
+                            "line": 18,
                             "column": 44
                           }
                         },
@@ -1326,11 +1171,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 19,
+                            "line": 18,
                             "column": 18
                           },
                           "to": {
-                            "line": 19,
+                            "line": 18,
                             "column": 45
                           }
                         },
@@ -1342,11 +1187,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 19,
+                            "line": 18,
                             "column": 25
                           },
                           "to": {
-                            "line": 19,
+                            "line": 18,
                             "column": 34
                           }
                         },
@@ -1362,11 +1207,11 @@
                 "source": {
                   "filename": "TrafficSemaphores",
                   "from": {
-                    "line": 19,
+                    "line": 18,
                     "column": 49
                   },
                   "to": {
-                    "line": 19,
+                    "line": 18,
                     "column": 64
                   }
                 },
@@ -1378,11 +1223,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 19,
+                        "line": 18,
                         "column": 49
                       },
                       "to": {
-                        "line": 19,
+                        "line": 18,
                         "column": 60
                       }
                     },
@@ -1394,11 +1239,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 19,
+                        "line": 18,
                         "column": 64
                       },
                       "to": {
-                        "line": 19,
+                        "line": 18,
                         "column": 64
                       }
                     },
@@ -1418,11 +1263,11 @@
           "source": {
             "filename": "TrafficSemaphores",
             "from": {
-              "line": 21,
+              "line": 20,
               "column": 1
             },
             "to": {
-              "line": 21,
+              "line": 20,
               "column": 73
             }
           },
@@ -1437,11 +1282,11 @@
             "source": {
               "filename": "TrafficSemaphores",
               "from": {
-                "line": 21,
+                "line": 20,
                 "column": 9
               },
               "to": {
-                "line": 21,
+                "line": 20,
                 "column": 73
               }
             },
@@ -1453,11 +1298,11 @@
                 "source": {
                   "filename": "TrafficSemaphores",
                   "from": {
-                    "line": 21,
+                    "line": 20,
                     "column": 9
                   },
                   "to": {
-                    "line": 21,
+                    "line": 20,
                     "column": 73
                   }
                 },
@@ -1469,11 +1314,11 @@
                 "source": {
                   "filename": "TrafficSemaphores",
                   "from": {
-                    "line": 21,
+                    "line": 20,
                     "column": 18
                   },
                   "to": {
-                    "line": 21,
+                    "line": 20,
                     "column": 27
                   }
                 },
@@ -1485,11 +1330,11 @@
                 "source": {
                   "filename": "TrafficSemaphores",
                   "from": {
-                    "line": 21,
+                    "line": 20,
                     "column": 31
                   },
                   "to": {
-                    "line": 21,
+                    "line": 20,
                     "column": 73
                   }
                 },
@@ -1501,11 +1346,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 21,
+                        "line": 20,
                         "column": 31
                       },
                       "to": {
-                        "line": 21,
+                        "line": 20,
                         "column": 59
                       }
                     },
@@ -1517,11 +1362,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 21,
+                            "line": 20,
                             "column": 31
                           },
                           "to": {
-                            "line": 21,
+                            "line": 20,
                             "column": 42
                           }
                         },
@@ -1533,11 +1378,11 @@
                             "source": {
                               "filename": "TrafficSemaphores",
                               "from": {
-                                "line": 21,
+                                "line": 20,
                                 "column": 31
                               },
                               "to": {
-                                "line": 21,
+                                "line": 20,
                                 "column": 42
                               }
                             },
@@ -1549,11 +1394,11 @@
                             "source": {
                               "filename": "TrafficSemaphores",
                               "from": {
-                                "line": 21,
+                                "line": 20,
                                 "column": 41
                               },
                               "to": {
-                                "line": 21,
+                                "line": 20,
                                 "column": 41
                               }
                             },
@@ -1567,11 +1412,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 21,
+                            "line": 20,
                             "column": 47
                           },
                           "to": {
-                            "line": 21,
+                            "line": 20,
                             "column": 59
                           }
                         },
@@ -1583,11 +1428,11 @@
                             "source": {
                               "filename": "TrafficSemaphores",
                               "from": {
-                                "line": 21,
+                                "line": 20,
                                 "column": 47
                               },
                               "to": {
-                                "line": 21,
+                                "line": 20,
                                 "column": 59
                               }
                             },
@@ -1599,11 +1444,11 @@
                             "source": {
                               "filename": "TrafficSemaphores",
                               "from": {
-                                "line": 21,
+                                "line": 20,
                                 "column": 58
                               },
                               "to": {
-                                "line": 21,
+                                "line": 20,
                                 "column": 58
                               }
                             },
@@ -1619,11 +1464,11 @@
                     "source": {
                       "filename": "TrafficSemaphores",
                       "from": {
-                        "line": 21,
+                        "line": 20,
                         "column": 64
                       },
                       "to": {
-                        "line": 21,
+                        "line": 20,
                         "column": 73
                       }
                     },
@@ -1635,11 +1480,11 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 21,
+                            "line": 20,
                             "column": 64
                           },
                           "to": {
-                            "line": 21,
+                            "line": 20,
                             "column": 73
                           }
                         },
@@ -1651,209 +1496,17 @@
                         "source": {
                           "filename": "TrafficSemaphores",
                           "from": {
-                            "line": 21,
+                            "line": 20,
                             "column": 72
                           },
                           "to": {
-                            "line": 21,
+                            "line": 20,
                             "column": 72
                           }
                         },
                         "type": "Untyped",
                         "kind": "NameEx",
                         "name": "s"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "source": {
-            "filename": "TrafficSemaphores",
-            "from": {
-              "line": 23,
-              "column": 1
-            },
-            "to": {
-              "line": 23,
-              "column": 48
-            }
-          },
-          "type": "Untyped",
-          "kind": "TlaOperDecl",
-          "name": "Spec",
-          "formalParams": [
-            
-          ],
-          "isRecursive": false,
-          "body": {
-            "source": {
-              "filename": "TrafficSemaphores",
-              "from": {
-                "line": 23,
-                "column": 9
-              },
-              "to": {
-                "line": 23,
-                "column": 48
-              }
-            },
-            "type": "Untyped",
-            "kind": "OperEx",
-            "oper": "AND",
-            "args": [
-              {
-                "source": {
-                  "filename": "TrafficSemaphores",
-                  "from": {
-                    "line": 23,
-                    "column": 9
-                  },
-                  "to": {
-                    "line": 23,
-                    "column": 12
-                  }
-                },
-                "type": "Untyped",
-                "kind": "OperEx",
-                "oper": "OPER_APP",
-                "args": [
-                  {
-                    "source": {
-                      "filename": "TrafficSemaphores",
-                      "from": {
-                        "line": 23,
-                        "column": 9
-                      },
-                      "to": {
-                        "line": 23,
-                        "column": 12
-                      }
-                    },
-                    "type": "Untyped",
-                    "kind": "NameEx",
-                    "name": "Init"
-                  }
-                ]
-              },
-              {
-                "source": {
-                  "filename": "TrafficSemaphores",
-                  "from": {
-                    "line": 23,
-                    "column": 16
-                  },
-                  "to": {
-                    "line": 23,
-                    "column": 48
-                  }
-                },
-                "type": "Untyped",
-                "kind": "OperEx",
-                "oper": "GLOBALLY",
-                "args": [
-                  {
-                    "source": {
-                      "filename": "TrafficSemaphores",
-                      "from": {
-                        "line": 23,
-                        "column": 18
-                      },
-                      "to": {
-                        "line": 23,
-                        "column": 48
-                      }
-                    },
-                    "type": "Untyped",
-                    "kind": "OperEx",
-                    "oper": "STUTTER",
-                    "args": [
-                      {
-                        "source": {
-                          "filename": "TrafficSemaphores",
-                          "from": {
-                            "line": 23,
-                            "column": 19
-                          },
-                          "to": {
-                            "line": 23,
-                            "column": 22
-                          }
-                        },
-                        "type": "Untyped",
-                        "kind": "OperEx",
-                        "oper": "OPER_APP",
-                        "args": [
-                          {
-                            "source": {
-                              "filename": "TrafficSemaphores",
-                              "from": {
-                                "line": 23,
-                                "column": 19
-                              },
-                              "to": {
-                                "line": 23,
-                                "column": 22
-                              }
-                            },
-                            "type": "Untyped",
-                            "kind": "NameEx",
-                            "name": "Next"
-                          }
-                        ]
-                      },
-                      {
-                        "source": {
-                          "filename": "TrafficSemaphores",
-                          "from": {
-                            "line": 23,
-                            "column": 25
-                          },
-                          "to": {
-                            "line": 23,
-                            "column": 48
-                          }
-                        },
-                        "type": "Untyped",
-                        "kind": "OperEx",
-                        "oper": "TUPLE",
-                        "args": [
-                          {
-                            "source": {
-                              "filename": "TrafficSemaphores",
-                              "from": {
-                                "line": 23,
-                                "column": 27
-                              },
-                              "to": {
-                                "line": 23,
-                                "column": 32
-                              }
-                            },
-                            "type": "Untyped",
-                            "kind": "NameEx",
-                            "name": "colors"
-                          },
-                          {
-                            "source": {
-                              "filename": "TrafficSemaphores",
-                              "from": {
-                                "line": 23,
-                                "column": 35
-                              },
-                              "to": {
-                                "line": 23,
-                                "column": 46
-                              }
-                            },
-                            "type": "Untyped",
-                            "kind": "NameEx",
-                            "name": "next_to_open"
-                          }
-                        ]
                       }
                     ]
                   }
