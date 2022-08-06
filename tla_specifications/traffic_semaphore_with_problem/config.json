@@ -1,0 +1,11 @@
+{
+  "processes": [
+    {
+      "process_id": "main",
+      "actions": [
+        "\\E s \\in {0, 1} : TurnGreen(s) \\/ TurnYellow(s) \\/ TurnRed(s)"
+      ]
+    }
+  ],
+  "shared_variables": ["colors", "next_to_open"]
+}
