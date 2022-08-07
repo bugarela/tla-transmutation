@@ -39,7 +39,7 @@ generateTestFromTrace moduleName dest ps (Test n t) = do
 -- generateBlackboxTests :: [String] -> DistributionConfig -> Either String IO()
 generateBlackboxTests ps (Config _ _ _ _ _ name _ _ _ tests dest) = mapM (generateTestFromTrace name dest ps) tests
 
--- main :: IO [()]
+main :: IO [()]
 main = do
   (configFile:_) <- getArgs
   config <- parseConfig configFile

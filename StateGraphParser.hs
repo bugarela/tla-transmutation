@@ -102,18 +102,21 @@ unescape (c1:c2:cs) =
 header :: String -> String
 header m = unlines ["defmodule " ++ m ++ "Test do", "  use ExUnit.Case", "  doctest " ++ m]
 
-main :: IO ()
-main = do
-  (moduleName:file:configFile:_) <- getArgs
-  config <- parseConfig configFile
+generateWhiteboxTests ps (Config _ _ _ _ _ name _ _ file _ dest) = do
   d <- (eitherDecode <$> getJSON file) :: IO (Either String Graph)
   case d of
     Left err -> putStrLn err
-    Right ps ->
-      case fmap processNames config of
-        Left err -> putStrLn err
-        Right ms -> case genTests moduleName ms ps of
-                      Left err -> putStrLn err
-                      Right s ->
-                        let f = "elixir/test/generated_code/" ++ snake moduleName ++ "_test.exs"
-                         in writeFile f s
+    Right graph -> case genTests name ps graph of
+                     Left err -> putStrLn err
+                     Right s ->
+                       let f = dest ++ "/test/generated_code/" ++ snake name ++ "_test.exs"
+                        in writeFile f s
+
+
+main :: IO ()
+main = do
+  (configFile:_) <- getArgs
+  config <- parseConfig configFile
+  case fmap (\c -> generateWhiteboxTests (processNames c) c) config of
+        Left err -> error err
+        Right c -> c
