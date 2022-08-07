@@ -14,7 +14,7 @@ jsonFile :: FilePath
 jsonFile = "config-sample.json"
 
 data DistributionConfig =
-  Config [ProcessConfig] [String] [ConstantConfig] String String String String String [BlackboxTest] String
+  Config [ProcessConfig] [String] [ConstantConfig] String String String String String String [BlackboxTest] String
   deriving (Show, Generic)
 
 data ProcessConfig =
@@ -37,12 +37,13 @@ instance FromJSON DistributionConfig where
       cs <- obj .: "constants"
       i <- obj .: "init"
       n <- obj .: "next"
+      m <- obj .: "module_name"
       f <- obj .: "input_format"
       file <- obj .: "input_file"
       g <- obj .: "state_graph"
       bs <- obj .: "blackbox_tests"
       dest <- obj .: "destination_folder"
-      return (Config ps vs cs i n f file g bs dest)
+      return (Config ps vs cs i n m f file g bs dest)
 
 instance FromJSON ProcessConfig where
   parseJSON =
@@ -77,4 +78,4 @@ parseConfig file = do
 -- main = parseJson jsonFile >>= print
 
 processNames :: DistributionConfig -> [String]
-processNames (Config ps _ _ _ _ _ _ _ _ _) = map (\(PConfig n _) -> n) ps
+processNames (Config ps _ _ _ _ _ _ _ _ _ _) = map (\(PConfig n _) -> n) ps

@@ -38,6 +38,7 @@
   ],
   "init": "Init",
   "next": "Next",
+  "module_name": "ERC20",
   "input_format": "json",
   "input_file": "ERC20.json",
   "state_graph": "states.json",

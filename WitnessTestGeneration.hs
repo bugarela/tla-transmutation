@@ -27,16 +27,22 @@ testFile testTrace modules testName =
     , "end"
     ]
 
-main :: IO ()
+generateTestFromTrace moduleName dest ps (Test n t) = do
+  f <- readFile t
+  case parseTrace f of
+    Right ss ->
+      let content = testFile (map (initialState [] . toValue) ss) (map ((moduleName ++ "_") ++) ps) n
+          outFile = dest ++ "/lib/mix/tasks/" ++ snake n ++ ".ex"
+       in writeFile outFile content
+    Left e -> print e
+
+-- generateBlackboxTests :: [String] -> DistributionConfig -> Either String IO()
+generateBlackboxTests ps (Config _ _ _ _ _ name _ _ _ tests dest) = mapM (generateTestFromTrace name dest ps) tests
+
+-- main :: IO [()]
 main = do
-  (moduleName:file:testName:configFile:_) <- getArgs
-  f <- readFile file
+  (configFile:_) <- getArgs
   config <- parseConfig configFile
-  case fmap processNames config of
-        Left err -> putStrLn err
-        Right ms -> case parseTrace f of
-                      Right ss ->
-                        let content = testFile (map (initialState [] . toValue) ss) (map ((moduleName ++ "_") ++) ms) testName
-                            outFile = "elixir/lib/mix/tasks/" ++ snake testName ++ ".ex"
-                         in writeFile outFile content
-                      Left e -> print e
+  case fmap (\c -> generateBlackboxTests (processNames c) c) config of
+        Left err -> error err
+        Right c -> c

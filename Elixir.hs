@@ -10,7 +10,7 @@ import Helpers
 import Snippets
 
 generate :: Spec -> DistributionConfig -> [(String, ElixirCode)]
-generate (Spec m i n ds) (Config ps shared consts _ _ _ _ _ _ _) =
+generate (Spec m i n ds) (Config ps shared consts _ _ _ _ _ _ _ _) =
   let defs = filter (not . (specialDef i n)) ds
       cs = findConstants ds
       vs = findVariables ds
