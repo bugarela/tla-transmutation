@@ -1,0 +1,13 @@
+11:21:22.011 [main] INFO  a.f.a.t.Tool$ - # APALACHE version: v0.20.3-1485-gb46aa9e76 | build: v0.20.3-1485-gb46aa9e76
+11:21:22.192 [main] INFO  a.f.a.t.Tool$ - Parse ERC20.tla
+11:21:22.195 [main] INFO  a.f.a.i.p.PassChainExecutor - PASS #0: SanyParser
+11:21:22.334 [main] ERROR a.f.a.t.Tool$ - Error by TLA+ parser: *** Abort messages: 1
+
+Unknown location
+
+Cannot find source file for module ERC20_typedefs imported in module ERC20.
+
+
+
+11:21:22.335 [main] INFO  a.f.a.t.Tool$ - It took me 0 days  0 hours  0 min  0 sec
+11:21:22.335 [main] INFO  a.f.a.t.Tool$ - Total time: 0.319 sec

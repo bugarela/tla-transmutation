@@ -1,0 +1,8 @@
+11:21:34.854 [main] INFO  a.f.a.t.Tool$ - # APALACHE version: v0.20.3-1485-gb46aa9e76 | build: v0.20.3-1485-gb46aa9e76
+11:21:34.967 [main] INFO  a.f.a.t.Tool$ - Parse ERC20.tla
+11:21:34.970 [main] INFO  a.f.a.i.p.PassChainExecutor - PASS #0: SanyParser
+11:21:35.331 [main] DEBUG a.f.a.i.p.PassChainExecutor - PASS #0: SanyParser [OK]
+11:21:35.331 [main] INFO  a.f.a.t.Tool$ - Parsed successfully
+Root module: ERC20 with 21 declarations.
+11:21:35.331 [main] INFO  a.f.a.t.Tool$ - It took me 0 days  0 hours  0 min  0 sec
+11:21:35.332 [main] INFO  a.f.a.t.Tool$ - Total time: 0.474 sec

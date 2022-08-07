@@ -29,8 +29,9 @@ sharedVariablesDeclaration shared =
 moduleContext (Module m _) = [(m, "module")]
 
 -- (CALL) helpers
-call i [] = snake i
-call i ps = snake i ++ "(" ++ intercalate ", " ps ++ ")"
+call g i [] = snake i
+call g i ps = let divider = if (i, "local") `elem` g then "." else ""
+              in snake i ++ divider ++ "(" ++ intercalate ", " ps ++ ")"
 
 -- (IF) helpers
 ifExpr c t e = "(if " ++ c ++ ", do: " ++ t ++ ", else: " ++ e ++ ")"
@@ -58,18 +59,20 @@ enclose s = "(" ++ s ++ ")"
 cFold :: [ElixirCode] -> ElixirCode
 cFold [] = "true"
 cFold [c] = c
-cFold cs = "Enum.all?([" ++ intercalate ", " cs ++ "])"
+cFold cs = let (preassignments, conditions) = partition preassignment cs
+           in intercalate "" (map (++ "\n") preassignments) ++ "Enum.all?([" ++ intercalate ", " conditions ++ "])"
 
 aFold :: [ElixirCode] -> ElixirCode
 aFold [] = "%{}"
 aFold as =
-  let (otherActions, actions) = partition preassignment as
+  let (preassignments, as') = partition preassignment as
+      (postAssignments, actions) = partition postassignment as'
       kvs = intercalate ",\n" (map keyValue actions)
       initialVariables =
         case actions of
           [] -> []
           _ -> ["%{\n" ++ ident kvs ++ "\n}"]
-   in mapMerge (initialVariables ++ otherActions)
+   in  intercalate "" (map (++ "\n") preassignments) ++ mapMerge (initialVariables ++ postAssignments)
 
 orFold :: [ElixirCode] -> ElixirCode
 orFold [] = "true"
@@ -86,11 +89,12 @@ keyValue a = drop 3 (dropEnd 2 a)
 mapMerge [m] = m
 mapMerge (m:ms) = "Map.merge(\n  " ++ m ++ ",\n" ++ ident (mapMerge ms) ++ ")\n"
 
-preassignment as =
+preassignment as = any (isPrefixOf " = ") (tails as)
+postassignment as =
   (head as) == '(' ||
   take 2 as == "if" || dropWhile (/= ':') as == [] || take 4 as == "Enum" || take 3 as == "Map" || take 4 as == "List"
 
-interpolate (Lit (Str i)) = "#{inspect " ++ i ++ "}"
+interpolate (Lit (Str i)) = i
 interpolate (Ref i) = "#{inspect " ++ i ++ "}"
 interpolate i = show i
 

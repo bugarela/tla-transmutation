@@ -1,3 +1,4 @@
+{-# LANGUAGE TupleSections #-}
 module Elixir where
 
 import Data.List
@@ -9,14 +10,14 @@ import Helpers
 import Snippets
 
 generate :: Spec -> DistributionConfig -> [(String, ElixirCode)]
-generate (Spec m i n ds) (Config ps shared) =
+generate (Spec m i n ds) (Config ps shared consts) =
   let defs = filter (not . (specialDef i n)) ds
       cs = findConstants ds
       vs = findVariables ds
       header = moduleHeader (moduleName m) m shared False
       -- defNext = findIdentifier n ds
       base = baseSpec header cs vs defs
-   in (moduleName m, base):map (generateForProcess m n vs defs) ps
+   in (moduleName m, base):map (generateForProcess m n vs cs defs) ps
 
 generateStarter :: Spec -> (String, ElixirCode)
 generateStarter (Spec m i _ ds) =
@@ -27,12 +28,12 @@ generateStarter (Spec m i _ ds) =
    in (moduleName m, starterTask (moduleName m) state)
 
 generateForProcess ::
-     Module -> String -> [Variable] -> [Definition] -> ProcessConfig -> (String, ElixirCode)
-generateForProcess m n vs defs (PConfig p as) =
+     Module -> String -> [Variable] -> [Constant] -> [Definition] -> ProcessConfig -> (String, ElixirCode)
+generateForProcess m n vs cs defs (PConfig p as) =
   let name = moduleName m ++ "_" ++ p
       header = moduleHeader name m [] True
       defNext = ActionDefinition n [] [] (ActionOr as)
-   in (name, spec header [] vs [] defNext)
+   in (name, spec header cs vs [] defNext)
 
 
 -- filterDefs :: [Call] -> [Definition] -> [Definition]
@@ -88,11 +89,16 @@ definition g (ValueDefinition i ps v) = declaration i ps ++ ident (value g v) ++
 -- Comment translation, not specified
 definition _ (Comment s) = "# " ++ cleanTrailing s
 
+definitionName (ActionDefinition i _ _ _) = i
+definitionName (ValueDefinition i _ _) = i
+
+localDefinition g (ValueDefinition i ps v) = snake i ++ " = fn(variables" ++ intercalate "" (map ("," ++) ps) ++ ") -> " ++ value g v ++ "end"
+
 {-- \vdash_d --}
 actionsAndConditions :: Context -> Action -> ([ElixirCode], [ElixirCode])
 -- (CALL)
 actionsAndConditions g (ActionCall i ps) =
-  ([call (i ++ "Condition") ("variables" : map (value g) ps)], [call i ("variables" : map (value g) ps)])
+  ([call g (i ++ "Condition") ("variables" : map (value g) ps)], [call g i ("variables" : map (value g) ps)])
 -- (AND)
 actionsAndConditions g (ActionAnd as) =
   let (ics, ias) = unzipAndFold (map (actionsAndConditions g) as)
@@ -125,6 +131,9 @@ actionsAndConditions g (ActionIf p t e) =
              else cFold ce)
       a = ifExpr cp (aFold at) (aFold ae)
    in ([c], [a])
+actionsAndConditions g (ActionLet ds a) = let (cs, as) = actionsAndConditions (g ++ map ((,"local") . definitionName) ds) a
+                                              defs = unwords (map (localDefinition g) ds)
+                                          in (defs:cs, defs:as)
 -- (COND)
 actionsAndConditions g (Condition p) = ([value g p], [])
 -- [new] (EXT)
@@ -137,7 +146,7 @@ actionsAndConditions g (Exists i v a) =
 actionsAndConditions g (ForAll i v a) =
   let ig = (i, "param") : g
       (ics, ias) = actionsAndConditions ig a
-      c = "Enum.all?(" ++ value ig v ++ ", fn (" ++ i ++ ") ->" ++ cFold ics ++ " end\n)"
+      c = "Enum.all?(" ++ value ig v ++ ", fn (" ++ i ++ ") ->" ++ cFold ics ++ " end)"
    in ([c], ias)
 -- (TRA)
 actionsAndConditions g a = ([], [action g a])
@@ -179,7 +188,7 @@ value g (Lt v1 v2) = value g v1 ++ " < " ++ value g v2
 value g (Gte v1 v2) = value g v1 ++ " >= " ++ value g v2
 value g (Lte v1 v2) = value g v1 ++ " <= " ++ value g v2
 -- [new] (PRED-CALL)
-value g (ConditionCall i ps) = call i ("variables" : map (value g) ps)
+value g (ConditionCall i ps) = call g i ("variables" : map (value g) ps)
 -- (PRED-IN)
 value g (RecordBelonging v1 v2) = "Enum.member?(" ++ value g v2 ++ ", " ++ value g v1 ++ ")"
 -- [new] (PRED-NOTIN)
@@ -209,6 +218,7 @@ value g (Filtered i v p) =
 value g (Cardinality s) = "Enum.count(" ++ value g s ++ ")"
 value g (SetIn v s) = "MapSet.member?(" ++ value g s ++ ", " ++ value g v ++ ")"
 value g (SetMinus s1 s2) = "MapSet.difference(" ++ value g s1 ++ ", " ++ value g s2 ++ ")"
+value g (SetTimes s1 s2) = "(for x <- " ++ value g s1 ++ ", y <- " ++ value g s2  ++ ", do: {x, y})"
 -- (REC-LIT) and (REC-EX), aggregated to ensure ordering
 value g (Record rs) =
   let (literals, generations) = partition isLiteral rs
@@ -219,7 +229,7 @@ value g (Record rs) =
         else m ++ " |> Enum.into(" ++ l ++ ")"
 -- (REC-EXCEPT)
 value g (Except i es) =
-  intercalate "\n" (map (\(k, v) -> "Map.put(" ++ reference g i ++ ", " ++ value g k ++ ", " ++ value g v ++ ")") es)
+  intercalate "|>" (reference g i:map (\(k, v) -> "Map.put(" ++ value g k ++ ", " ++ value g v ++ ")") es)
 value g (FunGen i s v) = "Map.new(" ++ value g s ++ ", fn(" ++ i ++ ") -> {" ++ i ++ ", " ++ value ((i, "param") : g) v ++ "} end)"
 -- [new] (CASE)
 value g (Case ms) = "cond do\n" ++ intercalate "\n" (map (caseMatch g) ms) ++ "\nend\n"

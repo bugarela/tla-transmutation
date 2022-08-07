@@ -60,6 +60,7 @@ data Action
   | ActionOr [Action]
   | ActionCall Identifier [Value]
   | ActionIf Value Action Action
+  | ActionLet [Definition] Action
   | Exists Identifier Value Action
   | ForAll Identifier Value Action
   deriving (Show, Eq)
@@ -91,6 +92,7 @@ data Value
   | Union Value Value
   | Filtered Identifier Value Value
   | Cardinality Value
+  | Fold Value Value Value
   | Record [(Key, Value)]
   | RecordSet [(Key, Value)]
   | Except Identifier [(Value, Value)]

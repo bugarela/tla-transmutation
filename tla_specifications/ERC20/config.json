@@ -1,0 +1,39 @@
+{
+  "processes": [
+    {
+      "process_id": "alice",
+      "actions": [
+        "\\E toAddr \\in ADDR: \\E value \\in AMOUNTS : SubmitTransfer(\"alice_OF_ADDR\", toAddr, value)",
+        "\\E fromAddr \\in ADDR: \\E toAddr \\in ADDR: \\E value \\in AMOUNTS : SubmitTransferFrom(\"alice_OF_ADDR\", fromAddr, toAddr, value)",
+        "\\E spender \\in ADDR: \\E value \\in AMOUNTS : SubmitApprove(\"alice_OF_ADDR\", spender, value)"
+      ]
+    },
+    {
+      "process_id": "bob",
+      "actions": [
+        "\\E toAddr \\in ADDR: \\E value \\in AMOUNTS : SubmitTransfer(\"bob_OF_ADDR\", toAddr, value)",
+        "\\E fromAddr \\in ADDR: \\E toAddr \\in ADDR: \\E value \\in AMOUNTS : SubmitTransferFrom(\"bob_OF_ADDR\", fromAddr, toAddr, value)",
+        "\\E spender \\in ADDR: \\E value \\in AMOUNTS : SubmitApprove(\"bob_OF_ADDR\", spender, value)"
+      ]
+    },
+    {
+      "process_id": "blockchain",
+      "actions": [
+        "\\E tx \\in pendingTransactions: CommitTransfer(tx)",
+        "\\E tx \\in pendingTransactions: CommitTransferFrom(tx)",
+        "\\E tx \\in pendingTransactions: CommitApprove(tx)"
+      ]
+    }
+  ],
+  "shared_variables": ["pendingTransactions", "lastTx", "nextTxId"],
+  "constants": [
+    {
+      "name": "ADDR",
+      "value": "{\"alice_OF_ADDR\", \"bob_OF_ADDR\"}"
+    },
+    {
+      "name": "AMOUNTS",
+      "value": "{0, 100, 500}"
+    }
+  ]
+}

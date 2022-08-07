@@ -71,6 +71,7 @@ instance FromJSON Declaration where
       case filename :: String of
         "Functions" -> return Ignored
         "SequencesExt" -> return Ignored
+        "Apalache" -> return Ignored
         _ -> do
           k <- obj .: "kind"
           n <- obj .: "name"
@@ -110,7 +111,8 @@ instance FromJSON Expression where
 
 -- TODO: Parse this from config or something
 actionNames :: [String]
-actionNames = ["SendMsg", "Deactivate", "Environment", "System", "PassToken", "InitiateProbe", "Next"]
+-- actionNames = ["SendMsg", "Deactivate", "Environment", "System", "PassToken", "InitiateProbe", "Next"]
+actionNames = ["SubmitTransfer", "CommitTransfer", "SubmitTransferFrom", "CommitTransferFrom", "SubmitApprove", "CommitApprove", "Next"]
 
 notIgnored Ignored = False
 notIgnored _ = True
@@ -202,6 +204,12 @@ convertValue (OperEx o as) =
           "SET_FILTER" ->
             case as of
               [a1, a2, a3] -> liftA3 H.Filtered (identifier a1) (convertValue a2) (convertValue a3)
+          "SET_UNION2" ->
+            case as of
+              [a1, a2] -> liftA2 H.Union (convertValue a1) (convertValue a2)
+          "Apalache!ApaFoldSet" ->
+            case as of
+              [a1, a2, a3] -> liftA3 H.Fold (convertValue a1) (convertValue a2) (convertValue a3)
           "INT_RANGE" ->
             case as of
               [a1, a2] -> liftA2 H.Range (convertValue a1) (convertValue a2)
@@ -287,7 +295,7 @@ convertAction (OperEx o as) =
               [a1, a2, a3] -> liftA3 H.ForAll (identifier a1) (convertValue a2) (convertExpression a3)
           "UNCHANGED" ->
             case as of
-              [a] -> liftA H.Unchanged (manyIdentifiers a)
+              [a] -> fmap H.Unchanged (manyIdentifiers a)
           "AND" ->
             case as of
               es -> fmap H.ActionAnd (mapM convertExpression es)
@@ -300,15 +308,19 @@ convertAction (OperEx o as) =
           "OPER_APP" ->
             case as of
               (e:es) -> liftA2 H.ActionCall (identifier e) (mapM convertValue es)
+          "IF_THEN_ELSE" ->
+            case as of
+              [a1, a2, a3] -> liftA3 H.ActionIf (convertValue a1) (convertAction a2) (convertAction a3)
           op -> Left ("Unknown action operator " ++ op ++ " with args " ++ show as)
    in left (\s -> s ++ "\nwhen converting " ++ show (OperEx o as)) r
+convertAction (LetInEx ds b) = liftA2 H.ActionLet (mapM convertDefinitions ds) (convertAction b)
 
 convertExpression :: Expression -> Either String H.Action
-convertExpression (OperEx o as) =
-  if isPredicate (OperEx o as)
-    then convertValue (OperEx o as) >>= \x -> Right (H.Condition x)
-    else convertAction (OperEx o as)
 convertExpression (ValEx v) = convertValue (ValEx v) >>= \cv -> Right (H.Condition cv)
+convertExpression e =
+  if isPredicate e
+    then convertValue e >>= \x -> Right (H.Condition x)
+    else convertAction e
 
 actionOperators :: [String]
 actionOperators = ["PRIME", "UNCHANGED"]
@@ -321,7 +333,11 @@ isPredicate (OperEx o as) =
   all isPredicate as && if o == "OPER_APP"
                           then case identifier (head as) of {Right i -> i `notElem` actionNames}
                           else o `notElem` actionOperators
+isPredicate (LetInEx ds b) = all definitionIsPredicate ds && isPredicate b
 isPredicate _ = True
+
+definitionIsPredicate (Declaration k n ps (Just body)) = isPredicate body
+definitionIsPredicate _ = True
 
 isTemporal :: Expression -> Bool
 isTemporal (OperEx o as) = o `elem` temporalOperators || any isTemporal as
