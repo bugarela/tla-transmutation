@@ -1,6 +1,6 @@
 import System.Environment
 
-import ConfigParser (parseConfig, processNames)
+import ConfigParser
 import Control.Applicative
 import Elixir
 import Head
@@ -8,30 +8,33 @@ import Helpers
 import JSONParser (parseJson)
 import Parser
 
-filename p = "elixir/lib/generated_code/" ++ snake p ++ ".ex"
+filename dest p = dest ++ "/lib/generated_code/" ++ snake p ++ ".ex"
 
-writeCode m (p, code) =
-  let f = filename p
+writeCode dest m (p, code) =
+  let f = filename dest p
    in writeFile f code >> return f
 
-writeStarter (name, code) =
-  let f = "elixir/lib/mix/tasks/" ++ snake name ++ "_starter.ex"
+writeStarter dest (name, code) =
+  let f = dest ++ "/lib/mix/tasks/" ++ snake name ++ "_starter.ex"
    in writeFile f code >> return f
 
-convert name init next config (m, ds) = do
-  files <- mapM (writeCode name) (generate (Spec m init next ds) config)
-  starter <- mapM (writeStarter . generateStarter (Spec m init next ds)) (processNames config)
+convert name init next dest config (m, ds) = do
+  files <- mapM (writeCode dest name) (generate (Spec m init next ds) config)
+  starter <- mapM (writeStarter dest . generateStarter (Spec m init next ds)) (processNames config)
   return (starter, files)
 
 main = do
-  (mode:name:i:n:configFile:_) <- getArgs
+  (configFile:_) <- getArgs
   config <- parseConfig configFile
-  ls <-
-    if mode == "tla"
-      then parseTla name
-      else parseJson name
-  case liftA2 (convert name i n) config ls of
+  case config of
     Left e -> putStrLn e
-    Right f -> do
-      a <- f
-      putStrLn ("Elixirs files written to " ++ show a)
+    Right (Config _ _ _ i n mode file _ _ dest) -> do
+      ls <-
+        if mode == "tla"
+          then parseTla file
+          else parseJson file
+      case liftA2 (convert file i n dest) config ls of
+        Left e -> putStrLn e
+        Right f -> do
+          a <- f
+          putStrLn ("Elixirs files written to " ++ show a)

@@ -7,11 +7,11 @@ defmodule ERC20 do
     ]
   end
   require Oracle
-  @amounts [0, 100, 500]
+  @amounts MapSet.new([0, 100, 500])
   def amounts, do: @amounts
 
 
-  @addr ["alice_OF_ADDR", "bob_OF_ADDR"]
+  @addr MapSet.new(["alice_OF_ADDR", "bob_OF_ADDR"])
   def addr, do: @addr
 
 

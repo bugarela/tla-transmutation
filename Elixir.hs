@@ -10,13 +10,13 @@ import Helpers
 import Snippets
 
 generate :: Spec -> DistributionConfig -> [(String, ElixirCode)]
-generate (Spec m i n ds) (Config ps shared consts) =
+generate (Spec m i n ds) (Config ps shared consts _ _ _ _ _ _ _) =
   let defs = filter (not . (specialDef i n)) ds
       cs = findConstants ds
       vs = findVariables ds
       header = moduleHeader (moduleName m) m shared False
       -- defNext = findIdentifier n ds
-      base = baseSpec header cs vs defs
+      base = baseSpec header cs vs defs consts
    in (moduleName m, base):map (generateForProcess m n vs cs defs) ps
 
 generateStarter :: Spec -> String -> (String, ElixirCode)
@@ -52,24 +52,25 @@ spec m h cs vs ds dn =
         , "\nend\n\n"
         ]
 
-baseSpec :: String -> [Constant] -> [Variable] -> [Definition] -> ElixirCode
-baseSpec h cs vs ds =
+baseSpec :: String -> [Constant] -> [Variable] -> [Definition] -> [ConstantConfig] -> ElixirCode
+baseSpec h cs vs ds consts =
   let g = map (\c -> (c, "const")) cs ++ map (\v -> (v, "variable")) vs
    in concat
         [ h
-        , ident (concat [constants cs, mapAndJoin (definition g) ds, "\n", decideAction, "\n", waitLockFunction])
+        , ident (concat [constants cs consts, mapAndJoin (definition g) ds, "\n", decideAction, "\n", waitLockFunction])
         , "\nend\n\n"
         ]
 
 {-- \vdash_const --}
 -- (CONST)
-constants :: [Constant] -> ElixirCode
-constants cs =
+constants :: [Constant] -> [ConstantConfig] -> ElixirCode
+constants cs vs =
   unlines
     (map
        (\c ->
           let s = snake c
-              decl = "@" ++ s ++ " \"<value for " ++ c ++ ">\"\n"
+              (Constant _ val) = head (dropWhile (\(Constant n _) -> n /= c) vs)
+              decl = "@" ++ s ++ " " ++ value [] val ++ "\n"
               acc = "def " ++ s ++ ", do: @" ++ s ++ "\n\n"
            in decl ++ acc)
        cs)

@@ -14,7 +14,7 @@ jsonFile :: FilePath
 jsonFile = "config-sample.json"
 
 data DistributionConfig =
-  Config [ProcessConfig] [String] [ConstantConfig]
+  Config [ProcessConfig] [String] [ConstantConfig] String String String String String [BlackboxTest] String
   deriving (Show, Generic)
 
 data ProcessConfig =
@@ -25,13 +25,24 @@ data ConstantConfig =
   Constant String H.Value
   deriving (Show, Generic)
 
+data BlackboxTest =
+  Test String String
+  deriving (Show, Generic)
+
 instance FromJSON DistributionConfig where
   parseJSON =
     withObject "DistribuitionConfig" $ \obj -> do
       ps <- obj .: "processes"
       vs <- obj .: "shared_variables"
       cs <- obj .: "constants"
-      return (Config ps vs cs)
+      i <- obj .: "init"
+      n <- obj .: "next"
+      f <- obj .: "input_format"
+      file <- obj .: "input_file"
+      g <- obj .: "state_graph"
+      bs <- obj .: "blackbox_tests"
+      dest <- obj .: "destination_folder"
+      return (Config ps vs cs i n f file g bs dest)
 
 instance FromJSON ProcessConfig where
   parseJSON =
@@ -51,6 +62,13 @@ instance FromJSON ConstantConfig where
         Left e -> fail ("Invalid value in:" ++ show v ++ ". Error: " ++ show e)
         Right val -> return (Constant n val)
 
+instance FromJSON BlackboxTest where
+  parseJSON =
+    withObject "BlackboxTest" $ \obj -> do
+      n <- obj .: "name"
+      t <- obj .: "trace"
+      return (Test n t)
+
 parseConfig :: FilePath -> IO (Either String DistributionConfig)
 parseConfig file = do
   content <- B.readFile file
@@ -59,4 +77,4 @@ parseConfig file = do
 -- main = parseJson jsonFile >>= print
 
 processNames :: DistributionConfig -> [String]
-processNames (Config ps _ _) = map (\(PConfig n _) -> n) ps
+processNames (Config ps _ _ _ _ _ _ _ _ _) = map (\(PConfig n _) -> n) ps

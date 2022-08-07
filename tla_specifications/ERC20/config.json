@@ -35,5 +35,12 @@
       "name": "AMOUNTS",
       "value": "{0, 100, 500}"
     }
-  ]
+  ],
+  "init": "Init",
+  "next": "Next",
+  "input_format": "json",
+  "input_file": "ERC20.json",
+  "state_graph": "states.json",
+  "blackbox_tests": [{"name": "exploit_trace", "trace": "trace.out"}],
+  "destination_folder": "../../elixir"
 }
