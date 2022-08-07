@@ -19,13 +19,13 @@ generate (Spec m i n ds) (Config ps shared consts) =
       base = baseSpec header cs vs defs
    in (moduleName m, base):map (generateForProcess m n vs cs defs) ps
 
-generateStarter :: Spec -> (String, ElixirCode)
-generateStarter (Spec m i _ ds) =
+generateStarter :: Spec -> String -> (String, ElixirCode)
+generateStarter (Spec m i _ ds) name =
   let cs = findConstants ds
       vs = findVariables ds
-      g = map (\c -> (c, "const")) cs ++ map (\v -> (v, "variable")) vs
+      g = (moduleName m, "module"):map (, "const") cs ++ map (, "variable") vs
       state = ini (g ++ moduleContext m) (findIdentifier i ds)
-   in (moduleName m, starterTask (moduleName m) state)
+   in (moduleName m ++ "_" ++ name, starterTask (moduleName m) name state)
 
 generateForProcess ::
      Module -> String -> [Variable] -> [Constant] -> [Definition] -> ProcessConfig -> (String, ElixirCode)
@@ -33,7 +33,7 @@ generateForProcess m n vs cs defs (PConfig p as) =
   let name = moduleName m ++ "_" ++ p
       header = moduleHeader name m [] True
       defNext = ActionDefinition n [] [] (ActionOr as)
-   in (name, spec header cs vs [] defNext)
+   in (name, spec (moduleName m) header cs vs [] defNext)
 
 
 -- filterDefs :: [Call] -> [Definition] -> [Definition]
@@ -43,12 +43,12 @@ generateForProcess m n vs cs defs (PConfig p as) =
 
 {-- \vdash --}
 -- (MOD)
-spec :: String -> [Constant] -> [Variable] -> [Definition] -> Next -> ElixirCode
-spec h cs vs ds dn =
-  let g = map (\c -> (c, "const")) cs ++ map (\v -> (v, "variable")) vs
+spec :: String -> String -> [Constant] -> [Variable] -> [Definition] -> Next -> ElixirCode
+spec m h cs vs ds dn =
+  let g = (m, "module"):map (\c -> (c, "const")) cs ++ map (\v -> (v, "variable")) vs
    in concat
         [ h
-        , ident (concat [constants cs, mapAndJoin (definition g) ds, "\n", next g dn, mainFunction])
+        , ident (concat [mapAndJoin (definition g) ds, "\n", next g dn, mainFunction])
         , "\nend\n\n"
         ]
 

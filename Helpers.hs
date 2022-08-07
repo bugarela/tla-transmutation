@@ -173,27 +173,32 @@ findIdentifier i ds =
     Just a -> a
     Nothing -> error ("Definition not found: " ++ show i ++ " in " ++ show ds)
 
-starterTask name init =
+starterTask mName name init =
   unlines
-    [ "defmodule Mix.Tasks." ++ pascal (name ++ "Starter") ++ " do"
+    [ "defmodule Mix.Tasks." ++ pascal (mName ++ "_" ++ name ++ "Starter") ++ " do"
     , "  @moduledoc \"Printed when the user requests `mix help echo`\""
     , "  @shortdoc \"Echoes arguments\""
     , "  use Mix.Task"
-    , "  import " ++ name
+    , "  import " ++ mName
+    , "  import " ++ mName ++ "_" ++ name
     , ""
     , "  @impl Mix.Task"
-    , "  def run(_) do"
-    , "      variables = %{}"
-    , "      initial_state = " ++ init
+    , "  def run(args) do"
+    , "    variables = %{}"
+    , "    initial_state = " ++ init
+    , "    oracle_host = String.to_atom(Enum.at(args, 0))"
+    , "    Node.connect(oracle_host)"
+    , "    oracle_pid = find_oracle()"
+    , "    IO.puts(inspect(oracle_pid))"
+    , "    main(oracle_pid, initial_state, 0)"
+    , "  end"
     , ""
-    , "    oracle = spawn(RandomOracle, :start, [initial_state, 0, nil])"
-    , "    :global.register_name(\"oracle\", oracle)"
-    , ""
-    , "    ref = Process.monitor(oracle)"
-    , ""
-    , "     receive do"
-    , "       {:DOWN, ^ref, _, _, _} ->"
-    , "         IO.puts(\"Oracle is down\")"
+    , "  def find_oracle() do"
+    , "    o = :global.whereis_name(\"oracle\")"
+    , "    if o == :undefined do"
+    , "      find_oracle()"
+    , "    else"
+    , "      o"
     , "    end"
     , "  end"
     , "end"

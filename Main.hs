@@ -1,6 +1,6 @@
 import System.Environment
 
-import ConfigParser (parseConfig)
+import ConfigParser (parseConfig, processNames)
 import Control.Applicative
 import Elixir
 import Head
@@ -20,7 +20,7 @@ writeStarter (name, code) =
 
 convert name init next config (m, ds) = do
   files <- mapM (writeCode name) (generate (Spec m init next ds) config)
-  starter <- writeStarter (generateStarter (Spec m init next ds))
+  starter <- mapM (writeStarter . generateStarter (Spec m init next ds)) (processNames config)
   return (starter, files)
 
 main = do

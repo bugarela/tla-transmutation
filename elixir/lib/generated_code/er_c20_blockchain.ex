@@ -2,14 +2,6 @@ defmodule ERC20_blockchain do
   require Oracle
 
   import ERC20
-  @amounts "<value for AMOUNTS>"
-  def amounts, do: @amounts
-
-
-  @addr "<value for ADDR>"
-  def addr, do: @addr
-
-
 
   def next(variables) do
     Enum.filter(
