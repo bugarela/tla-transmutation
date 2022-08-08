@@ -349,6 +349,8 @@ value = do try $ do string "Cardinality("
         do try $ do {e <- arithmeticExpression; ws; return (e)}
         <|>
         do {l <- lit; return (Lit l)}
+        <|>
+        tuple
 
 set = do try $ do {s1 <- atomSet; string "\\cup"; ws; s2 <- set; ws; return (Union s1 s2)}
       <|>
@@ -423,9 +425,11 @@ recEntry = do try $ do l <- lit
                        ws
                        string ":>"
                        ws
-                       a <- lit
+                       v <- value
                        ws
-                       return (Key l, (Lit a))
+                       return (Key l, v)
+
+tuple = do try $ do {string "<<"; vs <- value `sepBy` try comma; string ">>"; ws; return (Tuple vs)}
 
 lit = do try $ do stringLiteral
       <|>

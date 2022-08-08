@@ -40,5 +40,4 @@
   "state_graph": "states.json",
   "blackbox_tests": [{"name": "Termination", "trace": "trace.out"}],
   "destination_folder": "../../elixir"
-
 }

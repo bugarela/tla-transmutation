@@ -1,0 +1,374 @@
+State 1: <aa>
+/\ allowance = (<<"Bob_OF_ADDR", "Eve_OF_ADDR">> :> 0 @@ <<"Alice_OF_ADDR", "Alice_OF_ADDR">> :> 0 @@ <<"Alice_OF_ADDR", "Bob_OF_ADDR">> :> 0 @@ <<"Alice_OF_ADDR", "Eve_OF_ADDR">> :> 0 @@ <<"Bob_OF_ADDR", "Bob_OF_ADDR">> :> 0 @@ <<"Bob_OF_ADDR", "Alice_OF_ADDR">> :> 0 @@ <<"Eve_OF_ADDR", "Alice_OF_ADDR">> :> 0 @@ <<"Eve_OF_ADDR", "Bob_OF_ADDR">> :> 0 @@ <<"Eve_OF_ADDR", "Eve_OF_ADDR">> :> 0)
+/\ balanceOf = ("Alice_OF_ADDR" :> 100 @@ "Bob_OF_ADDR" :> 100 @@ "Eve_OF_ADDR" :> 100)
+/\ lastTx = [fail |-> FALSE, id |-> 0, tag |-> "None"]
+/\ nextTxId = 0
+/\ pendingTransactions = {}
+
+State2: <>
+  allowance
+      = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Eve_OF_ADDR">>, 0>> })
+    /\ balanceOf
+      = SetAsFun({ <<"Alice_OF_ADDR", 100>>,
+        <<"Bob_OF_ADDR", 100>>,
+        <<"Eve_OF_ADDR", 100>> })
+    /\ lastTx = [fail |-> FALSE, id |-> 0, tag |-> "None"]
+    /\ nextTxId = 1
+    /\ pendingTransactions
+      = {[fail |-> FALSE,
+        id |-> 0,
+        sender |-> "Eve_OF_ADDR",
+        spender |-> "Bob_OF_ADDR",
+        tag |-> "approve",
+        value |-> 1]}
+
+State 3: <>
+  allowance
+      = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Eve_OF_ADDR">>, 0>> })
+    /\ balanceOf
+      = SetAsFun({ <<"Alice_OF_ADDR", 100>>,
+        <<"Bob_OF_ADDR", 100>>,
+        <<"Eve_OF_ADDR", 100>> })
+    /\ lastTx = [fail |-> FALSE, id |-> 0, tag |-> "None"]
+    /\ nextTxId = 2
+    /\ pendingTransactions
+      = { [fail |-> FALSE,
+          id |-> 0,
+          sender |-> "Eve_OF_ADDR",
+          spender |-> "Bob_OF_ADDR",
+          tag |-> "approve",
+          value |-> 1],
+        [fail |-> FALSE,
+          id |-> 1,
+          sender |-> "Alice_OF_ADDR",
+          spender |-> "Bob_OF_ADDR",
+          tag |-> "approve",
+          value |-> 1] }
+
+State 4: <>
+  allowance
+      = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Eve_OF_ADDR">>, 0>> })
+    /\ balanceOf
+      = SetAsFun({ <<"Alice_OF_ADDR", 100>>,
+        <<"Bob_OF_ADDR", 100>>,
+        <<"Eve_OF_ADDR", 100>> })
+    /\ lastTx = [fail |-> FALSE, id |-> 0, tag |-> "None"]
+    /\ nextTxId = 3
+    /\ pendingTransactions
+      = { [fail |-> FALSE,
+          id |-> 0,
+          sender |-> "Eve_OF_ADDR",
+          spender |-> "Bob_OF_ADDR",
+          tag |-> "approve",
+          value |-> 1],
+        [fail |-> FALSE,
+          id |-> 1,
+          sender |-> "Alice_OF_ADDR",
+          spender |-> "Bob_OF_ADDR",
+          tag |-> "approve",
+          value |-> 1],
+        [fail |-> FALSE,
+          id |-> 2,
+          sender |-> "Bob_OF_ADDR",
+          tag |-> "transfer",
+          toAddr |-> "Alice_OF_ADDR",
+          value |-> 0] }
+
+State 4: <>
+  allowance
+      = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 1>>,
+        <<<<"Alice_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Eve_OF_ADDR">>, 0>> })
+    /\ balanceOf
+      = SetAsFun({ <<"Alice_OF_ADDR", 100>>,
+        <<"Bob_OF_ADDR", 100>>,
+        <<"Eve_OF_ADDR", 100>> })
+    /\ lastTx
+      = [fail |-> FALSE,
+        id |-> 1,
+        sender |-> "Alice_OF_ADDR",
+        spender |-> "Bob_OF_ADDR",
+        tag |-> "approve",
+        value |-> 1]
+    /\ nextTxId = 3
+    /\ pendingTransactions
+      = { [fail |-> FALSE,
+          id |-> 0,
+          sender |-> "Eve_OF_ADDR",
+          spender |-> "Bob_OF_ADDR",
+          tag |-> "approve",
+          value |-> 1],
+        [fail |-> FALSE,
+          id |-> 2,
+          sender |-> "Bob_OF_ADDR",
+          tag |-> "transfer",
+          toAddr |-> "Alice_OF_ADDR",
+          value |-> 0] }
+
+State 5: <>
+  allowance
+      = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 1>>,
+        <<<<"Alice_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Eve_OF_ADDR">>, 0>> })
+    /\ balanceOf
+      = SetAsFun({ <<"Alice_OF_ADDR", 100>>,
+        <<"Bob_OF_ADDR", 100>>,
+        <<"Eve_OF_ADDR", 100>> })
+    /\ lastTx = [fail |-> FALSE, id |-> 0, tag |-> "None"]
+    /\ nextTxId = 4
+    /\ pendingTransactions
+      = { [fail |-> FALSE,
+          id |-> 0,
+          sender |-> "Eve_OF_ADDR",
+          spender |-> "Bob_OF_ADDR",
+          tag |-> "approve",
+          value |-> 1],
+        [fail |-> FALSE,
+          id |-> 2,
+          sender |-> "Bob_OF_ADDR",
+          tag |-> "transfer",
+          toAddr |-> "Alice_OF_ADDR",
+          value |-> 0],
+        [fail |-> FALSE,
+          id |-> 3,
+          sender |-> "Eve_OF_ADDR",
+          spender |-> "Bob_OF_ADDR",
+          tag |-> "approve",
+          value |-> 3] }
+
+State 6: <>
+  allowance
+      = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 1>>,
+        <<<<"Alice_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Eve_OF_ADDR">>, 0>> })
+    /\ balanceOf
+      = SetAsFun({ <<"Alice_OF_ADDR", 100>>,
+        <<"Bob_OF_ADDR", 100>>,
+        <<"Eve_OF_ADDR", 100>> })
+    /\ lastTx
+      = [fail |-> FALSE,
+        id |-> 2,
+        sender |-> "Bob_OF_ADDR",
+        tag |-> "transfer",
+        toAddr |-> "Alice_OF_ADDR",
+        value |-> 0]
+    /\ nextTxId = 4
+    /\ pendingTransactions
+      = { [fail |-> FALSE,
+          id |-> 0,
+          sender |-> "Eve_OF_ADDR",
+          spender |-> "Bob_OF_ADDR",
+          tag |-> "approve",
+          value |-> 1],
+        [fail |-> FALSE,
+          id |-> 3,
+          sender |-> "Eve_OF_ADDR",
+          spender |-> "Bob_OF_ADDR",
+          tag |-> "approve",
+          value |-> 3] }
+
+State 7: <>
+  allowance
+      = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 1>>,
+        <<<<"Alice_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Eve_OF_ADDR">>, 0>> })
+    /\ balanceOf
+      = SetAsFun({ <<"Alice_OF_ADDR", 100>>,
+        <<"Bob_OF_ADDR", 100>>,
+        <<"Eve_OF_ADDR", 100>> })
+    /\ lastTx = [fail |-> FALSE, id |-> 0, tag |-> "None"]
+    /\ nextTxId = 5
+    /\ pendingTransactions
+      = { [fail |-> FALSE,
+          fromAddr |-> "Eve_OF_ADDR",
+          id |-> 4,
+          sender |-> "Bob_OF_ADDR",
+          tag |-> "transferFrom",
+          toAddr |-> "Alice_OF_ADDR",
+          value |-> 2],
+        [fail |-> FALSE,
+          id |-> 0,
+          sender |-> "Eve_OF_ADDR",
+          spender |-> "Bob_OF_ADDR",
+          tag |-> "approve",
+          value |-> 1],
+        [fail |-> FALSE,
+          id |-> 3,
+          sender |-> "Eve_OF_ADDR",
+          spender |-> "Bob_OF_ADDR",
+          tag |-> "approve",
+          value |-> 3] }
+
+State 7: <>
+  allowance
+      = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 1>>,
+        <<<<"Alice_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Eve_OF_ADDR">>, 0>> })
+    /\ balanceOf
+      = SetAsFun({ <<"Alice_OF_ADDR", 100>>,
+        <<"Bob_OF_ADDR", 100>>,
+        <<"Eve_OF_ADDR", 100>> })
+    /\ lastTx = [fail |-> FALSE, id |-> 0, tag |-> "None"]
+    /\ nextTxId = 6
+    /\ pendingTransactions
+      = { [fail |-> FALSE,
+          fromAddr |-> "Eve_OF_ADDR",
+          id |-> 4,
+          sender |-> "Bob_OF_ADDR",
+          tag |-> "transferFrom",
+          toAddr |-> "Alice_OF_ADDR",
+          value |-> 2],
+        [fail |-> FALSE,
+          id |-> 0,
+          sender |-> "Eve_OF_ADDR",
+          spender |-> "Bob_OF_ADDR",
+          tag |-> "approve",
+          value |-> 1],
+        [fail |-> FALSE,
+          id |-> 3,
+          sender |-> "Eve_OF_ADDR",
+          spender |-> "Bob_OF_ADDR",
+          tag |-> "approve",
+          value |-> 3],
+        [fail |-> FALSE,
+          id |-> 5,
+          sender |-> "Alice_OF_ADDR",
+          tag |-> "transfer",
+          toAddr |-> "Eve_OF_ADDR",
+          value |-> 0] }
+
+State 8: <>
+  allowance
+      = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 1>>,
+        <<<<"Alice_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Bob_OF_ADDR">>, 3>>,
+        <<<<"Eve_OF_ADDR", "Eve_OF_ADDR">>, 0>> })
+    /\ balanceOf
+      = SetAsFun({ <<"Alice_OF_ADDR", 100>>,
+        <<"Bob_OF_ADDR", 100>>,
+        <<"Eve_OF_ADDR", 100>> })
+    /\ lastTx
+      = [fail |-> FALSE,
+        id |-> 3,
+        sender |-> "Eve_OF_ADDR",
+        spender |-> "Bob_OF_ADDR",
+        tag |-> "approve",
+        value |-> 3]
+    /\ nextTxId = 6
+    /\ pendingTransactions
+      = { [fail |-> FALSE,
+          fromAddr |-> "Eve_OF_ADDR",
+          id |-> 4,
+          sender |-> "Bob_OF_ADDR",
+          tag |-> "transferFrom",
+          toAddr |-> "Alice_OF_ADDR",
+          value |-> 2],
+        [fail |-> FALSE,
+          id |-> 0,
+          sender |-> "Eve_OF_ADDR",
+          spender |-> "Bob_OF_ADDR",
+          tag |-> "approve",
+          value |-> 1],
+        [fail |-> FALSE,
+          id |-> 5,
+          sender |-> "Alice_OF_ADDR",
+          tag |-> "transfer",
+          toAddr |-> "Eve_OF_ADDR",
+          value |-> 0] }
+
+State 9: <>
+  allowance
+      = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 1>>,
+        <<<<"Alice_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+        <<<<"Bob_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+        <<<<"Eve_OF_ADDR", "Bob_OF_ADDR">>, 1>>,
+        <<<<"Eve_OF_ADDR", "Eve_OF_ADDR">>, 0>> })
+    /\ balanceOf
+      = SetAsFun({ <<"Alice_OF_ADDR", 102>>,
+        <<"Bob_OF_ADDR", 100>>,
+        <<"Eve_OF_ADDR", 98>> })
+    /\ lastTx
+      = [fail |-> FALSE,
+        fromAddr |-> "Eve_OF_ADDR",
+        id |-> 4,
+        sender |-> "Bob_OF_ADDR",
+        tag |-> "transferFrom",
+        toAddr |-> "Alice_OF_ADDR",
+        value |-> 2]
+    /\ nextTxId = 6
+    /\ pendingTransactions
+      = { [fail |-> FALSE,
+          id |-> 0,
+          sender |-> "Eve_OF_ADDR",
+          spender |-> "Bob_OF_ADDR",
+          tag |-> "approve",
+          value |-> 1],
+        [fail |-> FALSE,
+          id |-> 5,
+          sender |-> "Alice_OF_ADDR",
+          tag |-> "transfer",
+          toAddr |-> "Eve_OF_ADDR",
+          value |-> 0] }

@@ -13,31 +13,8 @@
  * Igor Konnov, Informal Systems, 2021-2022
  *)
 
-(*
-  Type definitions for the module ERC20.
-  An account address, in our case, simply an uninterpreted type ADDR.
-  A transaction (a la discriminated union but all fields are packed together):
-  @typeAlias: TX = [
-    tag: Str,
-    id: Int,
-    fail: Bool,
-    sender: ADDR,
-    spender: ADDR,
-    fromAddr: ADDR,
-    toAddr: ADDR,
-    value: Int
-  ];
-  A state of the state machine:
-  @typeAlias: STATE = [
-    balanceOf: ADDR -> Int,
-    allowance: <<ADDR, ADDR>> -> Int,
-    pendingTransactions: Set(TX),
-    lastTx: TX,
-    nextTxId: Int
-  ];
- *)
 
-EXTENDS Integers, Apalache
+EXTENDS Integers, Apalache, ERC20_typedef
 
 CONSTANTS
     \* Set of all addresses.
