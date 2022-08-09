@@ -1,1 +1,0 @@
- parse --output=EWD998.json EWD998.tla

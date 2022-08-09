@@ -25,5 +25,19 @@
       ]
     }
   ],
-  "shared_variables": ["tcolor", "tpos", "active"]
+  "shared_variables": ["tcolor", "tpos", "active"],
+  "constants": [
+    {
+      "name": "N",
+      "value": "3"
+    }
+  ],
+  "init": "Init",
+  "next": "Next",
+  "module_name": "EWD840",
+  "input_format": "json",
+  "input_file": "EWD840.json",
+  "state_graph": "states.json",
+  "blackbox_tests": [{"name": "Termination", "trace": "trace.out"}],
+  "destination_folder": "../../elixir"
 }

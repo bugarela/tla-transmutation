@@ -13,7 +13,7 @@ test "fromState 7" do
 }]
 
   actions = List.flatten([TrafficSemaphores_main.next(variables)])
-  states = Enum.map(actions, fn action -> action[:state] end)
+  states = Enum.map(actions, fn action -> action[:transition].(variables) end)
 
   assert Enum.sort(Enum.uniq(states)) == Enum.sort(Enum.uniq(expectedStates))
 end
@@ -30,7 +30,7 @@ test "fromState 8" do
 }]
 
   actions = List.flatten([TrafficSemaphores_main.next(variables)])
-  states = Enum.map(actions, fn action -> action[:state] end)
+  states = Enum.map(actions, fn action -> action[:transition].(variables) end)
 
   assert Enum.sort(Enum.uniq(states)) == Enum.sort(Enum.uniq(expectedStates))
 end
@@ -47,7 +47,7 @@ test "fromState 9" do
 }]
 
   actions = List.flatten([TrafficSemaphores_main.next(variables)])
-  states = Enum.map(actions, fn action -> action[:state] end)
+  states = Enum.map(actions, fn action -> action[:transition].(variables) end)
 
   assert Enum.sort(Enum.uniq(states)) == Enum.sort(Enum.uniq(expectedStates))
 end
@@ -64,7 +64,7 @@ test "fromState 10" do
 }]
 
   actions = List.flatten([TrafficSemaphores_main.next(variables)])
-  states = Enum.map(actions, fn action -> action[:state] end)
+  states = Enum.map(actions, fn action -> action[:transition].(variables) end)
 
   assert Enum.sort(Enum.uniq(states)) == Enum.sort(Enum.uniq(expectedStates))
 end
@@ -81,7 +81,7 @@ test "fromState 11" do
 }]
 
   actions = List.flatten([TrafficSemaphores_main.next(variables)])
-  states = Enum.map(actions, fn action -> action[:state] end)
+  states = Enum.map(actions, fn action -> action[:transition].(variables) end)
 
   assert Enum.sort(Enum.uniq(states)) == Enum.sort(Enum.uniq(expectedStates))
 end
@@ -98,7 +98,7 @@ test "fromState 12" do
 }]
 
   actions = List.flatten([TrafficSemaphores_main.next(variables)])
-  states = Enum.map(actions, fn action -> action[:state] end)
+  states = Enum.map(actions, fn action -> action[:transition].(variables) end)
 
   assert Enum.sort(Enum.uniq(states)) == Enum.sort(Enum.uniq(expectedStates))
 end

@@ -1,0 +1,2280 @@
+{
+  "name": "ApalacheIR",
+  "version": "1.0",
+  "description": "https://apalache.informal.systems/docs/adr/005adr-json.html",
+  "modules": [
+    {
+      "kind": "TlaModule",
+      "name": "a",
+      "declarations": [
+        {
+          "source": {
+            "filename": "TransactionCommit",
+            "from": {
+              "line": 6,
+              "column": 10
+            },
+            "to": {
+              "line": 6,
+              "column": 11
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaConstDecl",
+          "name": "RM"
+        },
+        {
+          "source": {
+            "filename": "TransactionCommit",
+            "from": {
+              "line": 7,
+              "column": 10
+            },
+            "to": {
+              "line": 7,
+              "column": 16
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaVarDecl",
+          "name": "rmState"
+        },
+        {
+          "source": {
+            "filename": "TransactionCommit",
+            "from": {
+              "line": 9,
+              "column": 1
+            },
+            "to": {
+              "line": 13,
+              "column": 69
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaOperDecl",
+          "name": "TCTypeOK",
+          "formalParams": [
+            
+          ],
+          "isRecursive": false,
+          "body": {
+            "source": {
+              "filename": "TransactionCommit",
+              "from": {
+                "line": 13,
+                "column": 3
+              },
+              "to": {
+                "line": 13,
+                "column": 69
+              }
+            },
+            "type": "Untyped",
+            "kind": "OperEx",
+            "oper": "SET_IN",
+            "args": [
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 13,
+                    "column": 3
+                  },
+                  "to": {
+                    "line": 13,
+                    "column": 9
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "rmState"
+              },
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 13,
+                    "column": 15
+                  },
+                  "to": {
+                    "line": 13,
+                    "column": 69
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "FUN_SET",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 13,
+                        "column": 16
+                      },
+                      "to": {
+                        "line": 13,
+                        "column": 17
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "NameEx",
+                    "name": "RM"
+                  },
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 13,
+                        "column": 22
+                      },
+                      "to": {
+                        "line": 13,
+                        "column": 68
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "SET_ENUM",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 13,
+                            "column": 23
+                          },
+                          "to": {
+                            "line": 13,
+                            "column": 31
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "ValEx",
+                        "value": {
+                          "kind": "TlaStr",
+                          "value": "working"
+                        }
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 13,
+                            "column": 34
+                          },
+                          "to": {
+                            "line": 13,
+                            "column": 43
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "ValEx",
+                        "value": {
+                          "kind": "TlaStr",
+                          "value": "prepared"
+                        }
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 13,
+                            "column": 46
+                          },
+                          "to": {
+                            "line": 13,
+                            "column": 56
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "ValEx",
+                        "value": {
+                          "kind": "TlaStr",
+                          "value": "committed"
+                        }
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 13,
+                            "column": 59
+                          },
+                          "to": {
+                            "line": 13,
+                            "column": 67
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "ValEx",
+                        "value": {
+                          "kind": "TlaStr",
+                          "value": "aborted"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "source": {
+            "filename": "TransactionCommit",
+            "from": {
+              "line": 15,
+              "column": 1
+            },
+            "to": {
+              "line": 15,
+              "column": 46
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaOperDecl",
+          "name": "TCInit",
+          "formalParams": [
+            
+          ],
+          "isRecursive": false,
+          "body": {
+            "source": {
+              "filename": "TransactionCommit",
+              "from": {
+                "line": 15,
+                "column": 13
+              },
+              "to": {
+                "line": 15,
+                "column": 46
+              }
+            },
+            "type": "Untyped",
+            "kind": "OperEx",
+            "oper": "EQ",
+            "args": [
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 15,
+                    "column": 13
+                  },
+                  "to": {
+                    "line": 15,
+                    "column": 19
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "rmState"
+              },
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 15,
+                    "column": 23
+                  },
+                  "to": {
+                    "line": 15,
+                    "column": 46
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "FUN_CTOR",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 15,
+                        "column": 37
+                      },
+                      "to": {
+                        "line": 15,
+                        "column": 45
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "ValEx",
+                    "value": {
+                      "kind": "TlaStr",
+                      "value": "working"
+                    }
+                  },
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 15,
+                        "column": 23
+                      },
+                      "to": {
+                        "line": 15,
+                        "column": 46
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "NameEx",
+                    "name": "r"
+                  },
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 15,
+                        "column": 30
+                      },
+                      "to": {
+                        "line": 15,
+                        "column": 31
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "NameEx",
+                    "name": "RM"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "source": {
+            "filename": "TransactionCommit",
+            "from": {
+              "line": 20,
+              "column": 1
+            },
+            "to": {
+              "line": 20,
+              "column": 67
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaOperDecl",
+          "name": "canCommit",
+          "formalParams": [
+            
+          ],
+          "isRecursive": false,
+          "body": {
+            "source": {
+              "filename": "TransactionCommit",
+              "from": {
+                "line": 20,
+                "column": 14
+              },
+              "to": {
+                "line": 20,
+                "column": 67
+              }
+            },
+            "type": "Untyped",
+            "kind": "OperEx",
+            "oper": "FORALL3",
+            "args": [
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 20,
+                    "column": 14
+                  },
+                  "to": {
+                    "line": 20,
+                    "column": 67
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "r"
+              },
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 20,
+                    "column": 23
+                  },
+                  "to": {
+                    "line": 20,
+                    "column": 24
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "RM"
+              },
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 20,
+                    "column": 28
+                  },
+                  "to": {
+                    "line": 20,
+                    "column": 67
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "SET_IN",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 20,
+                        "column": 28
+                      },
+                      "to": {
+                        "line": 20,
+                        "column": 37
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "FUN_APP",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 20,
+                            "column": 28
+                          },
+                          "to": {
+                            "line": 20,
+                            "column": 34
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "rmState"
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 20,
+                            "column": 36
+                          },
+                          "to": {
+                            "line": 20,
+                            "column": 36
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "r"
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 20,
+                        "column": 43
+                      },
+                      "to": {
+                        "line": 20,
+                        "column": 67
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "SET_ENUM",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 20,
+                            "column": 44
+                          },
+                          "to": {
+                            "line": 20,
+                            "column": 53
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "ValEx",
+                        "value": {
+                          "kind": "TlaStr",
+                          "value": "prepared"
+                        }
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 20,
+                            "column": 56
+                          },
+                          "to": {
+                            "line": 20,
+                            "column": 66
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "ValEx",
+                        "value": {
+                          "kind": "TlaStr",
+                          "value": "committed"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "source": {
+            "filename": "TransactionCommit",
+            "from": {
+              "line": 25,
+              "column": 1
+            },
+            "to": {
+              "line": 25,
+              "column": 54
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaOperDecl",
+          "name": "notCommitted",
+          "formalParams": [
+            
+          ],
+          "isRecursive": false,
+          "body": {
+            "source": {
+              "filename": "TransactionCommit",
+              "from": {
+                "line": 25,
+                "column": 17
+              },
+              "to": {
+                "line": 25,
+                "column": 54
+              }
+            },
+            "type": "Untyped",
+            "kind": "OperEx",
+            "oper": "FORALL3",
+            "args": [
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 25,
+                    "column": 17
+                  },
+                  "to": {
+                    "line": 25,
+                    "column": 54
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "r"
+              },
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 25,
+                    "column": 26
+                  },
+                  "to": {
+                    "line": 25,
+                    "column": 27
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "RM"
+              },
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 25,
+                    "column": 31
+                  },
+                  "to": {
+                    "line": 25,
+                    "column": 54
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "NE",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 25,
+                        "column": 31
+                      },
+                      "to": {
+                        "line": 25,
+                        "column": 40
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "FUN_APP",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 25,
+                            "column": 31
+                          },
+                          "to": {
+                            "line": 25,
+                            "column": 37
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "rmState"
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 25,
+                            "column": 39
+                          },
+                          "to": {
+                            "line": 25,
+                            "column": 39
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "r"
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 25,
+                        "column": 44
+                      },
+                      "to": {
+                        "line": 25,
+                        "column": 54
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "ValEx",
+                    "value": {
+                      "kind": "TlaStr",
+                      "value": "committed"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "source": {
+            "filename": "TransactionCommit",
+            "from": {
+              "line": 35,
+              "column": 1
+            },
+            "to": {
+              "line": 36,
+              "column": 62
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaOperDecl",
+          "name": "Prepare",
+          "formalParams": [
+            {
+              "kind": "OperParam",
+              "name": "r",
+              "arity": 0
+            }
+          ],
+          "isRecursive": false,
+          "body": {
+            "source": {
+              "filename": "TransactionCommit",
+              "from": {
+                "line": 35,
+                "column": 15
+              },
+              "to": {
+                "line": 36,
+                "column": 62
+              }
+            },
+            "type": "Untyped",
+            "kind": "OperEx",
+            "oper": "AND",
+            "args": [
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 35,
+                    "column": 18
+                  },
+                  "to": {
+                    "line": 35,
+                    "column": 39
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "EQ",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 35,
+                        "column": 18
+                      },
+                      "to": {
+                        "line": 35,
+                        "column": 27
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "FUN_APP",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 35,
+                            "column": 18
+                          },
+                          "to": {
+                            "line": 35,
+                            "column": 24
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "rmState"
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 35,
+                            "column": 26
+                          },
+                          "to": {
+                            "line": 35,
+                            "column": 26
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "r"
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 35,
+                        "column": 31
+                      },
+                      "to": {
+                        "line": 35,
+                        "column": 39
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "ValEx",
+                    "value": {
+                      "kind": "TlaStr",
+                      "value": "working"
+                    }
+                  }
+                ]
+              },
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 36,
+                    "column": 18
+                  },
+                  "to": {
+                    "line": 36,
+                    "column": 62
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "EQ",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 36,
+                        "column": 18
+                      },
+                      "to": {
+                        "line": 36,
+                        "column": 25
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "PRIME",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 36,
+                            "column": 18
+                          },
+                          "to": {
+                            "line": 36,
+                            "column": 24
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "rmState"
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 36,
+                        "column": 29
+                      },
+                      "to": {
+                        "line": 36,
+                        "column": 62
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "EXCEPT",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 36,
+                            "column": 30
+                          },
+                          "to": {
+                            "line": 36,
+                            "column": 36
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "rmState"
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 36,
+                            "column": 45
+                          },
+                          "to": {
+                            "line": 36,
+                            "column": 61
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "TUPLE",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 36,
+                                "column": 47
+                              },
+                              "to": {
+                                "line": 36,
+                                "column": 47
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "r"
+                          }
+                        ]
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 36,
+                            "column": 52
+                          },
+                          "to": {
+                            "line": 36,
+                            "column": 61
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "ValEx",
+                        "value": {
+                          "kind": "TlaStr",
+                          "value": "prepared"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "source": {
+            "filename": "TransactionCommit",
+            "from": {
+              "line": 50,
+              "column": 1
+            },
+            "to": {
+              "line": 56,
+              "column": 51
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaOperDecl",
+          "name": "TCConsistent",
+          "formalParams": [
+            
+          ],
+          "isRecursive": false,
+          "body": {
+            "source": {
+              "filename": "TransactionCommit",
+              "from": {
+                "line": 55,
+                "column": 3
+              },
+              "to": {
+                "line": 56,
+                "column": 51
+              }
+            },
+            "type": "Untyped",
+            "kind": "OperEx",
+            "oper": "FORALL3",
+            "args": [
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 55,
+                    "column": 3
+                  },
+                  "to": {
+                    "line": 56,
+                    "column": 51
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "r1"
+              },
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 55,
+                    "column": 17
+                  },
+                  "to": {
+                    "line": 55,
+                    "column": 18
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "RM"
+              },
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 55,
+                    "column": 3
+                  },
+                  "to": {
+                    "line": 56,
+                    "column": 51
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "FORALL3",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 55,
+                        "column": 3
+                      },
+                      "to": {
+                        "line": 56,
+                        "column": 51
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "NameEx",
+                    "name": "r2"
+                  },
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 55,
+                        "column": 17
+                      },
+                      "to": {
+                        "line": 55,
+                        "column": 18
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "NameEx",
+                    "name": "RM"
+                  },
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 55,
+                        "column": 22
+                      },
+                      "to": {
+                        "line": 56,
+                        "column": 51
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "NOT",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 55,
+                            "column": 24
+                          },
+                          "to": {
+                            "line": 56,
+                            "column": 51
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "AND",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 55,
+                                "column": 27
+                              },
+                              "to": {
+                                "line": 55,
+                                "column": 49
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "OperEx",
+                            "oper": "EQ",
+                            "args": [
+                              {
+                                "source": {
+                                  "filename": "TransactionCommit",
+                                  "from": {
+                                    "line": 55,
+                                    "column": 27
+                                  },
+                                  "to": {
+                                    "line": 55,
+                                    "column": 37
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "OperEx",
+                                "oper": "FUN_APP",
+                                "args": [
+                                  {
+                                    "source": {
+                                      "filename": "TransactionCommit",
+                                      "from": {
+                                        "line": 55,
+                                        "column": 27
+                                      },
+                                      "to": {
+                                        "line": 55,
+                                        "column": 33
+                                      }
+                                    },
+                                    "type": "Untyped",
+                                    "kind": "NameEx",
+                                    "name": "rmState"
+                                  },
+                                  {
+                                    "source": {
+                                      "filename": "TransactionCommit",
+                                      "from": {
+                                        "line": 55,
+                                        "column": 35
+                                      },
+                                      "to": {
+                                        "line": 55,
+                                        "column": 36
+                                      }
+                                    },
+                                    "type": "Untyped",
+                                    "kind": "NameEx",
+                                    "name": "r1"
+                                  }
+                                ]
+                              },
+                              {
+                                "source": {
+                                  "filename": "TransactionCommit",
+                                  "from": {
+                                    "line": 55,
+                                    "column": 41
+                                  },
+                                  "to": {
+                                    "line": 55,
+                                    "column": 49
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "ValEx",
+                                "value": {
+                                  "kind": "TlaStr",
+                                  "value": "aborted"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 56,
+                                "column": 27
+                              },
+                              "to": {
+                                "line": 56,
+                                "column": 51
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "OperEx",
+                            "oper": "EQ",
+                            "args": [
+                              {
+                                "source": {
+                                  "filename": "TransactionCommit",
+                                  "from": {
+                                    "line": 56,
+                                    "column": 27
+                                  },
+                                  "to": {
+                                    "line": 56,
+                                    "column": 37
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "OperEx",
+                                "oper": "FUN_APP",
+                                "args": [
+                                  {
+                                    "source": {
+                                      "filename": "TransactionCommit",
+                                      "from": {
+                                        "line": 56,
+                                        "column": 27
+                                      },
+                                      "to": {
+                                        "line": 56,
+                                        "column": 33
+                                      }
+                                    },
+                                    "type": "Untyped",
+                                    "kind": "NameEx",
+                                    "name": "rmState"
+                                  },
+                                  {
+                                    "source": {
+                                      "filename": "TransactionCommit",
+                                      "from": {
+                                        "line": 56,
+                                        "column": 35
+                                      },
+                                      "to": {
+                                        "line": 56,
+                                        "column": 36
+                                      }
+                                    },
+                                    "type": "Untyped",
+                                    "kind": "NameEx",
+                                    "name": "r2"
+                                  }
+                                ]
+                              },
+                              {
+                                "source": {
+                                  "filename": "TransactionCommit",
+                                  "from": {
+                                    "line": 56,
+                                    "column": 41
+                                  },
+                                  "to": {
+                                    "line": 56,
+                                    "column": 51
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "ValEx",
+                                "value": {
+                                  "kind": "TlaStr",
+                                  "value": "committed"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "source": {
+            "filename": "TransactionCommit",
+            "from": {
+              "line": 38,
+              "column": 1
+            },
+            "to": {
+              "line": 43,
+              "column": 64
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaOperDecl",
+          "name": "Decide",
+          "formalParams": [
+            {
+              "kind": "OperParam",
+              "name": "r",
+              "arity": 0
+            }
+          ],
+          "isRecursive": false,
+          "body": {
+            "source": {
+              "filename": "TransactionCommit",
+              "from": {
+                "line": 38,
+                "column": 15
+              },
+              "to": {
+                "line": 43,
+                "column": 64
+              }
+            },
+            "type": "Untyped",
+            "kind": "OperEx",
+            "oper": "OR",
+            "args": [
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 38,
+                    "column": 18
+                  },
+                  "to": {
+                    "line": 40,
+                    "column": 66
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "AND",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 38,
+                        "column": 21
+                      },
+                      "to": {
+                        "line": 38,
+                        "column": 43
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "EQ",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 38,
+                            "column": 21
+                          },
+                          "to": {
+                            "line": 38,
+                            "column": 30
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "FUN_APP",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 38,
+                                "column": 21
+                              },
+                              "to": {
+                                "line": 38,
+                                "column": 27
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "rmState"
+                          },
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 38,
+                                "column": 29
+                              },
+                              "to": {
+                                "line": 38,
+                                "column": 29
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "r"
+                          }
+                        ]
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 38,
+                            "column": 34
+                          },
+                          "to": {
+                            "line": 38,
+                            "column": 43
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "ValEx",
+                        "value": {
+                          "kind": "TlaStr",
+                          "value": "prepared"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 39,
+                        "column": 21
+                      },
+                      "to": {
+                        "line": 39,
+                        "column": 29
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "OPER_APP",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 39,
+                            "column": 21
+                          },
+                          "to": {
+                            "line": 39,
+                            "column": 29
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "canCommit"
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 40,
+                        "column": 21
+                      },
+                      "to": {
+                        "line": 40,
+                        "column": 66
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "EQ",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 40,
+                            "column": 21
+                          },
+                          "to": {
+                            "line": 40,
+                            "column": 28
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "PRIME",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 40,
+                                "column": 21
+                              },
+                              "to": {
+                                "line": 40,
+                                "column": 27
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "rmState"
+                          }
+                        ]
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 40,
+                            "column": 32
+                          },
+                          "to": {
+                            "line": 40,
+                            "column": 66
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "EXCEPT",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 40,
+                                "column": 33
+                              },
+                              "to": {
+                                "line": 40,
+                                "column": 39
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "rmState"
+                          },
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 40,
+                                "column": 48
+                              },
+                              "to": {
+                                "line": 40,
+                                "column": 65
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "OperEx",
+                            "oper": "TUPLE",
+                            "args": [
+                              {
+                                "source": {
+                                  "filename": "TransactionCommit",
+                                  "from": {
+                                    "line": 40,
+                                    "column": 50
+                                  },
+                                  "to": {
+                                    "line": 40,
+                                    "column": 50
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "r"
+                              }
+                            ]
+                          },
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 40,
+                                "column": 55
+                              },
+                              "to": {
+                                "line": 40,
+                                "column": 65
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "ValEx",
+                            "value": {
+                              "kind": "TlaStr",
+                              "value": "committed"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 41,
+                    "column": 18
+                  },
+                  "to": {
+                    "line": 43,
+                    "column": 64
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "AND",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 41,
+                        "column": 21
+                      },
+                      "to": {
+                        "line": 41,
+                        "column": 58
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "SET_IN",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 41,
+                            "column": 21
+                          },
+                          "to": {
+                            "line": 41,
+                            "column": 30
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "FUN_APP",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 41,
+                                "column": 21
+                              },
+                              "to": {
+                                "line": 41,
+                                "column": 27
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "rmState"
+                          },
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 41,
+                                "column": 29
+                              },
+                              "to": {
+                                "line": 41,
+                                "column": 29
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "r"
+                          }
+                        ]
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 41,
+                            "column": 36
+                          },
+                          "to": {
+                            "line": 41,
+                            "column": 58
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "SET_ENUM",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 41,
+                                "column": 37
+                              },
+                              "to": {
+                                "line": 41,
+                                "column": 45
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "ValEx",
+                            "value": {
+                              "kind": "TlaStr",
+                              "value": "working"
+                            }
+                          },
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 41,
+                                "column": 48
+                              },
+                              "to": {
+                                "line": 41,
+                                "column": 57
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "ValEx",
+                            "value": {
+                              "kind": "TlaStr",
+                              "value": "prepared"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 42,
+                        "column": 21
+                      },
+                      "to": {
+                        "line": 42,
+                        "column": 32
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "OPER_APP",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 42,
+                            "column": 21
+                          },
+                          "to": {
+                            "line": 42,
+                            "column": 32
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "notCommitted"
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 43,
+                        "column": 21
+                      },
+                      "to": {
+                        "line": 43,
+                        "column": 64
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "EQ",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 43,
+                            "column": 21
+                          },
+                          "to": {
+                            "line": 43,
+                            "column": 28
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "PRIME",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 43,
+                                "column": 21
+                              },
+                              "to": {
+                                "line": 43,
+                                "column": 27
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "rmState"
+                          }
+                        ]
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 43,
+                            "column": 32
+                          },
+                          "to": {
+                            "line": 43,
+                            "column": 64
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "EXCEPT",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 43,
+                                "column": 33
+                              },
+                              "to": {
+                                "line": 43,
+                                "column": 39
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "rmState"
+                          },
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 43,
+                                "column": 48
+                              },
+                              "to": {
+                                "line": 43,
+                                "column": 63
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "OperEx",
+                            "oper": "TUPLE",
+                            "args": [
+                              {
+                                "source": {
+                                  "filename": "TransactionCommit",
+                                  "from": {
+                                    "line": 43,
+                                    "column": 50
+                                  },
+                                  "to": {
+                                    "line": 43,
+                                    "column": 50
+                                  }
+                                },
+                                "type": "Untyped",
+                                "kind": "NameEx",
+                                "name": "r"
+                              }
+                            ]
+                          },
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 43,
+                                "column": 55
+                              },
+                              "to": {
+                                "line": 43,
+                                "column": 63
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "ValEx",
+                            "value": {
+                              "kind": "TlaStr",
+                              "value": "aborted"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "source": {
+            "filename": "TransactionCommit",
+            "from": {
+              "line": 45,
+              "column": 1
+            },
+            "to": {
+              "line": 45,
+              "column": 47
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaOperDecl",
+          "name": "TCNext",
+          "formalParams": [
+            
+          ],
+          "isRecursive": false,
+          "body": {
+            "source": {
+              "filename": "TransactionCommit",
+              "from": {
+                "line": 45,
+                "column": 11
+              },
+              "to": {
+                "line": 45,
+                "column": 47
+              }
+            },
+            "type": "Untyped",
+            "kind": "OperEx",
+            "oper": "EXISTS3",
+            "args": [
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 45,
+                    "column": 11
+                  },
+                  "to": {
+                    "line": 45,
+                    "column": 47
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "r"
+              },
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 45,
+                    "column": 20
+                  },
+                  "to": {
+                    "line": 45,
+                    "column": 21
+                  }
+                },
+                "type": "Untyped",
+                "kind": "NameEx",
+                "name": "RM"
+              },
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 45,
+                    "column": 25
+                  },
+                  "to": {
+                    "line": 45,
+                    "column": 47
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "OR",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 45,
+                        "column": 25
+                      },
+                      "to": {
+                        "line": 45,
+                        "column": 34
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "OPER_APP",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 45,
+                            "column": 25
+                          },
+                          "to": {
+                            "line": 45,
+                            "column": 34
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "Prepare"
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 45,
+                            "column": 33
+                          },
+                          "to": {
+                            "line": 45,
+                            "column": 33
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "r"
+                      }
+                    ]
+                  },
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 45,
+                        "column": 39
+                      },
+                      "to": {
+                        "line": 45,
+                        "column": 47
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "OPER_APP",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 45,
+                            "column": 39
+                          },
+                          "to": {
+                            "line": 45,
+                            "column": 47
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "Decide"
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 45,
+                            "column": 46
+                          },
+                          "to": {
+                            "line": 45,
+                            "column": 46
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "r"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "source": {
+            "filename": "TransactionCommit",
+            "from": {
+              "line": 62,
+              "column": 1
+            },
+            "to": {
+              "line": 62,
+              "column": 38
+            }
+          },
+          "type": "Untyped",
+          "kind": "TlaOperDecl",
+          "name": "TCSpec",
+          "formalParams": [
+            
+          ],
+          "isRecursive": false,
+          "body": {
+            "source": {
+              "filename": "TransactionCommit",
+              "from": {
+                "line": 62,
+                "column": 11
+              },
+              "to": {
+                "line": 62,
+                "column": 38
+              }
+            },
+            "type": "Untyped",
+            "kind": "OperEx",
+            "oper": "AND",
+            "args": [
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 62,
+                    "column": 11
+                  },
+                  "to": {
+                    "line": 62,
+                    "column": 16
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "OPER_APP",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 62,
+                        "column": 11
+                      },
+                      "to": {
+                        "line": 62,
+                        "column": 16
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "NameEx",
+                    "name": "TCInit"
+                  }
+                ]
+              },
+              {
+                "source": {
+                  "filename": "TransactionCommit",
+                  "from": {
+                    "line": 62,
+                    "column": 21
+                  },
+                  "to": {
+                    "line": 62,
+                    "column": 38
+                  }
+                },
+                "type": "Untyped",
+                "kind": "OperEx",
+                "oper": "GLOBALLY",
+                "args": [
+                  {
+                    "source": {
+                      "filename": "TransactionCommit",
+                      "from": {
+                        "line": 62,
+                        "column": 23
+                      },
+                      "to": {
+                        "line": 62,
+                        "column": 38
+                      }
+                    },
+                    "type": "Untyped",
+                    "kind": "OperEx",
+                    "oper": "STUTTER",
+                    "args": [
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 62,
+                            "column": 24
+                          },
+                          "to": {
+                            "line": 62,
+                            "column": 29
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "OperEx",
+                        "oper": "OPER_APP",
+                        "args": [
+                          {
+                            "source": {
+                              "filename": "TransactionCommit",
+                              "from": {
+                                "line": 62,
+                                "column": 24
+                              },
+                              "to": {
+                                "line": 62,
+                                "column": 29
+                              }
+                            },
+                            "type": "Untyped",
+                            "kind": "NameEx",
+                            "name": "TCNext"
+                          }
+                        ]
+                      },
+                      {
+                        "source": {
+                          "filename": "TransactionCommit",
+                          "from": {
+                            "line": 62,
+                            "column": 32
+                          },
+                          "to": {
+                            "line": 62,
+                            "column": 38
+                          }
+                        },
+                        "type": "Untyped",
+                        "kind": "NameEx",
+                        "name": "rmState"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

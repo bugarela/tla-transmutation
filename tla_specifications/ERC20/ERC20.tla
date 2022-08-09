@@ -14,7 +14,7 @@
  *)
 
 
-EXTENDS Integers, Apalache, ERC20_typedef
+EXTENDS Integers, Apalache
 
 CONSTANTS
     \* Set of all addresses.
@@ -299,4 +299,5 @@ NoTransferAboveApproved(trace) ==
         IN
         sumTransfers > 0 => existsApprovalForSumInPast
 
+Full == nextTxId <= 5
 ===============================================================================

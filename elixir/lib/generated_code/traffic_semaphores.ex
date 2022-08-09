@@ -6,18 +6,18 @@ defmodule TrafficSemaphores do
     ]
   end
   require Oracle
-  @semaphores "<value for SEMAPHORES>"
+  @semaphores MapSet.new([0, 1])
   def semaphores, do: @semaphores
 
 
   def turn_green_condition(variables, s) do
-    Enum.all?(@semaphores, fn(s2) -> variables[:colors][s2] == "red" end)
+    Enum.all?([Enum.all?(@semaphores, fn(s2) -> variables[:colors][s2] == "red" end), variables[:next_to_open] == s])
   end
 
   def turn_green(variables, s) do
     %{
-      colors: Map.put(variables[:colors], s, "green"),
-      next_to_open: variables[:next_to_open]
+      colors: variables[:colors]|>Map.put(s, "green"),
+      next_to_open: rem((s + 1), (Enum.count(@semaphores)))
     }
   end
 
@@ -28,7 +28,7 @@ defmodule TrafficSemaphores do
 
   def turn_yellow(variables, s) do
     %{
-      colors: Map.put(variables[:colors], s, "yellow"),
+      colors: variables[:colors]|>Map.put(s, "yellow"),
       next_to_open: variables[:next_to_open]
     }
   end
@@ -40,24 +40,25 @@ defmodule TrafficSemaphores do
 
   def turn_red(variables, s) do
     %{
-      colors: Map.put(variables[:colors], s, "red"),
+      colors: variables[:colors]|>Map.put(s, "red"),
       next_to_open: variables[:next_to_open]
     }
   end
 
 
+  # "Spec": OperEx "AND" [OperEx "OPER_APP" [NameEx "Init"],OperEx "GLOBALLY" [OperEx "STUTTER" [OperEx "OPER_APP" [NameEx "Next"],OperEx "TUPLE" [NameEx "colors",NameEx "next_to_open"]]]]
 
   def decide_action(oracle, variables, actions, step) do
-    different_states = Enum.uniq_by(actions, fn(action) -> action[:state] end)
+    different_states = Enum.uniq(Enum.map(actions, fn(action) -> action[:transition].(variables) end))
 
     cond do
       Enum.count(different_states) == 1 ->
-        Enum.at(actions, 0)[:state]
+        Enum.at(different_states, 0)
       true ->
-        send oracle, {:choose, self(), actions}
+        send oracle, {:choose, self(), different_states}
 
        receive do
-         {:ok, n} -> Enum.at(actions, n)[:state]
+         {:ok, n} -> Enum.at(different_states, n)
          {:cancel} -> variables
          {:stop} -> exit(0)
        end

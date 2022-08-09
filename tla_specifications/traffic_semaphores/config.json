@@ -1,0 +1,25 @@
+{
+  "processes": [
+    {
+      "process_id": "main",
+      "actions": [
+        "\\E s \\in SEMAPHORES : TurnGreen(s) \\/ TurnYellow(s) \\/ TurnRed(s)"
+      ]
+    }
+  ],
+  "shared_variables": ["colors", "next_to_open"],
+  "constants": [
+    {
+      "name": "SEMAPHORES",
+      "value": "{0, 1}"
+    }
+  ],
+  "init": "Init",
+  "next": "Next",
+  "module_name": "TrafficSemaphores",
+  "input_format": "json",
+  "input_file": "TrafficSemaphores.json",
+  "state_graph": "states.json",
+  "blackbox_tests": [],
+  "destination_folder": "../../elixir"
+}

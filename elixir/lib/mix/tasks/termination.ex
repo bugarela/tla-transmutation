@@ -51,9 +51,9 @@ defmodule Mix.Tasks.Termination do
     ]
 
     modules =  [
-        APAEWD840_node0,
-      APAEWD840_node1,
-      APAEWD840_node2
+        EWD840_node0,
+      EWD840_node1,
+      EWD840_node2
     ]
     pids = Enum.map(modules, fn m -> spawn(m, :main, [self(), Enum.at(trace, 0), 0]) end)
     TraceCheckerOracle.start(trace, 0, nil, pids)

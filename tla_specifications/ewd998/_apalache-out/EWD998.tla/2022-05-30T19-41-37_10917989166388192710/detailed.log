@@ -1,9 +1,0 @@
-19:41:37.649 [main] INFO  a.f.a.t.Tool$ - # APALACHE version: v0.22.0-1262-gf8b7a9c40 | build: v0.22.0-1262-gf8b7a9c40
-19:41:37.743 [main] INFO  a.f.a.t.Tool$ - Parse EWD998.tla
-19:41:37.745 [main] INFO  a.f.a.i.p.PassChainExecutor - PASS #0: SanyParser
-19:41:38.170 [main] WARN  a.f.a.t.i.SubstTranslator - Substitution of LEADS_TO needs care. The current implementation may fail to work.
-19:41:38.354 [main] DEBUG a.f.a.i.p.PassChainExecutor - PASS #0: SanyParser [OK]
-19:41:38.355 [main] INFO  a.f.a.t.Tool$ - Parsed successfully
-Root module: EWD998 with 100 declarations.
-19:41:38.355 [main] INFO  a.f.a.t.Tool$ - It took me 0 days  0 hours  0 min  0 sec
-19:41:38.356 [main] INFO  a.f.a.t.Tool$ - Total time: 0.705 sec
