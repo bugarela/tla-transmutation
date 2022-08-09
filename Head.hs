@@ -39,6 +39,7 @@ data Lit
   | Boolean Bool
   | Num Integer
   | FullSet String
+  | Tuple [Lit]
   deriving (Show, Eq)
 
 data Key
@@ -83,7 +84,7 @@ data Value
   | PForAll Identifier Value Value
   | Let [Definition] Value
   | Set [Value]
-  | Tuple [Value]
+  | TupleVal [Value]
   | FunSet Value Value
   | FunGen Identifier Value Value
   | SetTimes Value Value

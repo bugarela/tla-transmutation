@@ -1,17 +1,19 @@
 defmodule ERC20 do
   def shared_variables do
     [
-      :pendingTransactions,
-      :lastTx,
-      :nextTxId,
+      :pending_transactions,
+      :last_tx,
+      :next_tx_id,
+      :balance_of,
+      :allowance,
     ]
   end
   require Oracle
-  @amounts MapSet.new([0, 100, 500])
+  @amounts MapSet.new([0, 1, 2, 3, 98, 100, 102])
   def amounts, do: @amounts
 
 
-  @addr MapSet.new(["alice_OF_ADDR", "bob_OF_ADDR"])
+  @addr MapSet.new(["Alice_OF_ADDR", "Bob_OF_ADDR", "Eve_OF_ADDR"])
   def addr, do: @addr
 
 
@@ -138,16 +140,16 @@ defmodule ERC20 do
 
 
   def decide_action(oracle, variables, actions, step) do
-    different_states = Enum.uniq_by(actions, fn(action) -> action[:state] end)
+    different_states = Enum.uniq(Enum.map(actions, fn(action) -> action[:transition].(variables) end))
 
     cond do
       Enum.count(different_states) == 1 ->
-        Enum.at(actions, 0)[:state]
+        Enum.at(different_states, 0)
       true ->
-        send oracle, {:choose, self(), actions}
+        send oracle, {:choose, self(), different_states}
 
        receive do
-         {:ok, n} -> Enum.at(actions, n)[:state]
+         {:ok, n} -> Enum.at(different_states, n)
          {:cancel} -> variables
          {:stop} -> exit(0)
        end

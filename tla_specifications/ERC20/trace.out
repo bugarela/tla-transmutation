@@ -1,37 +1,47 @@
-State 1: <aa>
-/\ allowance = (<<"Bob_OF_ADDR", "Eve_OF_ADDR">> :> 0 @@ <<"Alice_OF_ADDR", "Alice_OF_ADDR">> :> 0 @@ <<"Alice_OF_ADDR", "Bob_OF_ADDR">> :> 0 @@ <<"Alice_OF_ADDR", "Eve_OF_ADDR">> :> 0 @@ <<"Bob_OF_ADDR", "Bob_OF_ADDR">> :> 0 @@ <<"Bob_OF_ADDR", "Alice_OF_ADDR">> :> 0 @@ <<"Eve_OF_ADDR", "Alice_OF_ADDR">> :> 0 @@ <<"Eve_OF_ADDR", "Bob_OF_ADDR">> :> 0 @@ <<"Eve_OF_ADDR", "Eve_OF_ADDR">> :> 0)
-/\ balanceOf = ("Alice_OF_ADDR" :> 100 @@ "Bob_OF_ADDR" :> 100 @@ "Eve_OF_ADDR" :> 100)
+State 1: <>
+/\ allowance
+  = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+    <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+    <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+    <<<<"Alice_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+    <<<<"Bob_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+    <<<<"Bob_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+    <<<<"Eve_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+    <<<<"Eve_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+    <<<<"Eve_OF_ADDR", "Eve_OF_ADDR">>, 0>> })
+/\ balanceOf
+  = SetAsFun({ <<"Alice_OF_ADDR", 100>>,
+    <<"Bob_OF_ADDR", 100>>,
+    <<"Eve_OF_ADDR", 100>> })
 /\ lastTx = [fail |-> FALSE, id |-> 0, tag |-> "None"]
 /\ nextTxId = 0
 /\ pendingTransactions = {}
 
-State2: <>
-  allowance
-      = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
-        <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
-        <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
-        <<<<"Alice_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
-        <<<<"Bob_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
-        <<<<"Bob_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
-        <<<<"Eve_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
-        <<<<"Eve_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
-        <<<<"Eve_OF_ADDR", "Eve_OF_ADDR">>, 0>> })
-    /\ balanceOf
-      = SetAsFun({ <<"Alice_OF_ADDR", 100>>,
-        <<"Bob_OF_ADDR", 100>>,
-        <<"Eve_OF_ADDR", 100>> })
-    /\ lastTx = [fail |-> FALSE, id |-> 0, tag |-> "None"]
-    /\ nextTxId = 1
-    /\ pendingTransactions
-      = {[fail |-> FALSE,
-        id |-> 0,
-        sender |-> "Eve_OF_ADDR",
-        spender |-> "Bob_OF_ADDR",
-        tag |-> "approve",
-        value |-> 1]}
+State 2: <>
+/\ allowance = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+    <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+    <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+    <<<<"Alice_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
+    <<<<"Bob_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+    <<<<"Bob_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+    <<<<"Eve_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
+    <<<<"Eve_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
+    <<<<"Eve_OF_ADDR", "Eve_OF_ADDR">>, 0>> })
+/\ balanceOf = SetAsFun({ <<"Alice_OF_ADDR", 100>>,
+    <<"Bob_OF_ADDR", 100>>,
+    <<"Eve_OF_ADDR", 100>> })
+/\ lastTx = [fail |-> FALSE, id |-> 0, tag |-> "None"]
+/\ nextTxId = 1
+/\ pendingTransactions
+  = {[fail |-> FALSE,
+    id |-> 0,
+    sender |-> "Eve_OF_ADDR",
+    spender |-> "Bob_OF_ADDR",
+    tag |-> "approve",
+    value |-> 1]}
 
 State 3: <>
-  allowance
+  /\ allowance
       = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
@@ -62,7 +72,7 @@ State 3: <>
           value |-> 1] }
 
 State 4: <>
-  allowance
+  /\ allowance
       = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 0>>,
@@ -99,7 +109,7 @@ State 4: <>
           value |-> 0] }
 
 State 4: <>
-  allowance
+  /\ allowance
       = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 1>>,
@@ -136,7 +146,7 @@ State 4: <>
           value |-> 0] }
 
 State 5: <>
-  allowance
+  /\ allowance
       = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 1>>,
@@ -173,7 +183,7 @@ State 5: <>
           value |-> 3] }
 
 State 6: <>
-  allowance
+  /\ allowance
       = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 1>>,
@@ -210,7 +220,7 @@ State 6: <>
           value |-> 3] }
 
 State 7: <>
-  allowance
+  /\ allowance
       = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 1>>,
@@ -248,7 +258,7 @@ State 7: <>
           value |-> 3] }
 
 State 7: <>
-  allowance
+  /\ allowance
       = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 1>>,
@@ -292,7 +302,7 @@ State 7: <>
           value |-> 0] }
 
 State 8: <>
-  allowance
+  /\ allowance
       = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 1>>,
@@ -336,7 +346,7 @@ State 8: <>
           value |-> 0] }
 
 State 9: <>
-  allowance
+  /\ allowance
       = SetAsFun({ <<<<"Bob_OF_ADDR", "Eve_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Alice_OF_ADDR">>, 0>>,
         <<<<"Alice_OF_ADDR", "Bob_OF_ADDR">>, 1>>,

@@ -215,7 +215,7 @@ convertValue (OperEx o as) =
               [a1, a2] -> liftA2 H.Range (convertValue a1) (convertValue a2)
           "TUPLE" ->
             case as of
-              vs -> fmap H.Tuple (mapM convertValue vs)
+              vs -> fmap H.TupleVal (mapM convertValue vs)
           "RECORD" ->
             case as of
               vs -> fmap H.Record (convertRecordValues vs)

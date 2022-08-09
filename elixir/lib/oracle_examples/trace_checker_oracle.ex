@@ -1,15 +1,23 @@
 defmodule TraceCheckerOracle do
   def start(trace, step, lock, pids) do
+    startWithValues(trace, step, lock, pids, [])
+  end
+
+  def startWithValues(trace, step, lock, pids, refused) do
     if step >= length(trace) - 1 do
       Enum.map(pids, fn pid -> send(pid, :stop) end)
       IO.puts("SUCCESS")
       exit(0)
     end
 
+    if Enum.sort(Enum.uniq(pids)) == Enum.sort(Enum.uniq(refused)) do
+      IO.puts("FAILURE")
+      exit(1)
+    end
+
     current_variables = Enum.at(trace, step)
 
     ref = Process.monitor(if lock != nil, do: lock, else: self())
-    IO.puts("TraceCheckerOracle at #{inspect(self())} is listening")
 
     receive do
       {:lock, p} ->
@@ -19,18 +27,18 @@ defmodule TraceCheckerOracle do
           send(p, {:already_locked, %{}})
         else
           send(p, {:lock_acquired, current_variables})
-          start(trace, step, p, pids)
+          startWithValues(trace, step, p, pids, refused)
         end
 
-      {:notify, _, current_state, next_state} ->
+      {:notify, p, current_state, next_state} ->
         if current_state != next_state do
           result = TraceRunner.check(trace, step, current_state, next_state)
           IO.puts("Step: #{step + 1}")
           IO.inspect(result)
           IO.inspect(next_state)
-          start(trace, step + 1, nil, pids)
+          startWithValues(trace, step + 1, nil, pids, [])
         else
-          start(trace, step, nil, pids)
+          startWithValues(trace, step, nil, pids, [p | refused])
         end
 
       {:choose, p, as} ->
@@ -39,14 +47,16 @@ defmodule TraceCheckerOracle do
         if choice != nil do
           send(p, {:ok, choice})
         else
+
           send(p, {:cancel})
         end
 
       {:DOWN, ^ref, _, _, _} ->
         IO.puts("Process #{inspect(ref)} is down")
-        start(trace, step, nil, pids)
+        Process.sleep(2000)
+        exit(1)
     end
 
-    start(trace, step, lock, pids)
+    startWithValues(trace, step, lock, pids, refused)
   end
 end

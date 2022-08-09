@@ -24,7 +24,7 @@ moduleHeader name (Module m doc) shared imp =
 sharedVariablesDeclaration :: [String] -> String
 sharedVariablesDeclaration [] = ""
 sharedVariablesDeclaration shared =
-  unlines ([ "def shared_variables do", "  [" ] ++ map (\v -> "    :" ++ v ++ ",") shared ++ ["  ]", "end"])
+  unlines ([ "def shared_variables do", "  [" ] ++ map (\v -> "    :" ++ snake v ++ ",") shared ++ ["  ]", "end"])
 
 moduleContext (Module m _) = [(m, "module")]
 

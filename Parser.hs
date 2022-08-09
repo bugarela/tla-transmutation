@@ -332,6 +332,8 @@ value = do try $ do string "Cardinality("
                     ws
                     return (Cardinality s)
         <|>
+        do {l <- lit; return (Lit l)}
+        <|>
         do {caseStatement;}
         <|>
         do try $ do {n1 <- Math.number; string ".."; n2 <- Math.number; ws; return (Range n1 n2)}
@@ -347,10 +349,6 @@ value = do try $ do string "Cardinality("
         do try $ do {n1 <- Math.number; string ".."; n2 <- Math.number; ws; return (Range n1 n2)}
         <|>
         do try $ do {e <- arithmeticExpression; ws; return (e)}
-        <|>
-        do {l <- lit; return (Lit l)}
-        <|>
-        tuple
 
 set = do try $ do {s1 <- atomSet; string "\\cup"; ws; s2 <- set; ws; return (Union s1 s2)}
       <|>
@@ -399,6 +397,14 @@ record = do try $ do char '['
                      ws
                      return (Record ms)
         <|>
+        do try $ do string "SetAsFun({"
+                    ws
+                    ts <- tuple `sepBy` try comma
+                    ws
+                    string "})"
+                    ws
+                    return (Record (map (\(Tuple [k, v]) -> (Key k, Lit v)) ts))
+        <|>
         do try $ do char '('
                     ms <- recEntry `sepBy` try (string "@@ ")
                     char ')'
@@ -429,7 +435,7 @@ recEntry = do try $ do l <- lit
                        ws
                        return (Key l, v)
 
-tuple = do try $ do {string "<<"; vs <- value `sepBy` try comma; string ">>"; ws; return (Tuple vs)}
+tuple = do try $ do {string "<<"; vs <- lit `sepBy` try comma; string ">>"; ws; return (Tuple vs)}
 
 lit = do try $ do stringLiteral
       <|>
@@ -438,6 +444,8 @@ lit = do try $ do stringLiteral
       do try $ do {string "TRUE"; return (Boolean True)}
       <|>
       do try $ do {string "FALSE"; return (Boolean False)}
+      <|>
+      tuple
 
 stringLiteral =  do try $ do {char '\"'; cs <- many1 (noneOf reserved); char '\"'; ws; return (Str cs)}
 literal = do try $ do {s <- stringLiteral; return (Lit s)}

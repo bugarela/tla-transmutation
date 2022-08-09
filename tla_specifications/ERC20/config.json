@@ -3,17 +3,25 @@
     {
       "process_id": "alice",
       "actions": [
-        "\\E toAddr \\in ADDR: \\E value \\in AMOUNTS : SubmitTransfer(\"alice_OF_ADDR\", toAddr, value)",
-        "\\E fromAddr \\in ADDR: \\E toAddr \\in ADDR: \\E value \\in AMOUNTS : SubmitTransferFrom(\"alice_OF_ADDR\", fromAddr, toAddr, value)",
-        "\\E spender \\in ADDR: \\E value \\in AMOUNTS : SubmitApprove(\"alice_OF_ADDR\", spender, value)"
+        "\\E toAddr \\in ADDR: \\E value \\in AMOUNTS : SubmitTransfer(\"Alice_OF_ADDR\", toAddr, value)",
+        "\\E fromAddr \\in ADDR: \\E toAddr \\in ADDR: \\E value \\in AMOUNTS : SubmitTransferFrom(\"Alice_OF_ADDR\", fromAddr, toAddr, value)",
+        "\\E spender \\in ADDR: \\E value \\in AMOUNTS : SubmitApprove(\"Alice_OF_ADDR\", spender, value)"
       ]
     },
     {
       "process_id": "bob",
       "actions": [
-        "\\E toAddr \\in ADDR: \\E value \\in AMOUNTS : SubmitTransfer(\"bob_OF_ADDR\", toAddr, value)",
-        "\\E fromAddr \\in ADDR: \\E toAddr \\in ADDR: \\E value \\in AMOUNTS : SubmitTransferFrom(\"bob_OF_ADDR\", fromAddr, toAddr, value)",
-        "\\E spender \\in ADDR: \\E value \\in AMOUNTS : SubmitApprove(\"bob_OF_ADDR\", spender, value)"
+        "\\E toAddr \\in ADDR: \\E value \\in AMOUNTS : SubmitTransfer(\"Bob_OF_ADDR\", toAddr, value)",
+        "\\E fromAddr \\in ADDR: \\E toAddr \\in ADDR: \\E value \\in AMOUNTS : SubmitTransferFrom(\"Bob_OF_ADDR\", fromAddr, toAddr, value)",
+        "\\E spender \\in ADDR: \\E value \\in AMOUNTS : SubmitApprove(\"Bob_OF_ADDR\", spender, value)"
+      ]
+    },
+     {
+      "process_id": "eve",
+      "actions": [
+        "\\E toAddr \\in ADDR: \\E value \\in AMOUNTS : SubmitTransfer(\"Eve_OF_ADDR\", toAddr, value)",
+        "\\E fromAddr \\in ADDR: \\E toAddr \\in ADDR: \\E value \\in AMOUNTS : SubmitTransferFrom(\"Eve_OF_ADDR\", fromAddr, toAddr, value)",
+        "\\E spender \\in ADDR: \\E value \\in AMOUNTS : SubmitApprove(\"Eve_OF_ADDR\", spender, value)"
       ]
     },
     {
@@ -25,15 +33,15 @@
       ]
     }
   ],
-  "shared_variables": ["pendingTransactions", "lastTx", "nextTxId"],
+  "shared_variables": ["pendingTransactions", "lastTx", "nextTxId", "balanceOf", "allowance"],
   "constants": [
     {
       "name": "ADDR",
-      "value": "{\"alice_OF_ADDR\", \"bob_OF_ADDR\"}"
+      "value": "{\"Alice_OF_ADDR\", \"Bob_OF_ADDR\", \"Eve_OF_ADDR\"}"
     },
     {
       "name": "AMOUNTS",
-      "value": "{0, 100, 500}"
+      "value": "{0, 1, 2, 3, 98, 100, 102}"
     }
   ],
   "init": "Init",
@@ -42,6 +50,6 @@
   "input_format": "json",
   "input_file": "ERC20.json",
   "state_graph": "states.json",
-  "blackbox_tests": [{"name": "exploit_trace", "trace": "trace.out"}],
+  "blackbox_tests": [{"name": "ExploitTrace", "trace": "trace.out"}],
   "destination_folder": "../../elixir"
 }

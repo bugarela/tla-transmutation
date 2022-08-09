@@ -15,6 +15,27 @@ defmodule APAEWD840 do
     20
   end
 
+
+  def color(variables) do
+    MapSet.new(["white", "black"])
+  end
+
+
+  def const_init4(variables) do
+    MapSet.member?(MapSet.new([4]), @n)
+  end
+
+
+  def const_init10(variables) do
+    MapSet.member?(MapSet.new([10]), @n)
+  end
+
+
+  def const_init_all20(variables) do
+    MapSet.member?(2..50, @n)
+  end
+
+
   def nodes(variables) do
     MapSet.new(Enum.filter(0..max_n(variables), fn(i) -> i < @n end))
   end
@@ -29,7 +50,7 @@ defmodule APAEWD840 do
       tpos: @n - 1,
       tcolor: "white",
       active: variables[:active],
-      color: Map.put(variables[:color], 0, "white")
+      color: variables[:color]|>Map.put(0, "white")
     }
   end
 
@@ -43,7 +64,7 @@ defmodule APAEWD840 do
       tpos: i - 1,
       tcolor: (if variables[:color][i] == "black", do: "black", else: variables[:tcolor]),
       active: variables[:active],
-      color: Map.put(variables[:color], i, "white")
+      color: variables[:color]|>Map.put(i, "white")
     }
   end
 
@@ -54,8 +75,8 @@ defmodule APAEWD840 do
 
   def send_msg(variables, i, j) do
     %{
-      active: Map.put(variables[:active], j, true),
-      color: Map.put(variables[:color], i, (if j > i, do: "black", else: variables[:color][i])),
+      active: variables[:active]|>Map.put(j, true),
+      color: variables[:color]|>Map.put(i, (if j > i, do: "black", else: variables[:color][i])),
       tpos: variables[:tpos],
       tcolor: variables[:tcolor]
     }
@@ -68,7 +89,7 @@ defmodule APAEWD840 do
 
   def deactivate(variables, i) do
     %{
-      active: Map.put(variables[:active], i, false),
+      active: variables[:active]|>Map.put(i, false),
       color: variables[:color],
       tpos: variables[:tpos],
       tcolor: variables[:tcolor]
@@ -100,16 +121,16 @@ defmodule APAEWD840 do
   # "CheckInductiveSpec": OperEx "AND" [OperEx "OPER_APP" [NameEx "Inv"],OperEx "GLOBALLY" [OperEx "STUTTER" [OperEx "OPER_APP" [NameEx "Next"],OperEx "OPER_APP" [NameEx "vars"]]]]
 
   def decide_action(oracle, variables, actions, step) do
-    different_states = Enum.uniq_by(actions, fn(action) -> action[:state] end)
+    different_states = Enum.uniq(Enum.map(actions, fn(action) -> action[:transition].(variables) end))
 
     cond do
       Enum.count(different_states) == 1 ->
-        Enum.at(actions, 0)[:state]
+        Enum.at(different_states, 0)
       true ->
-        send oracle, {:choose, self(), actions}
+        send oracle, {:choose, self(), different_states}
 
        receive do
-         {:ok, n} -> Enum.at(actions, n)[:state]
+         {:ok, n} -> Enum.at(different_states, n)
          {:cancel} -> variables
          {:stop} -> exit(0)
        end

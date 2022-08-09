@@ -235,10 +235,10 @@ value g (FunGen i s v) = "Map.new(" ++ value g s ++ ", fn(" ++ i ++ ") -> {" ++ 
 -- [new] (CASE)
 value g (Case ms) = "cond do\n" ++ intercalate "\n" (map (caseMatch g) ms) ++ "\nend\n"
 -- Others, not specified
+value g (TupleVal [a]) = value g a
+value g (TupleVal as) = "{" ++ intercalate ", " (map (value g) as) ++ "}"
 value g (Range n1 n2) = value g n1 ++ ".." ++ value g n2
 value g (Ref i) = reference g i
-value g (Tuple [a]) = value g a
-value g (Tuple as) = "{" ++ intercalate ", " (map (value g) as) ++ "}"
 value g (Neg a) = "-" ++ value' g a
 value g (Add a b) = value' g a ++ " + " ++ value' g b
 value g (Sub a b) = value' g a ++ " - " ++ value' g b
@@ -259,6 +259,7 @@ lit (Boolean b) =
   if b
     then "true"
     else "false"
+lit (Tuple as) = "{" ++ intercalate ", " (map lit as) ++ "}"
 
 {-- \vdash_init --}
 initialState :: Context -> Value -> ElixirCode
@@ -300,7 +301,7 @@ actionInfo g a =
   let (cs, as) = actionsAndConditions g a
       n = "action: \"" ++ actionName a ++ "\""
       c = "condition: " ++ cFold cs
-      s = "state: " ++ aFold as
+      s = "transition: fn (variables) -> " ++ aFold as ++ " end"
    in "%{ " ++ intercalate ", " [n, c, s] ++ " }"
 
 caseMatch g (Match p v) = value g p ++ " -> " ++ value g v

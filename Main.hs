@@ -28,7 +28,7 @@ main = do
   config <- parseConfig configFile
   case config of
     Left e -> putStrLn e
-    Right (Config _ _ _ i n mode file _ _ dest) -> do
+    Right (Config _ _ _ i n _ mode file _ _ dest) -> do
       ls <-
         if mode == "tla"
           then parseTla file
